@@ -1,17 +1,57 @@
-# pachislot_income_app
+# パチスロ収支表アプリ
 
-A new Flutter project.
+Flutterで開発中のパチスロ収支管理アプリです。
 
-## Getting Started
+## 概要
 
-This project is a starting point for a Flutter application.
+日々のパチスロ収支を簡単に記録・管理できるアプリです。
 
-A few resources to get you started if this is your first Flutter project:
+収支入力だけでなく、メモ機能やカレンダー表示、統計分析などを搭載し、収支を分かりやすく可視化します。
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 開発環境
+
+- Flutter 3.41.4
+- Dart
+- VS Code
+- macOS
+
+---
+
+## 主な機能
+
+- 収支入力
+- メモ
+- カレンダー
+- 統計
+- 機種別収支
+- SQLite（実装予定）
+- FastAPI連携（実装予定）
+
+---
+
+## 開発状況
+
+- ✅ Home
+- ✅ Input
+- 🚧 Memo
+- ⏳ SQLite
+- ⏳ FastAPI
+
+---
+
+## 今後の予定
+
+- SQLiteによるデータ保存
+- 機種別収支分析
+- グラフ表示
+- FastAPI連携
+- バックアップ機能
+- ストア公開（Android / iOS）
+
+---
+
+## ライセンス
+
+Public Repository
