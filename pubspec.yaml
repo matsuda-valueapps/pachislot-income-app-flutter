@@ -1,0 +1,54 @@
+name: pachislot_income_app
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 日本語ロケール対応
+  flutter_localizations:
+    sdk: flutter
+
+  # iOSスタイルアイコン
+  cupertino_icons: ^1.0.8
+
+  # 状態管理
+  provider: ^6.1.5
+
+  # 日付・数値フォーマット
+  intl: ^0.20.2
+
+  # カレンダー
+  table_calendar: ^3.2.0
+
+  # グラフ
+  fl_chart: ^1.0.0
+
+  # ローカル保存
+  shared_preferences: ^2.5.3
+
+  # 外部リンク
+  url_launcher: ^6.3.2
+
+  holiday_jp: ^0.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/logo/
