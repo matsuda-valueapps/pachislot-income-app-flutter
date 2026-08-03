@@ -14,6 +14,8 @@ class InputFieldDecoration {
     String? suffixText,
     String? prefixText,
     bool filled = true,
+
+    bool alignLabelWithHint = false,
   }) {
     return InputDecoration(
       hintText: hintText,
@@ -23,6 +25,8 @@ class InputFieldDecoration {
 
       prefixText: prefixText,
       suffixText: suffixText,
+
+      alignLabelWithHint: alignLabelWithHint,
 
       filled: filled,
       fillColor: AppColors.surface,

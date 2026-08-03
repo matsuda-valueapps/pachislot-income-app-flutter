@@ -25,9 +25,10 @@ class MemoTitleField extends StatelessWidget {
           controller: controller,
           style: AppTextStyles.body,
           decoration: InputFieldDecoration.build(
-            hintText: '例：2026/07/31',
+            hintText: '例：2026/07/31 マルハン新宿',
           ),
           textInputAction: TextInputAction.next,
+          maxLength: 50,
         ),
         const SizedBox(
           height: AppSpacing.lg,
