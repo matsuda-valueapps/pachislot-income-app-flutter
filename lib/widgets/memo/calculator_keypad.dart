@@ -14,90 +14,90 @@ class CalculatorKeypad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildRow([
-          _numberButton('7'),
-          _numberButton('8'),
-          _numberButton('9'),
-          _operatorButton('÷'),
-        ]),
-        _buildRow([
-          _numberButton('4'),
-          _numberButton('5'),
-          _numberButton('6'),
-          _operatorButton('×'),
-        ]),
-        _buildRow([
-          _numberButton('1'),
-          _numberButton('2'),
-          _numberButton('3'),
-          _operatorButton('-'),
-        ]),
-        _buildRow([
-          _numberButton('0'),
-          _decimalButton(),
-          _equalButton(),
-          _operatorButton('+'),
-        ]),
-        _buildRow([
-          _clearButton(),
-          _backspaceButton(),
-        ]),
+        Row(
+          children: [
+            _numberButton('0'),
+            _numberButton('1'),
+            _numberButton('2'),
+            _numberButton('3'),
+            _numberButton('4'),
+            _numberButton('5'),
+            _numberButton('6'),
+            _numberButton('7'),
+            _numberButton('8'),
+            _numberButton('9'),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            _operatorButton('+'),
+            _operatorButton('-'),
+            _operatorButton('×'),
+            _operatorButton('÷'),
+            _equalButton(),
+            _decimalButton(),
+            _backspaceButton(),
+            _clearButton(),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildRow(List<Widget> children) {
-    return Row(
-      children: children,
-    );
-  }
-
   Widget _numberButton(String value) {
-    return CalculatorButton(
-      text: value,
-      onPressed: () {
-        controller.inputNumber(value);
-      },
+    return Expanded(
+      child: CalculatorButton(
+        label: value,
+        onPressed: () => controller.inputNumber(value),
+      ),
     );
   }
 
   Widget _operatorButton(String value) {
-    return CalculatorButton(
-      text: value,
-      onPressed: () {
-        controller.inputOperator(value);
-      },
+    return Expanded(
+      child: CalculatorButton(
+        label: value,
+        onPressed: () => controller.inputOperator(value),
+      ),
     );
   }
 
   Widget _decimalButton() {
-    return CalculatorButton(
-      text: '.',
-      onPressed: controller.inputDecimal,
+    return Expanded(
+      child: CalculatorButton(
+        label: '.',
+        onPressed: controller.inputDecimal,
+      ),
     );
   }
 
   Widget _equalButton() {
-    return CalculatorButton(
-      text: '=',
-      onPressed: controller.calculate,
+    return Expanded(
+      child: CalculatorButton(
+        label: '=',
+        onPressed: controller.calculate,
+      ),
     );
   }
 
   Widget _clearButton() {
-    return CalculatorButton(
-      text: 'C',
-      flex: 2,
-      onPressed: controller.clear,
+    return Expanded(
+      child: CalculatorButton(
+        label: 'C',
+        onPressed: controller.clear,
+      ),
     );
   }
 
   Widget _backspaceButton() {
-    return CalculatorButton(
-      text: '⌫',
-      flex: 2,
-      onPressed: controller.backspace,
+    return Expanded(
+      child: CalculatorButton(
+        label: '⌫',
+        onPressed: controller.backspace,
+      ),
     );
   }
 }

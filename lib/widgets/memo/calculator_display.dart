@@ -18,12 +18,12 @@ class CalculatorDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 72,
+      height: 50,
+      margin: const EdgeInsets.only(
+        bottom: AppSpacing.sm,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-      ),
-      margin: const EdgeInsets.only(
-        bottom: AppSpacing.md,
       ),
       alignment: Alignment.centerRight,
       decoration: BoxDecoration(
@@ -43,8 +43,9 @@ class CalculatorDisplay extends StatelessWidget {
           maxLines: 1,
           textAlign: TextAlign.right,
           style: AppTextStyles.body.copyWith(
-            fontSize: 28,
+            fontSize: 30,
             fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
       ),

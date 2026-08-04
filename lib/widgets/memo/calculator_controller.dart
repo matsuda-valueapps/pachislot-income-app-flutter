@@ -1,37 +1,51 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 class CalculatorController extends ChangeNotifier {
+  final NumberFormat _formatter = NumberFormat('#,###.########');
+
   String _display = '0';
 
-  double? _leftValue;
-  String? _operator;
+  double? _previousValue;
 
-  bool _startNewInput = true;
+  String? _currentOperator;
 
-  /// 現在の表示
+  bool _waitingForOperand = false;
+
+  /// 表示文字列
   String get display => _display;
 
-  /// 数値入力
-  void inputNumber(String number) {
-    if (_startNewInput) {
-      _display = number;
-      _startNewInput = false;
+  //==================================================
+  // 数字入力
+  //==================================================
+
+  void inputNumber(String value) {
+    if (_waitingForOperand) {
+      _display = value;
+      _waitingForOperand = false;
     } else {
-      if (_display == '0') {
-        _display = number;
+      final raw = _display.replaceAll(',', '');
+
+      if (raw == '0') {
+        _display = value;
       } else {
-        _display += number;
+        _display = raw + value;
       }
     }
+
+    _formatDisplay();
 
     notifyListeners();
   }
 
-  /// 小数点
+  //==================================================
+  // 小数点
+  //==================================================
+
   void inputDecimal() {
-    if (_startNewInput) {
+    if (_waitingForOperand) {
       _display = '0.';
-      _startNewInput = false;
+      _waitingForOperand = false;
     } else if (!_display.contains('.')) {
       _display += '.';
     }
@@ -39,86 +53,97 @@ class CalculatorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 演算子
-  void inputOperator(String operator) {
-    final current =
-        double.tryParse(_display) ?? 0;
+  //==================================================
+  // 演算子
+  //==================================================
 
-    if (_leftValue == null) {
-      _leftValue = current;
-    } else if (_operator != null) {
-      _leftValue = _calculate(
-        _leftValue!,
+  void inputOperator(String operator) {
+    final current = _currentValue;
+
+    if (_previousValue == null) {
+      _previousValue = current;
+    } else if (!_waitingForOperand) {
+      _previousValue = _calculate(
+        _previousValue!,
         current,
-        _operator!,
+        _currentOperator!,
       );
+
+      _display = _formatNumber(_previousValue!);
     }
 
-    _display = _format(_leftValue!);
-
-    _operator = operator;
-
-    _startNewInput = true;
+    _currentOperator = operator;
+    _waitingForOperand = true;
 
     notifyListeners();
   }
 
-  /// =
+  //==================================================
+  // =
+  //==================================================
+
   void calculate() {
-    if (_leftValue == null || _operator == null) {
+    if (_previousValue == null ||
+        _currentOperator == null ||
+        _waitingForOperand) {
       return;
     }
-
-    final right =
-        double.tryParse(_display) ?? 0;
 
     final result = _calculate(
-      _leftValue!,
-      right,
-      _operator!,
+      _previousValue!,
+      _currentValue,
+      _currentOperator!,
     );
 
-    _display = _format(result);
+    _display = _formatNumber(result);
 
-    _leftValue = null;
-    _operator = null;
-
-    _startNewInput = true;
+    _previousValue = null;
+    _currentOperator = null;
+    _waitingForOperand = true;
 
     notifyListeners();
   }
 
-  /// C
+  //==================================================
+  // C
+  //==================================================
+
   void clear() {
     _display = '0';
-
-    _leftValue = null;
-
-    _operator = null;
-
-    _startNewInput = true;
+    _previousValue = null;
+    _currentOperator = null;
+    _waitingForOperand = false;
 
     notifyListeners();
   }
 
-  /// ⌫
+  //==================================================
+  // ⌫
+  //==================================================
+
   void backspace() {
-    if (_startNewInput) {
+    if (_waitingForOperand) {
       return;
     }
 
-    if (_display.length <= 1) {
+    final raw = _display.replaceAll(',', '');
+
+    if (raw.length <= 1) {
       _display = '0';
-      _startNewInput = true;
     } else {
-      _display = _display.substring(
-        0,
-        _display.length - 1,
-      );
+      _display = raw.substring(0, raw.length - 1);
+      _formatDisplay();
     }
 
     notifyListeners();
   }
+
+  //==================================================
+  // 内部
+  //==================================================
+
+  double get _currentValue =>
+      double.tryParse(_display.replaceAll(',', '')) ?? 0;
 
   double _calculate(
     double left,
@@ -146,11 +171,21 @@ class CalculatorController extends ChangeNotifier {
     }
   }
 
-  String _format(double value) {
+  void _formatDisplay() {
+    final value = double.tryParse(
+      _display.replaceAll(',', ''),
+    );
+
+    if (value != null) {
+      _display = _formatNumber(value);
+    }
+  }
+
+  String _formatNumber(double value) {
     if (value == value.toInt()) {
-      return value.toInt().toString();
+      return _formatter.format(value.toInt());
     }
 
-    return value.toString();
+    return _formatter.format(value);
   }
 }

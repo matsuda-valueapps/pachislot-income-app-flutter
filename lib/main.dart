@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 import 'pages/main_page.dart';
+import 'providers/calculator_provider.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -15,27 +17,30 @@ class PachislotIncomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'パチスロ収支表',
+    return ChangeNotifierProvider(
+      create: (_) => CalculatorProvider(),
+      child: MaterialApp(
+        title: 'パチスロ収支表',
 
-      debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
 
-      theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme,
 
-      // 日本語ロケール対応
-      locale: const Locale('ja', 'JP'),
+        // 日本語ロケール対応
+        locale: const Locale('ja', 'JP'),
 
-      supportedLocales: const [
-        Locale('ja', 'JP'),
-      ],
+        supportedLocales: const [
+          Locale('ja', 'JP'),
+        ],
 
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
 
-      home: const MainPage(),
+        home: const MainPage(),
+      ),
     );
   }
 }

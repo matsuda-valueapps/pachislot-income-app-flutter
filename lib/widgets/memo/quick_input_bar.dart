@@ -10,14 +10,22 @@ class QuickInputBar extends StatelessWidget {
 
   final TextEditingController controller;
 
-  static const List<String> _items = [
+  /// 上段
+  static const List<String> _topItems = [
+    'G',
     'BIG',
     'REG',
     'AT',
     'CZ',
+  ];
+
+  /// 下段
+  static const List<String> _bottomItems = [
     'ヤメ',
     '投資',
+    'K',
     '回収',
+    '枚',
   ];
 
   void _insertText(String text) {
@@ -52,13 +60,53 @@ class QuickInputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: _items.map((item) {
-        return ActionChip(
-          label: Text(item),
-          onPressed: () => _insertText(item),
+    return Column(
+      children: [
+        _buildRow(_topItems),
+
+        const SizedBox(
+          height: AppSpacing.sm,
+        ),
+
+        _buildRow(_bottomItems),
+      ],
+    );
+  }
+
+  Widget _buildRow(List<String> items) {
+    return Row(
+      children: items.map((item) {
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 3,
+            ),
+            child: SizedBox(
+              height: 40,
+              child: OutlinedButton(
+                onPressed: () => _insertText(item),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(12),
+                  ),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    item,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
       }).toList(),
     );

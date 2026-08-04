@@ -22,11 +22,8 @@ class CalculatorPanel extends StatelessWidget {
       builder: (context, child) {
         return Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(
-            top: AppSpacing.lg,
-          ),
           padding: const EdgeInsets.all(
-            AppSpacing.md,
+            AppSpacing.sm,
           ),
           decoration: BoxDecoration(
             color: AppColors.surface,
@@ -43,9 +40,11 @@ class CalculatorPanel extends StatelessWidget {
               CalculatorDisplay(
                 value: controller.display,
               ),
+
               const SizedBox(
-                height: AppSpacing.md,
+                height: 2,
               ),
+
               CalculatorKeypad(
                 controller: controller,
               ),
