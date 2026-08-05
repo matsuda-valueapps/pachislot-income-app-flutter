@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/calculator_provider.dart';
+import '../services/memo_draft_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/memo/calculator_bottom_sheet.dart';
@@ -32,20 +33,52 @@ class _MemoPageState extends State<MemoPage> {
   void initState() {
     super.initState();
 
-    _titleController.text = DateFormat(
-      'yyyy/MM/dd',
-    ).format(DateTime.now());
+    _loadDraft();
+
+    _titleController.addListener(_saveDraft);
+
+    _memoController.addListener(_saveDraft);
   }
 
   @override
   void dispose() {
+    _titleController.removeListener(_saveDraft);
+    _memoController.removeListener(_saveDraft);
+
     _titleController.dispose();
     _memoController.dispose();
 
     super.dispose();
   }
 
-  /// 保存
+  /// 下書き読込
+  Future<void> _loadDraft() async {
+    final draft =
+        await MemoDraftService.loadDraft();
+
+    if (!mounted) return;
+
+    final title = draft['title'] ?? '';
+    final body = draft['body'] ?? '';
+
+    _titleController.text = title.isNotEmpty
+        ? title
+        : DateFormat(
+            'yyyy/MM/dd',
+          ).format(DateTime.now());
+
+    _memoController.text = body;
+  }
+
+  /// 下書き保存
+  Future<void> _saveDraft() async {
+    await MemoDraftService.saveDraft(
+      title: _titleController.text,
+      body: _memoController.text,
+    );
+  }
+
+  /// 保存（SQLite実装予定）
   void _saveMemo() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
