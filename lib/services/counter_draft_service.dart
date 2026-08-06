@@ -10,6 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CounterDraftService {
   CounterDraftService._();
 
+  //==================================================
+  // Key
+  //==================================================
+
   static const String _startGameKey = 'counter_start_game';
   static const String _currentGameKey = 'counter_current_game';
 
@@ -19,7 +23,10 @@ class CounterDraftService {
   static const String _grapeKey = 'counter_grape';
   static const String _chanceKey = 'counter_chance';
 
-  /// 下書き保存
+  //==================================================
+  // 保存
+  //==================================================
+
   static Future<void> saveDraft({
     required int startGame,
     required int currentGame,
@@ -31,71 +38,39 @@ class CounterDraftService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setInt(
-      _startGameKey,
-      startGame,
-    );
+    await prefs.setInt(_startGameKey, startGame);
+    await prefs.setInt(_currentGameKey, currentGame);
 
-    await prefs.setInt(
-      _currentGameKey,
-      currentGame,
-    );
-
-    await prefs.setInt(
-      _cherryKey,
-      cherry,
-    );
-
-    await prefs.setInt(
-      _bellKey,
-      bell,
-    );
-
-    await prefs.setInt(
-      _suikaKey,
-      suika,
-    );
-
-    await prefs.setInt(
-      _grapeKey,
-      grape,
-    );
-
-    await prefs.setInt(
-      _chanceKey,
-      chance,
-    );
+    await prefs.setInt(_cherryKey, cherry);
+    await prefs.setInt(_bellKey, bell);
+    await prefs.setInt(_suikaKey, suika);
+    await prefs.setInt(_grapeKey, grape);
+    await prefs.setInt(_chanceKey, chance);
   }
 
-  /// 下書き読込
+  //==================================================
+  // 読み込み
+  //==================================================
+
   static Future<Map<String, int>> loadDraft() async {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'startGame':
-          prefs.getInt(_startGameKey) ?? 0,
+      'startGame': prefs.getInt(_startGameKey) ?? 0,
+      'currentGame': prefs.getInt(_currentGameKey) ?? 0,
 
-      'currentGame':
-          prefs.getInt(_currentGameKey) ?? 0,
-
-      'cherry':
-          prefs.getInt(_cherryKey) ?? 0,
-
-      'bell':
-          prefs.getInt(_bellKey) ?? 0,
-
-      'suika':
-          prefs.getInt(_suikaKey) ?? 0,
-
-      'grape':
-          prefs.getInt(_grapeKey) ?? 0,
-
-      'chance':
-          prefs.getInt(_chanceKey) ?? 0,
+      'cherry': prefs.getInt(_cherryKey) ?? 0,
+      'bell': prefs.getInt(_bellKey) ?? 0,
+      'suika': prefs.getInt(_suikaKey) ?? 0,
+      'grape': prefs.getInt(_grapeKey) ?? 0,
+      'chance': prefs.getInt(_chanceKey) ?? 0,
     };
   }
 
-  /// 下書き削除
+  //==================================================
+  // 下書き削除
+  //==================================================
+
   static Future<void> clearDraft() async {
     final prefs = await SharedPreferences.getInstance();
 

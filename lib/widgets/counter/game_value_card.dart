@@ -12,6 +12,7 @@ class GameValueCard extends StatelessWidget {
     required this.controller,
     this.suffixText = 'G',
     this.hintText = '0',
+    this.onChanged,
   });
 
   /// タイトル
@@ -25,6 +26,9 @@ class GameValueCard extends StatelessWidget {
 
   /// ヒント
   final String hintText;
+
+  /// 値変更時
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +71,13 @@ class GameValueCard extends StatelessWidget {
                   controller: controller,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.right,
-                  inputFormatters: [
+                  inputFormatters:  [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
+                  onChanged: onChanged,
                   decoration: InputDecoration(
                     isDense: true,
-                    contentPadding:
-                        const EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),

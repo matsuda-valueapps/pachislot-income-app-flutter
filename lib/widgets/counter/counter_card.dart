@@ -108,8 +108,8 @@ class CounterCard extends StatelessWidget {
             child: Text(
               probability,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
+                fontSize: 13,
+                color: Colors.grey.shade600,
               ),
             ),
           ),

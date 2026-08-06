@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../models/counter_item.dart';
+import '../providers/counter_provider.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/counter/counter_card.dart';
@@ -25,33 +26,27 @@ class _CounterPageState
       _currentGameController =
       TextEditingController();
 
-  final List<CounterItem> _items = const [
-    CounterItem(
-      id: 'cherry',
-      name: 'チェリー',
-      color: Colors.red,
-    ),
-    CounterItem(
-      id: 'bell',
-      name: 'ベル',
-      color: Colors.yellow,
-    ),
-    CounterItem(
-      id: 'suika',
-      name: 'スイカ',
-      color: Colors.green,
-    ),
-    CounterItem(
-      id: 'grape',
-      name: 'ブドウ',
-      color: Colors.purple,
-    ),
-    CounterItem(
-      id: 'chance',
-      name: 'チャンス目',
-      color: Colors.blue,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider =
+          context.read<CounterProvider>();
+
+      await provider.loadDraft();
+
+      _startGameController.text =
+          provider.startGame == 0
+              ? ''
+              : provider.startGame.toString();
+
+      _currentGameController.text =
+          provider.currentGame == 0
+              ? ''
+              : provider.currentGame.toString();
+    });
+  }
 
   @override
   void dispose() {
@@ -71,21 +66,30 @@ class _CounterPageState
     );
   }
 
-  void _onReset() {
+  Future<void> _onReset(
+    CounterProvider provider,
+  ) async {
+    await provider.reset();
+
     _startGameController.clear();
     _currentGameController.clear();
 
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('リセットしました'),
+        content: Text(
+          'リセットしました',
+        ),
       ),
     );
-
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.watch<CounterProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('小役カウンター'),
@@ -102,19 +106,34 @@ class _CounterPageState
                 StartGameCounter(
                   controller:
                       _startGameController,
+                  onChanged:
+                      provider.updateStartGame,
                 ),
 
                 GameCounter(
                   controller:
                       _currentGameController,
+                  onChanged:
+                      provider.updateCurrentGame,
                 ),
 
-                ..._items.map(
+                ...provider.items.map(
                   (item) => CounterCard(
                     item: item,
-                    probability: '1 / -----',
-                    onIncrement: () {},
-                    onDecrement: () {},
+                    probability:
+                        provider.probability(
+                      item.id,
+                    ),
+                    onIncrement: () {
+                      provider.increment(
+                        item.id,
+                      );
+                    },
+                    onDecrement: () {
+                      provider.decrement(
+                        item.id,
+                      );
+                    },
                   ),
                 ),
 
@@ -126,7 +145,10 @@ class _CounterPageState
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _onReset,
+                        onPressed: () =>
+                            _onReset(
+                          provider,
+                        ),
                         child: const Text(
                           'リセット',
                         ),
