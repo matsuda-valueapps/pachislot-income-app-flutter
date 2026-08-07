@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 import '../../theme/app_spacing.dart';
 import 'input_field_decoration.dart';
@@ -27,6 +27,7 @@ class AmountField extends StatelessWidget {
   /// キーボードアクション
   final TextInputAction textInputAction;
 
+  /// バリデーション
   final FormFieldValidator<String>? validator;
 
   @override
@@ -40,17 +41,16 @@ class AmountField extends StatelessWidget {
 
         TextFormField(
           controller: controller,
-
           validator: validator,
-
           keyboardType: TextInputType.number,
-
           textAlign: TextAlign.end,
-
           textInputAction: textInputAction,
 
           inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
+            CurrencyInputFormatter(
+              thousandSeparator: ThousandSeparator.Comma,
+              mantissaLength: 0,
+            ),
           ],
 
           decoration: InputFieldDecoration.build(

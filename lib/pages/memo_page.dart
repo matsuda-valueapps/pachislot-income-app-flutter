@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/calculator_provider.dart';
+import '../services/dialog_service.dart';
 import '../services/memo_draft_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
@@ -79,7 +80,23 @@ class _MemoPageState extends State<MemoPage> {
   }
 
   /// 保存（SQLite実装予定）
-  void _saveMemo() {
+  Future<void> _saveMemo() async {
+    final result =
+        await DialogService.showConfirm(
+      context: context,
+      title: '保存しますか？',
+      message: 'メモ内容を保存します。',
+      confirmText: '保存',
+    );
+
+    if (!mounted) {
+  return;
+    }
+
+    if (!result) {
+      return;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(

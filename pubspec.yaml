@@ -39,6 +39,8 @@ dependencies:
 
   holiday_jp: ^0.0.8
 
+  flutter_multi_formatter: ^2.13.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

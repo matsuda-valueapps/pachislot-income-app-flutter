@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/counter_provider.dart';
+import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/counter/counter_card.dart';
@@ -56,7 +57,25 @@ class _CounterPageState
     super.dispose();
   }
 
-  void _onSave() {
+  /// 保存
+  Future<void> _onSave() async {
+    final result =
+        await DialogService.showConfirm(
+      context: context,
+      title: '保存しますか？',
+      message: 'カウント内容を保存します。',
+      confirmText: '保存',
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!result) {
+      return;
+    }
+
+    // Step(SQLite)で保存処理を実装
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -66,15 +85,34 @@ class _CounterPageState
     );
   }
 
+  /// リセット
   Future<void> _onReset(
     CounterProvider provider,
   ) async {
+    final result =
+        await DialogService.showConfirm(
+      context: context,
+      title: 'リセットしますか？',
+      message: '入力内容をすべてリセットします。',
+      confirmText: 'リセット',
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!result) {
+      return;
+    }
+
     await provider.reset();
 
     _startGameController.clear();
     _currentGameController.clear();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

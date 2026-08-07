@@ -52,10 +52,63 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+          minimumSize: const Size(
+            double.infinity,
+            50,
           ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          shape: const StadiumBorder(),
+        ),
+      ),
+
+      // ==========================
+      // FilledButton
+      // ==========================
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+
+          minimumSize: const Size(
+            double.infinity,
+            50,
+          ),
+
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+
+          shape: const StadiumBorder(),
+        ),
+      ),
+
+      // ==========================
+      // OutlinedButton
+      // ==========================
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+
+          minimumSize: const Size(
+            double.infinity,
+            50,
+          ),
+
+          side: BorderSide(
+            color: Colors.grey.shade500,
+            width: 1.2,
+          ),
+
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+
+          shape: const StadiumBorder(),
         ),
       ),
 
