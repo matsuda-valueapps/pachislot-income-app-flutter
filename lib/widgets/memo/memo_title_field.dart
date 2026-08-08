@@ -9,9 +9,18 @@ class MemoTitleField extends StatelessWidget {
   const MemoTitleField({
     super.key,
     required this.controller,
+    this.onTap,
+    this.readOnly = false,
   });
 
+  /// タイトル
   final TextEditingController controller;
+
+  /// タップ時処理
+  final VoidCallback? onTap;
+
+  /// 読み取り専用
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +30,24 @@ class MemoTitleField extends StatelessWidget {
         const InputLabel(
           text: 'メモタイトル',
         ),
+
         TextFormField(
           controller: controller,
           style: AppTextStyles.body,
+
+          readOnly: readOnly,
+
+          onTap: onTap,
+
           decoration: InputFieldDecoration.build(
-            hintText: '例：2026/07/31 マルハン新宿',
+            hintText: '例：マルハン新宿',
           ),
+
           textInputAction: TextInputAction.next,
+
           maxLength: 50,
         ),
+
         const SizedBox(
           height: AppSpacing.lg,
         ),

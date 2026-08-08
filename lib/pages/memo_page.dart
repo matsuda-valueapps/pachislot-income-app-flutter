@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/calculator_provider.dart';
@@ -9,6 +8,7 @@ import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/memo/calculator_bottom_sheet.dart';
 import '../widgets/memo/calculator_toggle.dart';
+import '../widgets/memo/memo_date_field.dart';
 import '../widgets/memo/memo_editor.dart';
 import '../widgets/memo/memo_save_button.dart';
 import '../widgets/memo/memo_title_field.dart';
@@ -22,6 +22,9 @@ class MemoPage extends StatefulWidget {
 }
 
 class _MemoPageState extends State<MemoPage> {
+  /// 日付
+  DateTime _selectedDate = DateTime.now();
+
   /// メモタイトル
   final TextEditingController _titleController =
       TextEditingController();
@@ -52,34 +55,74 @@ class _MemoPageState extends State<MemoPage> {
     super.dispose();
   }
 
+  /// 日付選択
+  ///
+  /// 入力画面と同じカレンダーを表示
+  Future<void> _selectDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      locale: const Locale('ja', 'JP'),
+    );
+
+    if (pickedDate == null) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _selectedDate = pickedDate;
+    });
+
+    await _saveDraft();
+  }
+
   /// 下書き読込
   Future<void> _loadDraft() async {
     final draft =
         await MemoDraftService.loadDraft();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
-    final title = draft['title'] ?? '';
-    final body = draft['body'] ?? '';
+    final dateString = draft['date'] ?? '';
 
-    _titleController.text = title.isNotEmpty
-        ? title
-        : DateFormat(
-            'yyyy/MM/dd',
-          ).format(DateTime.now());
+    if (dateString.isNotEmpty) {
+      try {
+        _selectedDate =
+            DateTime.parse(dateString);
+      } catch (_) {
+        _selectedDate = DateTime.now();
+      }
+    } else {
+      _selectedDate = DateTime.now();
+    }
 
-    _memoController.text = body;
+    _titleController.text =
+        draft['title'] ?? '';
+
+    _memoController.text =
+        draft['body'] ?? '';
+
+    setState(() {});
   }
 
   /// 下書き保存
   Future<void> _saveDraft() async {
     await MemoDraftService.saveDraft(
+      date: _selectedDate,
       title: _titleController.text,
       body: _memoController.text,
     );
   }
 
-  /// 保存（SQLite実装予定）
+  /// 保存
   Future<void> _saveMemo() async {
     final result =
         await DialogService.showConfirm(
@@ -90,17 +133,37 @@ class _MemoPageState extends State<MemoPage> {
     );
 
     if (!mounted) {
-  return;
+      return;
     }
 
     if (!result) {
       return;
     }
 
+    // ==========================================
+    // SQLite実装時に正式保存処理を追加
+    // ==========================================
+
+    // 下書きを削除
+    await MemoDraftService.clearDraft();
+
+    if (!mounted) {
+      return;
+    }
+
+    // 保存後は本日の日付に戻す
+    setState(() {
+      _selectedDate = DateTime.now();
+
+      _titleController.clear();
+
+      _memoController.clear();
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'SQLite実装時に保存処理を追加します',
+          '保存しました',
         ),
       ),
     );
@@ -138,24 +201,54 @@ class _MemoPageState extends State<MemoPage> {
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
                           children: [
+                            // ==========================================
+                            // 日付
+                            // ==========================================
+
+                            MemoDateField(
+                              selectedDate:
+                                  _selectedDate,
+                              onTap: _selectDate,
+                            ),
+
+                            // ==========================================
+                            // タイトル
+                            // ==========================================
+
                             MemoTitleField(
                               controller:
                                   _titleController,
                             ),
+
+                            // ==========================================
+                            // 本文
+                            // ==========================================
 
                             MemoEditor(
                               controller:
                                   _memoController,
                             ),
 
+                            // ==========================================
+                            // クイック入力
+                            // ==========================================
+
                             QuickInputBar(
                               controller:
                                   _memoController,
                             ),
 
+                            // ==========================================
+                            // 保存
+                            // ==========================================
+
                             MemoSaveButton(
                               onPressed: _saveMemo,
                             ),
+
+                            // ==========================================
+                            // 電卓表示切替
+                            // ==========================================
 
                             const CalculatorToggle(),
                           ],
@@ -165,6 +258,10 @@ class _MemoPageState extends State<MemoPage> {
                   ),
                 ),
               ),
+
+              // ==========================================
+              // 電卓
+              // ==========================================
 
               const Positioned(
                 left: 0,
