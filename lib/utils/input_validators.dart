@@ -7,7 +7,7 @@ class InputValidators {
     String fieldName = '入力項目',
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldNameを入力してください';
+      return '$fieldNameを入力して下さい';
     }
 
     return null;
@@ -16,17 +16,19 @@ class InputValidators {
   /// 金額チェック
   static String? amount(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return '金額を入力してください';
+      return '金額を入力して下さい';
     }
 
-    final amount = int.tryParse(value);
+    final amount = int.tryParse(
+      value.replaceAll(',', ''),
+    );
 
     if (amount == null) {
-      return '数値を入力してください';
+      return '数値を入力して下さい';
     }
 
     if (amount < 0) {
-      return '0以上の数値を入力してください';
+      return '0以上の数値を入力して下さい';
     }
 
     return null;

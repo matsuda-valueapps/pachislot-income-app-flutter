@@ -40,7 +40,7 @@ class MemoTitleField extends StatelessWidget {
           onTap: onTap,
 
           decoration: InputFieldDecoration.build(
-            hintText: '例：マルハン新宿',
+            hintText: '例：マルハン○○店',
           ),
 
           textInputAction: TextInputAction.next,
