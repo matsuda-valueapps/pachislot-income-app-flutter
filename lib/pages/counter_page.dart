@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/counter_record.dart';
 import '../providers/counter_provider.dart';
+import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
@@ -31,22 +33,28 @@ class _CounterPageState
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final provider =
-          context.read<CounterProvider>();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        final provider =
+            context.read<CounterProvider>();
 
-      await provider.loadDraft();
+        await provider.loadDraft();
 
-      _startGameController.text =
-          provider.startGame == 0
-              ? ''
-              : provider.startGame.toString();
+        if (!mounted) {
+          return;
+        }
 
-      _currentGameController.text =
-          provider.currentGame == 0
-              ? ''
-              : provider.currentGame.toString();
-    });
+        _startGameController.text =
+            provider.startGame == 0
+                ? ''
+                : provider.startGame.toString();
+
+        _currentGameController.text =
+            provider.currentGame == 0
+                ? ''
+                : provider.currentGame.toString();
+      },
+    );
   }
 
   @override
@@ -57,8 +65,49 @@ class _CounterPageState
     super.dispose();
   }
 
+  /// SQLite保存用のCounterRecordを作成
+  CounterRecord _createCounterRecord(
+    CounterProvider provider,
+  ) {
+    final now = DateTime.now();
+
+    return CounterRecord(
+      startGame: provider.startGame,
+      currentGame: provider.currentGame,
+      cherry: provider.items
+          .firstWhere(
+            (item) => item.id == 'cherry',
+          )
+          .count,
+      bell: provider.items
+          .firstWhere(
+            (item) => item.id == 'bell',
+          )
+          .count,
+      suika: provider.items
+          .firstWhere(
+            (item) => item.id == 'suika',
+          )
+          .count,
+      grape: provider.items
+          .firstWhere(
+            (item) => item.id == 'grape',
+          )
+          .count,
+      chance: provider.items
+          .firstWhere(
+            (item) => item.id == 'chance',
+          )
+          .count,
+      createdAt: now.toIso8601String(),
+      updatedAt: now.toIso8601String(),
+    );
+  }
+
   /// 保存
-  Future<void> _onSave() async {
+  Future<void> _onSave(
+    CounterProvider provider,
+  ) async {
     final result =
         await DialogService.showConfirm(
       context: context,
@@ -75,14 +124,75 @@ class _CounterPageState
       return;
     }
 
-    // Step(SQLite)で保存処理を実装
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'SQLite実装時に保存処理を追加します',
+    try {
+      // ==========================================
+      // SQLiteへ正式保存
+      // ==========================================
+
+      final record =
+          _createCounterRecord(provider);
+
+      await DatabaseService.instance
+          .insertCounterRecord(record);
+
+      if (!mounted) {
+        return;
+      }
+
+      // ==========================================
+      // SQLite保存成功後にカウンターを初期化
+      //
+      // provider.reset() の中で、
+      // CounterDraftService.clearDraft()
+      // も実行される。
+      // ==========================================
+
+      await provider.reset();
+
+      if (!mounted) {
+        return;
+      }
+
+      // ==========================================
+      // TextFieldも初期状態へ戻す
+      // ==========================================
+
+      _startGameController.clear();
+      _currentGameController.clear();
+
+      // ==========================================
+      // 保存完了
+      // ==========================================
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            '保存しました',
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      // ==========================================
+      // SQLite保存失敗
+      //
+      // この場合はprovider.reset()を実行しないため、
+      // 下書きは残る。
+      // ==========================================
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            '保存に失敗しました。もう一度お試しください。',
+          ),
+        ),
+      );
+    }
   }
 
   /// リセット
@@ -114,7 +224,8 @@ class _CounterPageState
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
       const SnackBar(
         content: Text(
           'リセットしました',
@@ -199,7 +310,10 @@ class _CounterPageState
 
                     Expanded(
                       child: FilledButton(
-                        onPressed: _onSave,
+                        onPressed: () =>
+                            _onSave(
+                          provider,
+                        ),
                         child: const Text(
                           '保存',
                         ),

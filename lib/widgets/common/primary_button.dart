@@ -45,14 +45,18 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppColors.primary;
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color bgColor =
+        backgroundColor ?? AppColors.primary;
+
+    final Color fgColor =
+        foregroundColor ?? Colors.white;
 
     return SizedBox(
       width: width,
       height: height,
       child: FilledButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed:
+            isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: bgColor,
           foregroundColor: fgColor,
@@ -70,15 +74,21 @@ class PrimaryButton extends StatelessWidget {
                 ),
               )
             : Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize:
+                    MainAxisSize.min,
                 children: [
-                  if (icon case IconData iconData) ...[
+                  if (icon
+                      case IconData iconData) ...[
                     Icon(iconData),
-                    const SizedBox(width: AppSpacing.sm),
+                    const SizedBox(
+                      width: AppSpacing.sm,
+                    ),
                   ],
                   Text(
                     text,
-                    style: AppTextStyles.button.copyWith(
+                    style:
+                        AppTextStyles.button
+                            .copyWith(
                       color: fgColor,
                     ),
                   ),

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'pages/main_page.dart';
 import 'providers/calculator_provider.dart';
 import 'providers/counter_provider.dart';
+import 'providers/home_provider.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -20,12 +21,28 @@ class PachislotIncomeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // ==========================================
+        // 電卓
+        // ==========================================
+
         ChangeNotifierProvider(
           create: (_) => CalculatorProvider(),
         ),
 
+        // ==========================================
+        // 小役カウンター
+        // ==========================================
+
         ChangeNotifierProvider(
           create: (_) => CounterProvider(),
+        ),
+
+        // ==========================================
+        // ホーム画面
+        // ==========================================
+
+        ChangeNotifierProvider(
+          create: (_) => HomeProvider(),
         ),
       ],
       child: MaterialApp(

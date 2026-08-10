@@ -28,7 +28,7 @@ class MemoTitleField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const InputLabel(
-          text: 'メモタイトル',
+          text: 'タイトル',
         ),
 
         TextFormField(

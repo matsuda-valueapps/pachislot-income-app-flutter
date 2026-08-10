@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/memo_record.dart';
 import '../providers/calculator_provider.dart';
+import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../services/memo_draft_service.dart';
 import '../theme/app_spacing.dart';
@@ -84,8 +86,7 @@ class _MemoPageState extends State<MemoPage> {
 
   /// 下書き読込
   Future<void> _loadDraft() async {
-    final draft =
-        await MemoDraftService.loadDraft();
+    final draft = await MemoDraftService.loadDraft();
 
     if (!mounted) {
       return;
@@ -95,8 +96,7 @@ class _MemoPageState extends State<MemoPage> {
 
     if (dateString.isNotEmpty) {
       try {
-        _selectedDate =
-            DateTime.parse(dateString);
+        _selectedDate = DateTime.parse(dateString);
       } catch (_) {
         _selectedDate = DateTime.now();
       }
@@ -104,11 +104,9 @@ class _MemoPageState extends State<MemoPage> {
       _selectedDate = DateTime.now();
     }
 
-    _titleController.text =
-        draft['title'] ?? '';
+    _titleController.text = draft['title'] ?? '';
 
-    _memoController.text =
-        draft['body'] ?? '';
+    _memoController.text = draft['body'] ?? '';
 
     setState(() {});
   }
@@ -122,10 +120,26 @@ class _MemoPageState extends State<MemoPage> {
     );
   }
 
+  /// SQLiteへ正式保存
+  Future<void> _saveMemoToDatabase() async {
+    final now = DateTime.now();
+
+    final record = MemoRecord(
+      date: _selectedDate.toIso8601String().split('T').first,
+      title: _titleController.text,
+      body: _memoController.text,
+      createdAt: now.toIso8601String(),
+      updatedAt: now.toIso8601String(),
+    );
+
+    await DatabaseService.instance.insertMemoRecord(
+      record,
+    );
+  }
+
   /// 保存
   Future<void> _saveMemo() async {
-    final result =
-        await DialogService.showConfirm(
+    final result = await DialogService.showConfirm(
       context: context,
       title: '保存しますか？',
       message: 'メモ内容を保存します。',
@@ -140,33 +154,67 @@ class _MemoPageState extends State<MemoPage> {
       return;
     }
 
-    // ==========================================
-    // SQLite実装時に正式保存処理を追加
-    // ==========================================
+    try {
+      // ==========================================
+      // SQLiteへ正式保存
+      // ==========================================
 
-    // 下書きを削除
-    await MemoDraftService.clearDraft();
+      await _saveMemoToDatabase();
 
-    if (!mounted) {
-      return;
-    }
+      if (!mounted) {
+        return;
+      }
 
-    // 保存後は本日の日付に戻す
-    setState(() {
-      _selectedDate = DateTime.now();
+      // ==========================================
+      // SQLite保存成功後に下書きを削除
+      // ==========================================
 
-      _titleController.clear();
+      await MemoDraftService.clearDraft();
 
-      _memoController.clear();
-    });
+      if (!mounted) {
+        return;
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          '保存しました',
+      // ==========================================
+      // 保存後は初期状態へ戻す
+      // ==========================================
+
+      setState(() {
+        _selectedDate = DateTime.now();
+
+        _titleController.clear();
+
+        _memoController.clear();
+      });
+
+      // ==========================================
+      // 保存完了
+      // ==========================================
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            '保存しました',
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      // ==========================================
+      // SQLite保存失敗
+      // ==========================================
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            '保存に失敗しました。もう一度お試しください。',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -206,8 +254,7 @@ class _MemoPageState extends State<MemoPage> {
                             // ==========================================
 
                             MemoDateField(
-                              selectedDate:
-                                  _selectedDate,
+                              selectedDate: _selectedDate,
                               onTap: _selectDate,
                             ),
 
@@ -216,8 +263,7 @@ class _MemoPageState extends State<MemoPage> {
                             // ==========================================
 
                             MemoTitleField(
-                              controller:
-                                  _titleController,
+                              controller: _titleController,
                             ),
 
                             // ==========================================
@@ -225,8 +271,7 @@ class _MemoPageState extends State<MemoPage> {
                             // ==========================================
 
                             MemoEditor(
-                              controller:
-                                  _memoController,
+                              controller: _memoController,
                             ),
 
                             // ==========================================
@@ -234,8 +279,7 @@ class _MemoPageState extends State<MemoPage> {
                             // ==========================================
 
                             QuickInputBar(
-                              controller:
-                                  _memoController,
+                              controller: _memoController,
                             ),
 
                             // ==========================================
