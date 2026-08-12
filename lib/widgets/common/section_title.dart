@@ -44,7 +44,10 @@ class SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: AppTextStyles.sectionTitle,
+              style: AppTextStyles.sectionTitle.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 

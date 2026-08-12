@@ -7,42 +7,60 @@ import '../common/app_card.dart';
 import '../common/section_title.dart';
 import '../common/stat_tile.dart';
 
-/// ホーム画面用 統計カード
+/// ホーム画面用 月間統計カード
 class StatisticsCard extends StatelessWidget {
   const StatisticsCard({
     super.key,
+    required this.monthLabel,
     required this.totalGames,
     required this.winGames,
+    required this.winRate,
     required this.averageIncome,
   });
 
-  /// 遊技回数
+  /// 表示年月
+  ///
+  /// 例：
+  /// 2026年8月
+  final String monthLabel;
+
+  /// 月間遊技回数
   final int totalGames;
 
-  /// 勝利回数
+  /// 月間勝利回数
   final int winGames;
 
-  /// 平均収支
+  /// 月間勝率
+  final double winRate;
+
+  /// 月間平均収支
   final int averageIncome;
 
+  /// 金額表示
   String _format(int value) {
     return NumberFormat('#,###').format(value);
   }
 
   @override
   Widget build(BuildContext context) {
-    final double winRate =
-        totalGames == 0 ? 0 : (winGames / totalGames) * 100;
-
     return AppCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
-          const SectionTitle(
-            title: '統計',
+          // ==========================================
+          // タイトル
+          // ==========================================
+
+          SectionTitle(
+            title: '$monthLabel統計',
           ),
 
           AppSpacing.gapLg,
+
+          // ==========================================
+          // 遊技回数・勝利回数
+          // ==========================================
 
           Row(
             children: [
@@ -60,8 +78,10 @@ class StatisticsCard extends StatelessWidget {
                 child: StatTile(
                   label: '勝利回数',
                   value: '$winGames 回',
-                  icon: Icons.emoji_events_outlined,
-                  valueColor: AppColors.profit,
+                  icon:
+                      Icons.emoji_events_outlined,
+                  valueColor:
+                      AppColors.profit,
                 ),
               ),
             ],
@@ -69,14 +89,20 @@ class StatisticsCard extends StatelessWidget {
 
           AppSpacing.gapMd,
 
+          // ==========================================
+          // 勝率・平均収支
+          // ==========================================
+
           Row(
             children: [
               Expanded(
                 child: StatTile(
                   label: '勝率',
-                  value: '${winRate.toStringAsFixed(1)}%',
+                  value:
+                      '${winRate.toStringAsFixed(1)}%',
                   icon: Icons.percent,
-                  valueColor: AppColors.primary,
+                  valueColor:
+                      AppColors.primary,
                 ),
               ),
 
@@ -85,11 +111,15 @@ class StatisticsCard extends StatelessWidget {
               Expanded(
                 child: StatTile(
                   label: '平均収支',
-                  value: '${averageIncome >= 0 ? '+' : ''}${_format(averageIncome)}円',
-                  icon: Icons.bar_chart_outlined,
-                  valueColor: averageIncome >= 0
-                      ? AppColors.profit
-                      : AppColors.loss,
+                  value:
+                      '${averageIncome >= 0 ? '+' : ''}'
+                      '${_format(averageIncome)}円',
+                  icon:
+                      Icons.bar_chart_outlined,
+                  valueColor:
+                      averageIncome >= 0
+                          ? AppColors.profit
+                          : AppColors.loss,
                 ),
               ),
             ],

@@ -11,10 +11,18 @@ import '../common/section_title.dart';
 class MonthlyIncomeCard extends StatelessWidget {
   const MonthlyIncomeCard({
     super.key,
+    required this.year,
+    required this.month,
     required this.income,
     required this.investment,
     required this.recovery,
   });
+
+  /// 表示する年
+  final int year;
+
+  /// 表示する月
+  final int month;
 
   /// 月間収支
   final int income;
@@ -25,6 +33,7 @@ class MonthlyIncomeCard extends StatelessWidget {
   /// 総回収額
   final int recovery;
 
+  /// 金額フォーマット
   String _format(int value) {
     return NumberFormat('#,###').format(value);
   }
@@ -35,18 +44,28 @@ class MonthlyIncomeCard extends StatelessWidget {
 
     return AppCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
-          const SectionTitle(
-            title: '今月の収支',
+          // ==========================================
+          // タイトル
+          // ==========================================
+
+          SectionTitle(
+            title: '$year年$month月収支',
           ),
 
           AppSpacing.gapMd,
 
+          // ==========================================
+          // 収支
+          // ==========================================
+
           Center(
             child: Text(
               '${isProfit ? '+' : ''}${_format(income)} 円',
-              style: AppTextStyles.amountLarge.copyWith(
+              style:
+                  AppTextStyles.amountLarge.copyWith(
                 color: isProfit
                     ? AppColors.profit
                     : AppColors.loss,
@@ -62,19 +81,25 @@ class MonthlyIncomeCard extends StatelessWidget {
 
           AppSpacing.gapMd,
 
+          // ==========================================
+          // 投資・回収
+          // ==========================================
+
           Row(
             children: [
               Expanded(
                 child: _InfoItem(
                   title: '投資',
-                  value: '${_format(investment)} 円',
+                  value:
+                      '${_format(investment)} 円',
                   color: AppColors.loss,
                 ),
               ),
               Expanded(
                 child: _InfoItem(
                   title: '回収',
-                  value: '${_format(recovery)} 円',
+                  value:
+                      '${_format(recovery)} 円',
                   color: AppColors.profit,
                 ),
               ),
@@ -86,6 +111,7 @@ class MonthlyIncomeCard extends StatelessWidget {
   }
 }
 
+/// 投資・回収の項目
 class _InfoItem extends StatelessWidget {
   const _InfoItem({
     required this.title,
@@ -106,7 +132,9 @@ class _InfoItem extends StatelessWidget {
           style: AppTextStyles.caption,
         ),
 
-        const SizedBox(height: 2),
+        const SizedBox(
+          height: 2,
+        ),
 
         Text(
           value,

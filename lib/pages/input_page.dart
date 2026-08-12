@@ -21,6 +21,7 @@ class InputPage extends StatefulWidget {
   const InputPage({
     super.key,
     this.record,
+    this.initialDate,
   });
 
   /// 編集対象の収支データ
@@ -28,6 +29,15 @@ class InputPage extends StatefulWidget {
   /// nullの場合は新規入力。
   /// null以外の場合は編集モード。
   final IncomeRecord? record;
+
+  /// 新規入力時の初期日付
+  ///
+  /// カレンダーから特定の日付を選択して
+  /// 入力画面を開く場合に使用する。
+  ///
+  /// nullの場合は従来通り、
+  /// 下書きの日付または今日の日付を使用する。
+  final DateTime? initialDate;
 
   @override
   State<InputPage> createState() => _InputPageState();
@@ -91,6 +101,10 @@ class _InputPageState extends State<InputPage> {
       _loadRecord();
     } else {
       // 新規モードでは下書きを読み込む。
+      //
+      // initialDateが指定されている場合でも、
+      // 下書きの入力内容は読み込む。
+      // ただし日付についてはinitialDateを優先する。
       _loadDraft();
     }
 
@@ -365,23 +379,43 @@ class _InputPageState extends State<InputPage> {
     }
 
     setState(() {
-      final dateString =
-          draft['date'];
+      // ==========================================================
+      // 日付
+      // ==========================================================
+      //
+      // カレンダーなどからinitialDateが渡された場合は、
+      // その日付を優先する。
+      //
+      // initialDateがnullの場合のみ、
+      // 下書きの日付を使用する。
+      // ==========================================================
 
-      if (dateString != null &&
-          dateString
-              .toString()
-              .isNotEmpty) {
-        try {
-          _selectedDate =
-              DateTime.parse(
-            dateString.toString(),
-          );
-        } catch (_) {
-          _selectedDate =
-              DateTime.now();
+      if (widget.initialDate != null) {
+        _selectedDate =
+            widget.initialDate!;
+      } else {
+        final dateString =
+            draft['date'];
+
+        if (dateString != null &&
+            dateString
+                .toString()
+                .isNotEmpty) {
+          try {
+            _selectedDate =
+                DateTime.parse(
+              dateString.toString(),
+            );
+          } catch (_) {
+            _selectedDate =
+                DateTime.now();
+          }
         }
       }
+
+      // ==========================================================
+      // 入力内容
+      // ==========================================================
 
       _hallController.text =
           draft['hall'] ?? '';
@@ -788,170 +822,170 @@ class _InputPageState extends State<InputPage> {
           child: SingleChildScrollView(
             padding: AppSpacing.page,
             child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
-            children: [
-              AppCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    // ==========================================
-                    // 日付
-                    // ==========================================
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
+              children: [
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      // ==========================================
+                      // 日付
+                      // ==========================================
 
-                    DateField(
-                      selectedDate:
-                          _selectedDate,
-                      onTap:
-                          _selectDate,
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.lg,
-                    ),
-
-                    // ==========================================
-                    // ホール名
-                    // ==========================================
-
-                    TextInputField(
-                      label: 'ホール名',
-                      controller:
-                          _hallController,
-                      hintText:
-                          '例：マルハン○○店',
-                      validator:
-                          (value) =>
-                              InputValidators
-                                  .required(
-                        value,
-                        fieldName:
-                            'ホール名',
+                      DateField(
+                        selectedDate:
+                            _selectedDate,
+                        onTap:
+                            _selectDate,
                       ),
-                    ),
 
-                    // ==========================================
-                    // 機種名
-                    // ==========================================
-
-                    TextInputField(
-                      label: '機種名',
-                      controller:
-                          _machineController,
-                      hintText:
-                          '例：L北斗の拳',
-                      validator:
-                          (value) =>
-                              InputValidators
-                                  .required(
-                        value,
-                        fieldName:
-                            '機種名',
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
                       ),
-                    ),
 
-                    // ==========================================
-                    // 貯メダル投資
-                    // ==========================================
+                      // ==========================================
+                      // ホール名
+                      // ==========================================
 
-                    AmountField(
-                      label:
-                          '貯メダル投資（円）',
-                      controller:
-                          _medalInvestController,
-                      validator:
-                          InputValidators
-                              .amount,
-                    ),
+                      TextInputField(
+                        label: 'ホール名',
+                        controller:
+                            _hallController,
+                        hintText:
+                            '例：マルハン○○店',
+                        validator:
+                            (value) =>
+                                InputValidators
+                                    .required(
+                          value,
+                          fieldName:
+                              'ホール名',
+                        ),
+                      ),
 
-                    // ==========================================
-                    // 現金投資
-                    // ==========================================
+                      // ==========================================
+                      // 機種名
+                      // ==========================================
 
-                    AmountField(
-                      label:
-                          '現金投資（円）',
-                      controller:
-                          _cashInvestController,
-                      validator:
-                          InputValidators
-                              .amount,
-                    ),
+                      TextInputField(
+                        label: '機種名',
+                        controller:
+                            _machineController,
+                        hintText:
+                            '例：L北斗の拳',
+                        validator:
+                            (value) =>
+                                InputValidators
+                                    .required(
+                          value,
+                          fieldName:
+                              '機種名',
+                        ),
+                      ),
 
-                    // ==========================================
-                    // 貯メダル回収
-                    // ==========================================
+                      // ==========================================
+                      // 貯メダル投資
+                      // ==========================================
 
-                    AmountField(
-                      label:
-                          '貯メダル回収（円）',
-                      controller:
-                          _medalReturnController,
-                      validator:
-                          InputValidators
-                              .amount,
-                    ),
+                      AmountField(
+                        label:
+                            '貯メダル投資（円）',
+                        controller:
+                            _medalInvestController,
+                        validator:
+                            InputValidators
+                                .amount,
+                      ),
 
-                    // ==========================================
-                    // 現金回収
-                    // ==========================================
+                      // ==========================================
+                      // 現金投資
+                      // ==========================================
 
-                    AmountField(
-                      label:
-                          '現金回収（円）',
-                      controller:
-                          _cashReturnController,
-                      validator:
-                          InputValidators
-                              .amount,
-                    ),
+                      AmountField(
+                        label:
+                            '現金投資（円）',
+                        controller:
+                            _cashInvestController,
+                        validator:
+                            InputValidators
+                                .amount,
+                      ),
 
-                    const SizedBox(
-                      height:
-                          AppSpacing.lg,
-                    ),
+                      // ==========================================
+                      // 貯メダル回収
+                      // ==========================================
 
-                    // ==========================================
-                    // 収支
-                    // ==========================================
+                      AmountField(
+                        label:
+                            '貯メダル回収（円）',
+                        controller:
+                            _medalReturnController,
+                        validator:
+                            InputValidators
+                                .amount,
+                      ),
 
-                    ProfitCard(
-                      profit: _profit,
-                    ),
+                      // ==========================================
+                      // 現金回収
+                      // ==========================================
 
-                    // ==========================================
-                    // メモ
-                    // ==========================================
+                      AmountField(
+                        label:
+                            '現金回収（円）',
+                        controller:
+                            _cashReturnController,
+                        validator:
+                            InputValidators
+                                .amount,
+                      ),
 
-                    MemoField(
-                      controller:
-                          _memoController,
-                      hintText:
-                          '自由にメモを入力できます',
-                    ),
-                  ],
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      // ==========================================
+                      // 収支
+                      // ==========================================
+
+                      ProfitCard(
+                        profit: _profit,
+                      ),
+
+                      // ==========================================
+                      // メモ
+                      // ==========================================
+
+                      MemoField(
+                        controller:
+                            _memoController,
+                        hintText:
+                            '自由にメモを入力できます',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(
-                height:
-                    AppSpacing.xl,
-              ),
+                const SizedBox(
+                  height:
+                      AppSpacing.xl,
+                ),
 
-              // ==========================================
-              // 保存 / 更新
-              // ==========================================
+                // ==========================================
+                // 保存 / 更新
+                // ==========================================
 
-              PrimaryButton(
-                text: _isEditMode
-                    ? '更新'
-                    : '保存',
-                onPressed:
-                    _onSavePressed,
-              ),
-            ],
+                PrimaryButton(
+                  text: _isEditMode
+                      ? '更新'
+                      : '保存',
+                  onPressed:
+                      _onSavePressed,
+                ),
+              ],
             ),
           ),
         ),

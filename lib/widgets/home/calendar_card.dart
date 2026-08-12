@@ -1,111 +1,277 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:holiday_jp/holiday_jp.dart';
 
+import '../../providers/home_provider.dart';
 import '../../theme/app_colors.dart';
 import '../common/app_card.dart';
-
-import 'package:holiday_jp/holiday_jp.dart';
 
 /// ホーム画面用カレンダーカード
 class CalendarCard extends StatefulWidget {
   const CalendarCard({
     super.key,
+    this.onDateSelected,
   });
 
+  /// 日付タップ時のコールバック
+  ///
+  /// CalendarCard自身ではSQLiteや画面遷移を行わず、
+  /// タップされた日付だけを親Widgetへ通知する。
+  final ValueChanged<DateTime>? onDateSelected;
+
   @override
-  State<CalendarCard> createState() => _CalendarCardState();
+  State<CalendarCard> createState() =>
+      _CalendarCardState();
 }
 
-class _CalendarCardState extends State<CalendarCard> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now();
+class _CalendarCardState
+    extends State<CalendarCard> {
+  /// 現在カレンダーで表示している年月
+  late DateTime _focusedDay;
 
-  /// 将来SQLiteから取得する収支データ
-  ///
-  /// 例：
-  /// DateTime(2026, 7, 2): 8200
-  /// DateTime(2026, 7, 5): -15000
-  final Map<DateTime, int> _dailyIncome = {};
+  /// 選択中の日付
+  late DateTime _selectedDay;
 
+  /// 初期化
+  @override
+  void initState() {
+    super.initState();
+
+    final provider =
+        context.read<HomeProvider>();
+
+    _focusedDay =
+        provider.focusedMonth;
+
+    _selectedDay = DateTime.now();
+  }
+
+  //==================================================
+  // 休日
+  //==================================================
+
+  /// 祝日判定
   bool _isHoliday(DateTime day) {
     return isHoliday(day);
   }
 
-  bool _isProfitDay(DateTime day) {
-    for (final entry in _dailyIncome.entries) {
-      if (isSameDay(entry.key, day)) {
-        return entry.value > 0;
+  //==================================================
+  // 収支マーカー
+  //==================================================
+
+  /// 現在保存されている収支データから
+  /// 該当日の収支がプラスか判定
+  bool _isProfitDay(
+    DateTime day,
+    HomeProvider provider,
+  ) {
+    for (final record
+        in provider.incomeRecords) {
+      try {
+        final recordDate =
+            DateTime.parse(record.date);
+
+        if (isSameDay(recordDate, day)) {
+          return record.profit > 0;
+        }
+      } catch (_) {
+        // 日付が不正な場合は無視
       }
     }
 
     return false;
   }
 
-  bool _isLossDay(DateTime day) {
-    for (final entry in _dailyIncome.entries) {
-      if (isSameDay(entry.key, day)) {
-        return entry.value < 0;
+  /// 現在保存されている収支データから
+  /// 該当日の収支がマイナスか判定
+  bool _isLossDay(
+    DateTime day,
+    HomeProvider provider,
+  ) {
+    for (final record
+        in provider.incomeRecords) {
+      try {
+        final recordDate =
+            DateTime.parse(record.date);
+
+        if (isSameDay(recordDate, day)) {
+          return record.profit < 0;
+        }
+      } catch (_) {
+        // 日付が不正な場合は無視
       }
     }
 
     return false;
   }
 
-  Color _defaultTextColor(DateTime day) {
-    if (_isHoliday(day) || day.weekday == DateTime.sunday) {
+  //==================================================
+  // 日付カラー
+  //==================================================
+
+  /// 通常の日付文字色
+  Color _defaultTextColor(
+    DateTime day,
+  ) {
+    if (_isHoliday(day) ||
+        day.weekday ==
+            DateTime.sunday) {
       return Colors.red;
     }
 
-    if (day.weekday == DateTime.saturday) {
+    if (day.weekday ==
+        DateTime.saturday) {
       return Colors.blue;
     }
 
     return Colors.black87;
   }
 
+  //==================================================
+  // 日付タップ
+  //==================================================
+
+  /// 日付タップ処理
+  ///
+  /// CalendarCardではSQLite検索や画面遷移を行わず、
+  /// タップされた日付を親Widgetへ通知する。
+  void _handleDateSelected(
+    DateTime selectedDay,
+  ) {
+    widget.onDateSelected?.call(
+      selectedDay,
+    );
+  }
+
+  //==================================================
+  // Build
+  //==================================================
+
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.watch<HomeProvider>();
+
     return AppCard(
       child: TableCalendar(
         locale: 'ja_JP',
 
         firstDay: DateTime(2020),
         lastDay: DateTime(2035),
+
         focusedDay: _focusedDay,
 
-        calendarFormat: CalendarFormat.month,
+        calendarFormat:
+            CalendarFormat.month,
 
         daysOfWeekHeight: 32,
 
         selectedDayPredicate: (day) =>
-            isSameDay(_selectedDay, day),
+            isSameDay(
+              _selectedDay,
+              day,
+            ),
 
-        onDaySelected: (selectedDay, focusedDay) {
+        //==================================================
+        // 日付選択
+        //==================================================
+
+        onDaySelected: (
+          selectedDay,
+          focusedDay,
+        ) {
           setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
+            _selectedDay =
+                selectedDay;
+
+            _focusedDay =
+                focusedDay;
           });
+
+          // 表示年月が変更された場合、
+          // HomeProviderへ通知する。
+          provider.setFocusedMonth(
+            focusedDay,
+          );
+
+          // タップされた日付を親Widgetへ通知する。
+          //
+          // SQLite検索・確認ダイアログ・画面遷移は
+          // CalendarCardでは行わない。
+          _handleDateSelected(
+            selectedDay,
+          );
         },
+
+        //==================================================
+        // 月変更
+        //==================================================
+
+        onPageChanged: (focusedDay) {
+          setState(() {
+            _focusedDay =
+                focusedDay;
+          });
+
+          // カレンダーの表示月が変更されたら
+          // HomeProviderへ通知する。
+          provider.setFocusedMonth(
+            focusedDay,
+          );
+        },
+
+        //==================================================
+        // ヘッダー
+        //==================================================
 
         headerStyle: const HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
         ),
 
-        calendarStyle: const CalendarStyle(
+        //==================================================
+        // カレンダースタイル
+        //==================================================
+
+        calendarStyle:
+            const CalendarStyle(
           outsideDaysVisible: true,
         ),
 
-        calendarBuilders: CalendarBuilders(
+        //==================================================
+        // カレンダーBuilder
+        //==================================================
 
-          dowBuilder: (context, day) {
-            final text = ['日', '月', '火', '水', '木', '金', '土'][day.weekday % 7];
+        calendarBuilders:
+            CalendarBuilders(
 
-            Color color = Colors.black87;
+          //==================================================
+          // 曜日
+          //==================================================
 
-            if (day.weekday == DateTime.sunday) {
+          dowBuilder: (
+            context,
+            day,
+          ) {
+            final text = [
+              '日',
+              '月',
+              '火',
+              '水',
+              '木',
+              '金',
+              '土',
+            ][day.weekday % 7];
+
+            Color color =
+                Colors.black87;
+
+            if (day.weekday ==
+                DateTime.sunday) {
               color = Colors.red;
-            } else if (day.weekday == DateTime.saturday) {
+            } else if (day.weekday ==
+                DateTime.saturday) {
               color = Colors.blue;
             }
 
@@ -114,47 +280,100 @@ class _CalendarCardState extends State<CalendarCard> {
                 text,
                 style: TextStyle(
                   color: color,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:
+                      FontWeight.w600,
                 ),
               ),
             );
           },
-          
-          defaultBuilder: (context, day, focusedDay) {
+
+          //==================================================
+          // 通常日
+          //==================================================
+
+          defaultBuilder: (
+            context,
+            day,
+            focusedDay,
+          ) {
             return _buildDay(
               day,
-              textColor: _defaultTextColor(day),
+              textColor:
+                  _defaultTextColor(day),
             );
           },
 
-          outsideBuilder: (context, day, focusedDay) {
+          //==================================================
+          // 範囲外の日付
+          //==================================================
+
+          outsideBuilder: (
+            context,
+            day,
+            focusedDay,
+          ) {
             return _buildDay(
               day,
-              textColor: Colors.grey.shade400,
+              textColor:
+                  Colors.grey.shade400,
             );
           },
 
-          todayBuilder: (context, day, focusedDay) {
+          //==================================================
+          // 今日
+          //==================================================
+
+          todayBuilder: (
+            context,
+            day,
+            focusedDay,
+          ) {
             return _buildCircleDay(
               day,
               AppColors.primary,
             );
           },
 
-          selectedBuilder: (context, day, focusedDay) {
+          //==================================================
+          // 選択中の日付
+          //==================================================
+
+          selectedBuilder: (
+            context,
+            day,
+            focusedDay,
+          ) {
             return _buildCircleDay(
               day,
               Colors.indigo,
             );
           },
 
-          markerBuilder: (context, day, events) {
-            if (_isProfitDay(day)) {
-              return _buildMarker(Colors.green);
+          //==================================================
+          // 収支マーカー
+          //==================================================
+
+          markerBuilder: (
+            context,
+            day,
+            events,
+          ) {
+            if (_isProfitDay(
+              day,
+              provider,
+            )) {
+              return _buildMarker(
+                Colors.green,
+              );
             }
 
-            if (_isLossDay(day)) {
-              return _buildMarker(Colors.red);
+            if (_isLossDay(
+              day,
+              provider,
+            )) {
+              return _buildMarker(
+                Colors.red,
+              );
             }
 
             return null;
@@ -163,6 +382,10 @@ class _CalendarCardState extends State<CalendarCard> {
       ),
     );
   }
+
+  //==================================================
+  // 日付表示
+  //==================================================
 
   Widget _buildDay(
     DateTime day, {
@@ -177,6 +400,10 @@ class _CalendarCardState extends State<CalendarCard> {
       ),
     );
   }
+
+  //==================================================
+  // 円形日付表示
+  //==================================================
 
   Widget _buildCircleDay(
     DateTime day,
@@ -195,21 +422,33 @@ class _CalendarCardState extends State<CalendarCard> {
           '${day.day}',
           style: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            fontWeight:
+                FontWeight.bold,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMarker(Color color) {
+  //==================================================
+  // 収支マーカー
+  //==================================================
+
+  Widget _buildMarker(
+    Color color,
+  ) {
     return Align(
-      alignment: Alignment.bottomCenter,
+      alignment:
+          Alignment.bottomCenter,
       child: Container(
         width: 6,
         height: 6,
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
+        margin:
+            const EdgeInsets.only(
+          bottom: 4,
+        ),
+        decoration:
+            BoxDecoration(
           color: color,
           shape: BoxShape.circle,
         ),

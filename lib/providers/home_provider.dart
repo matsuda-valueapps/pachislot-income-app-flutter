@@ -16,6 +16,9 @@ class HomeProvider extends ChangeNotifier {
   /// エラー
   String? _errorMessage;
 
+  /// 現在カレンダーで表示している年月
+  DateTime _focusedMonth = DateTime.now();
+
   //==================================================
   // Getter
   //==================================================
@@ -34,17 +37,61 @@ class HomeProvider extends ChangeNotifier {
   bool get hasData =>
       _incomeRecords.isNotEmpty;
 
+  /// 現在カレンダーで表示している年月
+  DateTime get focusedMonth =>
+      _focusedMonth;
+
+  /// 現在表示中の年
+  int get focusedYear =>
+      _focusedMonth.year;
+
+  /// 現在表示中の月
+  int get focusedMonthNumber =>
+      _focusedMonth.month;
+
+  /// 現在表示中の年月ラベル
+  ///
+  /// 例：
+  /// 2026年8月
+  String get focusedMonthLabel =>
+      '$focusedYear年$focusedMonthNumber月';
+
   //==================================================
-  // 月間収支
+  // カレンダー表示月
   //==================================================
 
-  /// 今月の収支データ
+  /// カレンダーで表示する年月を変更
+  ///
+  /// CalendarCardから呼び出す。
+  void setFocusedMonth(DateTime month) {
+    final normalizedMonth = DateTime(
+      month.year,
+      month.month,
+      1,
+    );
+
+    // 同じ年月なら更新しない
+    if (_focusedMonth.year ==
+            normalizedMonth.year &&
+        _focusedMonth.month ==
+            normalizedMonth.month) {
+      return;
+    }
+
+    _focusedMonth = normalizedMonth;
+
+    notifyListeners();
+  }
+
+  //==================================================
+  // 月間データ
+  //==================================================
+
+  /// カレンダーで現在表示している月の収支データ
   List<IncomeRecord> get currentMonthRecords {
-    final now = DateTime.now();
-
     final yearMonth =
-        '${now.year.toString().padLeft(4, '0')}-'
-        '${now.month.toString().padLeft(2, '0')}';
+        '${focusedYear.toString().padLeft(4, '0')}-'
+        '${focusedMonthNumber.toString().padLeft(2, '0')}';
 
     return _incomeRecords
         .where(
@@ -54,7 +101,7 @@ class HomeProvider extends ChangeNotifier {
         .toList();
   }
 
-  /// 今月の収支
+  /// 現在表示中の月の収支
   int get monthlyIncome {
     return currentMonthRecords.fold(
       0,
@@ -63,7 +110,7 @@ class HomeProvider extends ChangeNotifier {
     );
   }
 
-  /// 今月の投資額
+  /// 現在表示中の月の投資額
   int get monthlyInvestment {
     return currentMonthRecords.fold(
       0,
@@ -74,7 +121,7 @@ class HomeProvider extends ChangeNotifier {
     );
   }
 
-  /// 今月の回収額
+  /// 現在表示中の月の回収額
   int get monthlyRecovery {
     return currentMonthRecords.fold(
       0,
@@ -86,18 +133,68 @@ class HomeProvider extends ChangeNotifier {
   }
 
   //==================================================
-  // 統計
+  // 月間統計
   //==================================================
 
-  /// 保存済みの稼働件数
+  /// 現在表示中の月の遊技回数
+  ///
+  /// 1件のincome_recordを1遊技として数える。
+  int get monthlyTotalGames =>
+      currentMonthRecords.length;
+
+  /// 現在表示中の月の勝利回数
+  ///
+  /// 収支が0円より大きいデータを
+  /// 勝利として数える。
+  int get monthlyWinGames {
+    return currentMonthRecords
+        .where(
+          (record) => record.profit > 0,
+        )
+        .length;
+  }
+
+  /// 現在表示中の月の勝率
+  ///
+  /// 遊技回数が0回の場合は0.0を返す。
+  double get monthlyWinRate {
+    if (monthlyTotalGames == 0) {
+      return 0.0;
+    }
+
+    return monthlyWinGames /
+        monthlyTotalGames *
+        100;
+  }
+
+  /// 現在表示中の月の平均収支
+  ///
+  /// 月間収支を月間遊技回数で割る。
+  ///
+  /// 遊技回数が0回の場合は0円を返す。
+  int get monthlyAverageIncome {
+    if (monthlyTotalGames == 0) {
+      return 0;
+    }
+
+    return monthlyIncome ~/
+        monthlyTotalGames;
+  }
+
+  //==================================================
+  // 全期間統計
+  //==================================================
+
+  /// 保存済みの全期間の稼働件数
   ///
   /// 1件のincome_recordを1稼働として数える。
   int get totalGames =>
       _incomeRecords.length;
 
-  /// 勝ち件数
+  /// 全期間の勝ち件数
   ///
-  /// 収支が0円より大きいデータを勝ちとして数える。
+  /// 収支が0円より大きいデータを
+  /// 勝ちとして数える。
   int get winGames {
     return _incomeRecords
         .where(
@@ -106,7 +203,7 @@ class HomeProvider extends ChangeNotifier {
         .length;
   }
 
-  /// 平均収支
+  /// 全期間の平均収支
   ///
   /// 保存済みの全収支データを対象に計算する。
   int get averageIncome {
