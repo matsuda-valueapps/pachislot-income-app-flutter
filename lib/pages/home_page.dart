@@ -24,6 +24,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState
     extends State<HomePage> {
+  /// CalendarCardの再生成用Key
+  ///
+  /// CalendarCardを再生成することで、
+  /// 初期選択日を今日へ戻す。
+  Key _calendarKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +42,91 @@ class _HomePageState
         await provider.loadIncomeRecords();
       },
     );
+  }
+
+  //==================================================
+  // カレンダー再生成
+  //==================================================
+
+  /// HomePageへ戻ってきた際に、
+  /// カレンダーを現在年月＋今日の選択状態へ戻す。
+  ///
+  /// この処理は「別画面からHomePageへ戻った場合」に使用する。
+  ///
+  /// 例：
+  /// 7月を表示
+  /// ↓
+  /// 他画面へ移動
+  /// ↓
+  /// HomePageへ戻る
+  /// ↓
+  /// 8月（現在月）＋今日を選択
+  Future<void> _resetHomeToCurrentMonth() async {
+    if (!mounted) {
+      return;
+    }
+
+    final provider =
+        context.read<HomeProvider>();
+
+    //==================================================
+    // HomeProviderの表示年月を現在年月へ戻す
+    //==================================================
+
+    provider.resetToCurrentMonth();
+
+    if (!mounted) {
+      return;
+    }
+
+    //==================================================
+    // CalendarCardを再生成
+    //==================================================
+    //
+    // CalendarCardのinitState()で
+    // _selectedDay = DateTime.now()
+    // となるため、今日が選択状態になる。
+    //==================================================
+
+    setState(() {
+      _calendarKey = UniqueKey();
+    });
+  }
+
+  /// 現在年月を表示している場合のみ
+  /// CalendarCardを再生成する。
+  ///
+  /// カレンダー内のキャンセル処理などで使用する。
+  ///
+  /// 現在年月の場合：
+  /// → 今日を選択状態へ戻す。
+  ///
+  /// 過去月・未来月の場合：
+  /// → CalendarCardを再生成しない。
+  ///   現在の選択状態を維持する。
+  void _resetCalendarIfCurrentMonth() {
+    final provider =
+        context.read<HomeProvider>();
+
+    final focusedMonth =
+        provider.focusedMonth;
+
+    final now = DateTime.now();
+
+    //==================================================
+    // 現在年月の場合のみ再生成
+    //==================================================
+
+    if (focusedMonth.year == now.year &&
+        focusedMonth.month == now.month) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _calendarKey = UniqueKey();
+      });
+    }
   }
 
   //==================================================
@@ -61,6 +152,14 @@ class _HomePageState
     await context
         .read<HomeProvider>()
         .refresh();
+
+    if (!mounted) {
+      return;
+    }
+
+    // 他画面からHomePageへ戻ってきたため、
+    // 必ず現在月＋今日の選択状態へ戻す。
+    await _resetHomeToCurrentMonth();
   }
 
   //==================================================
@@ -136,9 +235,24 @@ class _HomePageState
         return;
       }
 
+      //================================================
+      // キャンセル
+      //================================================
+
       if (!shouldEdit) {
+        // 現在年月の場合のみ、
+        // 今日を選択状態へ戻す。
+        //
+        // 過去月・未来月の場合は
+        // 現在の選択状態を維持する。
+        _resetCalendarIfCurrentMonth();
+
         return;
       }
+
+      //================================================
+      // 修正する
+      //================================================
 
       await Navigator.push(
         context,
@@ -159,6 +273,15 @@ class _HomePageState
       await context
           .read<HomeProvider>()
           .refresh();
+
+      if (!mounted) {
+        return;
+      }
+
+      // 詳細画面という別画面から
+      // HomePageへ戻ってきたため、
+      // 必ず現在月＋今日へ戻す。
+      await _resetHomeToCurrentMonth();
 
       return;
     }
@@ -183,9 +306,24 @@ class _HomePageState
       return;
     }
 
+    //================================================
+    // キャンセル
+    //================================================
+
     if (!shouldInput) {
+      // 現在年月の場合のみ、
+      // 今日を選択状態へ戻す。
+      //
+      // 過去月・未来月の場合は
+      // 現在の選択状態を維持する。
+      _resetCalendarIfCurrentMonth();
+
       return;
     }
+
+    //================================================
+    // 入力する
+    //================================================
 
     // 保存データがない場合は、
     // タップした日付を初期日付として
@@ -208,6 +346,15 @@ class _HomePageState
     await context
         .read<HomeProvider>()
         .refresh();
+
+    if (!mounted) {
+      return;
+    }
+
+    // 入力画面という別画面から
+    // HomePageへ戻ってきたため、
+    // 必ず現在月＋今日へ戻す。
+    await _resetHomeToCurrentMonth();
   }
 
   //==================================================
@@ -238,6 +385,7 @@ class _HomePageState
               // ==========================================
 
               CalendarCard(
+                key: _calendarKey,
                 onDateSelected:
                     _handleCalendarDateSelected,
               ),

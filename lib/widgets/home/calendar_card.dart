@@ -31,7 +31,9 @@ class _CalendarCardState
   late DateTime _focusedDay;
 
   /// 選択中の日付
-  late DateTime _selectedDay;
+  ///
+  /// nullの場合は「無選択」。
+  DateTime? _selectedDay;
 
   /// 初期化
   @override
@@ -44,7 +46,25 @@ class _CalendarCardState
     _focusedDay =
         provider.focusedMonth;
 
-    _selectedDay = DateTime.now();
+    final now = DateTime.now();
+
+    //==================================================
+    // 初期選択状態
+    //==================================================
+    //
+    // 現在年月を表示している場合
+    // → 今日を選択
+    //
+    // 過去月・未来月の場合
+    // → 無選択
+    //==================================================
+
+    if (_focusedDay.year == now.year &&
+        _focusedDay.month == now.month) {
+      _selectedDay = now;
+    } else {
+      _selectedDay = null;
+    }
   }
 
   //==================================================
@@ -158,7 +178,7 @@ class _CalendarCardState
         locale: 'ja_JP',
 
         firstDay: DateTime(2020),
-        lastDay: DateTime(2035),
+        lastDay: DateTime(2070),
 
         focusedDay: _focusedDay,
 
@@ -209,9 +229,46 @@ class _CalendarCardState
         //==================================================
 
         onPageChanged: (focusedDay) {
+          final now = DateTime.now();
+
           setState(() {
             _focusedDay =
                 focusedDay;
+
+            //================================================
+            // 現在年月の場合
+            //================================================
+            //
+            // 今日を選択状態にする。
+            //
+            // 例：
+            // 2026年8月 → 2026年8月13日を選択
+            //================================================
+
+            if (focusedDay.year ==
+                    now.year &&
+                focusedDay.month ==
+                    now.month) {
+              _selectedDay = now;
+            }
+
+            //================================================
+            // 過去月・未来月の場合
+            //================================================
+            //
+            // 月を移動した直後は無選択にする。
+            //
+            // 例：
+            // 8月 → 7月
+            // → 無選択
+            //
+            // 例：
+            // 8月 → 9月
+            // → 無選択
+            //================================================
+            else {
+              _selectedDay = null;
+            }
           });
 
           // カレンダーの表示月が変更されたら
@@ -228,6 +285,10 @@ class _CalendarCardState
         headerStyle: const HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
+          titleTextStyle: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
 
         //==================================================
@@ -358,21 +419,25 @@ class _CalendarCardState
             day,
             events,
           ) {
+            // プラス収支
             if (_isProfitDay(
               day,
               provider,
             )) {
-              return _buildMarker(
-                Colors.green,
+              return _buildResultLabel(
+                'Win',
+                AppColors.profit,
               );
             }
 
+            // マイナス収支
             if (_isLossDay(
               day,
               provider,
             )) {
-              return _buildMarker(
-                Colors.red,
+              return _buildResultLabel(
+                'Lose',
+                AppColors.loss,
               );
             }
 
@@ -396,6 +461,7 @@ class _CalendarCardState
         '${day.day}',
         style: TextStyle(
           color: textColor,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -431,26 +497,40 @@ class _CalendarCardState
   }
 
   //==================================================
-  // 収支マーカー
+  // 収支結果ラベル
   //==================================================
 
-  Widget _buildMarker(
+  /// 日付の下にWin / Loseを表示する。
+  ///
+  /// Win  → 緑
+  /// Lose → 赤
+  Widget _buildResultLabel(
+    String text,
     Color color,
   ) {
     return Align(
       alignment:
           Alignment.bottomCenter,
-      child: Container(
-        width: 6,
-        height: 6,
-        margin:
-            const EdgeInsets.only(
-          bottom: 4,
+      child: Transform.translate(
+        offset: const Offset(
+          0,
+          8,
         ),
-        decoration:
-            BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
+        child: Padding(
+          padding:
+              const EdgeInsets.only(
+            bottom: 2,
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight:
+                  FontWeight.w600,
+              height: 1.0,
+            ),
+          ),
         ),
       ),
     );

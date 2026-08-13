@@ -83,6 +83,46 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// カレンダーの表示年月を現在年月へ戻す。
+  ///
+  /// MainPageから呼び出す。
+  ///
+  /// 他のBottomNavigation画面から
+  /// ホーム画面へ戻った際に、
+  /// カレンダーを必ず現在年月へ戻すために使用する。
+  ///
+  /// 例：
+  ///
+  /// 2026年7月を表示中
+  /// ↓
+  /// 「入力」へ移動
+  /// ↓
+  /// 「ホーム」へ戻る
+  /// ↓
+  /// 2026年8月へ戻る
+  void resetToCurrentMonth() {
+    final now = DateTime.now();
+
+    final currentMonth = DateTime(
+      now.year,
+      now.month,
+      1,
+    );
+
+    // すでに現在年月の場合は、
+    // focusedMonthを変更しない。
+    if (_focusedMonth.year ==
+            currentMonth.year &&
+        _focusedMonth.month ==
+            currentMonth.month) {
+      return;
+    }
+
+    _focusedMonth = currentMonth;
+
+    notifyListeners();
+  }
+
   //==================================================
   // 月間データ
   //==================================================
