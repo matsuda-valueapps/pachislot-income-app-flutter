@@ -81,8 +81,10 @@ class _CalendarCardState
   //==================================================
 
   /// 現在保存されている収支データから
-  /// 該当日の収支がプラスか判定
-  bool _isProfitDay(
+  /// 該当日の収支金額を取得する。
+  ///
+  /// 収支データが存在しない場合はnullを返す。
+  int? _getProfitForDay(
     DateTime day,
     HomeProvider provider,
   ) {
@@ -93,37 +95,50 @@ class _CalendarCardState
             DateTime.parse(record.date);
 
         if (isSameDay(recordDate, day)) {
-          return record.profit > 0;
+          // 収支が0円の場合はマーカーを表示しない。
+          if (record.profit == 0) {
+            return null;
+          }
+
+          return record.profit;
         }
       } catch (_) {
         // 日付が不正な場合は無視
       }
     }
 
-    return false;
+    return null;
   }
 
-  /// 現在保存されている収支データから
-  /// 該当日の収支がマイナスか判定
-  bool _isLossDay(
-    DateTime day,
-    HomeProvider provider,
-  ) {
-    for (final record
-        in provider.incomeRecords) {
-      try {
-        final recordDate =
-            DateTime.parse(record.date);
+  /// 収支金額をカンマ区切りにする。
+  ///
+  /// 例：
+  /// 1000    → 1,000
+  /// 10000   → 10,000
+  /// 1000000 → 1,000,000
+  String _formatNumber(int number) {
+    final numberString =
+        number.abs().toString();
 
-        if (isSameDay(recordDate, day)) {
-          return record.profit < 0;
-        }
-      } catch (_) {
-        // 日付が不正な場合は無視
-      }
+    return numberString.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+  }
+
+  /// 収支金額をカレンダー表示用の文字列にする。
+  ///
+  /// プラス：
+  /// +10,000
+  ///
+  /// マイナス：
+  /// -10,000
+  String _formatProfit(int profit) {
+    if (profit > 0) {
+      return '+${_formatNumber(profit)}';
     }
 
-    return false;
+    return '-${_formatNumber(profit)}';
   }
 
   //==================================================
@@ -419,24 +434,35 @@ class _CalendarCardState
             day,
             events,
           ) {
-            // プラス収支
-            if (_isProfitDay(
+            final profit =
+                _getProfitForDay(
               day,
               provider,
-            )) {
+            );
+
+            // 収支データなし
+            if (profit == null) {
+              return null;
+            }
+
+            //================================================
+            // プラス収支
+            //================================================
+
+            if (profit > 0) {
               return _buildResultLabel(
-                'Win',
+                _formatProfit(profit),
                 AppColors.profit,
               );
             }
 
+            //================================================
             // マイナス収支
-            if (_isLossDay(
-              day,
-              provider,
-            )) {
+            //================================================
+
+            if (profit < 0) {
               return _buildResultLabel(
-                'Lose',
+                _formatProfit(profit),
                 AppColors.loss,
               );
             }
@@ -500,10 +526,13 @@ class _CalendarCardState
   // 収支結果ラベル
   //==================================================
 
-  /// 日付の下にWin / Loseを表示する。
+  /// 日付の下に収支金額を表示する。
   ///
-  /// Win  → 緑
-  /// Lose → 赤
+  /// プラス収支 → 緑
+  /// 例：+10,000
+  ///
+  /// マイナス収支 → 赤
+  /// 例：-10,000
   Widget _buildResultLabel(
     String text,
     Color color,
@@ -521,14 +550,19 @@ class _CalendarCardState
               const EdgeInsets.only(
             bottom: 2,
           ),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight:
-                  FontWeight.w600,
-              height: 1.0,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight:
+                    FontWeight.w600,
+                height: 1.0,
+              ),
             ),
           ),
         ),

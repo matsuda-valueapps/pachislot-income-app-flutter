@@ -10,23 +10,39 @@ class StatTile extends StatelessWidget {
   const StatTile({
     super.key,
     required this.label,
-    required this.value,
+    this.value,
+    this.valueWidget,
     this.icon,
     this.valueColor,
     this.backgroundColor,
     this.onTap,
-  });
+  }) : assert(
+          value != null || valueWidget != null,
+          'value または valueWidget のどちらかを指定してください。',
+        );
 
   /// 項目名
   final String label;
 
   /// 値
-  final String value;
+  ///
+  /// 通常の文字列を表示する場合に使用する。
+  final String? value;
+
+  /// 値Widget
+  ///
+  /// FittedBoxなどを使用して
+  /// 独自の表示を行う場合に使用する。
+  final Widget? valueWidget;
 
   /// アイコン（任意）
   final IconData? icon;
 
   /// 値の色
+  ///
+  /// valueを使用する場合に適用する。
+  /// valueWidgetを使用する場合は
+  /// Widget側で色を指定する。
   final Color? valueColor;
 
   /// 背景色
@@ -37,8 +53,11 @@ class StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppColors.card;
-    final Color textColor = valueColor ?? Colors.black87;
+    final Color bgColor =
+        backgroundColor ?? AppColors.card;
+
+    final Color textColor =
+        valueColor ?? Colors.black87;
 
     return Material(
       color: Colors.transparent,
@@ -56,7 +75,8 @@ class StatTile extends StatelessWidget {
           child: Padding(
             padding: AppSpacing.card,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 if (icon case IconData iconData) ...[
                   Icon(
@@ -74,12 +94,29 @@ class StatTile extends StatelessWidget {
 
                 AppSpacing.gapXs,
 
-                Text(
-                  value,
-                  style: AppTextStyles.statValue.copyWith(
-                    color: textColor,
+                //==================================================
+                // 値
+                //==================================================
+                //
+                // valueWidgetが指定されている場合
+                // → Widgetをそのまま表示
+                //
+                // valueWidgetがない場合
+                // → 従来通りString valueを表示
+                //==================================================
+
+                if (valueWidget != null)
+                  valueWidget!
+                else
+                  Text(
+                    value!,
+                    maxLines: 1,
+                    softWrap: false,
+                    style:
+                        AppTextStyles.statValue.copyWith(
+                      color: textColor,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

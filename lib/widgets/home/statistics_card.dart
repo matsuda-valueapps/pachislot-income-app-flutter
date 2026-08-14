@@ -41,6 +41,30 @@ class StatisticsCard extends StatelessWidget {
     return NumberFormat('#,###').format(value);
   }
 
+  /// 平均収支表示
+  ///
+  /// 画面幅が狭い端末でも金額を1行に収める。
+  Widget _buildAverageIncome() {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Text(
+        '${averageIncome >= 0 ? '+' : ''}'
+        '${_format(averageIncome)}円',
+        maxLines: 1,
+        softWrap: false,
+        style: TextStyle(
+          color:
+              averageIncome >= 0
+                  ? AppColors.profit
+                  : AppColors.loss,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppCard(
@@ -111,15 +135,10 @@ class StatisticsCard extends StatelessWidget {
               Expanded(
                 child: StatTile(
                   label: '平均収支',
-                  value:
-                      '${averageIncome >= 0 ? '+' : ''}'
-                      '${_format(averageIncome)}円',
+                  valueWidget:
+                      _buildAverageIncome(),
                   icon:
                       Icons.bar_chart_outlined,
-                  valueColor:
-                      averageIncome >= 0
-                          ? AppColors.profit
-                          : AppColors.loss,
                 ),
               ),
             ],
