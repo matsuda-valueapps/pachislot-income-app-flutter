@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -22,13 +21,42 @@ class MemoDateField extends StatelessWidget {
   /// 日付タップ時の処理
   final VoidCallback onTap;
 
+  //==================================================
+  // 日付表示
+  //==================================================
+
+  /// 日付を
+  /// YYYY年M月D日(曜日)
+  /// 形式で表示する。
+  ///
+  /// 例：
+  /// 2026/08/17（月）
+  /// ↓
+  /// 2026年8月17日(月)
+  String _formatDate(DateTime date) {
+    const weekdays = [
+      '月',
+      '火',
+      '水',
+      '木',
+      '金',
+      '土',
+      '日',
+    ];
+
+    final weekday =
+        weekdays[date.weekday - 1];
+
+    return '${date.year}年'
+        '${date.month}月'
+        '${date.day}日'
+        '($weekday)';
+  }
+
   @override
   Widget build(BuildContext context) {
     final formattedDate =
-        DateFormat(
-          'yyyy/MM/dd（E）',
-          'ja_JP',
-        ).format(selectedDate);
+        _formatDate(selectedDate);
 
     return Column(
       crossAxisAlignment:

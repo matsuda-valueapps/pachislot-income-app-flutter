@@ -18,14 +18,37 @@ class IncomeDetailPage extends StatelessWidget {
   final IncomeRecord record;
 
   /// 日付表示
+  ///
+  /// SQLiteに保存されている
+  /// YYYY-MM-DD形式の日付を、
+  /// YYYY年M月D日(曜日)形式へ変換する。
+  ///
+  /// 例：
+  /// 2026-08-12
+  /// ↓
+  /// 2026年8月12日(水)
   String _formatDate(String date) {
     try {
       final parsedDate =
           DateTime.parse(date);
 
-      return '${parsedDate.year}/'
-          '${parsedDate.month.toString().padLeft(2, '0')}/'
-          '${parsedDate.day.toString().padLeft(2, '0')}';
+      const weekdays = [
+        '月',
+        '火',
+        '水',
+        '木',
+        '金',
+        '土',
+        '日',
+      ];
+
+      final weekday =
+          weekdays[parsedDate.weekday - 1];
+
+      return '${parsedDate.year}年'
+          '${parsedDate.month}月'
+          '${parsedDate.day}日'
+          '($weekday)';
     } catch (_) {
       return date;
     }

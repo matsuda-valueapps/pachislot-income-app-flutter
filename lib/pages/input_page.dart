@@ -811,7 +811,7 @@ class _InputPageState extends State<InputPage> {
       appBar: AppBar(
         title: Text(
           _isEditMode
-              ? '編集'
+              ? '収支編集'
               : '入力',
         ),
         centerTitle: true,

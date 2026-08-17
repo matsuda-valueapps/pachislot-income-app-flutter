@@ -7,10 +7,20 @@ class MemoSaveButton extends StatelessWidget {
   const MemoSaveButton({
     super.key,
     required this.onPressed,
+    this.label = '保存',
   });
 
-  /// 保存ボタン押下時
+  /// 保存・更新ボタン押下時
   final VoidCallback onPressed;
+
+  /// ボタンに表示する文字
+  ///
+  /// 新規メモ：
+  /// 「保存」
+  ///
+  /// 編集メモ：
+  /// 「更新」
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +29,7 @@ class MemoSaveButton extends StatelessWidget {
         top: AppSpacing.lg,
       ),
       child: PrimaryButton(
-        text: '保存',
+        text: label,
         onPressed: onPressed,
       ),
     );

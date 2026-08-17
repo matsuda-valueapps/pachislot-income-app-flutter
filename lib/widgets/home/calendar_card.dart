@@ -193,7 +193,7 @@ class _CalendarCardState
         locale: 'ja_JP',
 
         firstDay: DateTime(2020),
-        lastDay: DateTime(2070),
+        lastDay: DateTime(2100),
 
         focusedDay: _focusedDay,
 
@@ -503,8 +503,8 @@ class _CalendarCardState
   ) {
     return Center(
       child: Container(
-        width: 38,
-        height: 38,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
