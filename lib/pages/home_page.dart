@@ -441,7 +441,7 @@ class _HomePageState
                   Icons.history,
                 ),
                 label: const Text(
-                  '保存データを見る',
+                  '保存データ一覧',
                 ),
               ),
             ],

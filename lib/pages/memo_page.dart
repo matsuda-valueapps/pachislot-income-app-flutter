@@ -707,7 +707,7 @@ class _MemoPageState
                                 .format_list_bulleted,
                           ),
                           label: const Text(
-                            '保存したメモを見る',
+                            '保存メモ一覧',
                           ),
                         ),
                       ],

@@ -132,6 +132,10 @@ class SearchPage extends StatelessWidget {
                   title: '便利ツール',
                   icon: Icons.map,
                   children: [
+                    //========================================
+                    // Googleマップ
+                    //========================================
+
                     SearchCard(
                       title: 'Googleマップ',
                       subtitle:
@@ -142,6 +146,25 @@ class SearchPage extends StatelessWidget {
                           context,
                           'Googleマップ',
                           'https://maps.google.com/',
+                        );
+                      },
+                    ),
+
+                    //========================================
+                    // Googleカレンダー
+                    //========================================
+
+                    SearchCard(
+                      title: 'Googleカレンダー',
+                      subtitle:
+                          'イベント予定を確認する',
+                      icon:
+                          Icons.calendar_month_outlined,
+                      onTap: () {
+                        UrlLauncherService.open(
+                          context,
+                          'Googleカレンダー',
+                          'https://calendar.google.com/',
                         );
                       },
                     ),
