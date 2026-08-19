@@ -17,6 +17,48 @@ class IncomeListPage extends StatefulWidget {
 
 class _IncomeListPageState
     extends State<IncomeListPage> {
+  //==================================================
+  // Controller
+  //==================================================
+
+  /// キーワード検索
+  final TextEditingController
+      _searchController =
+      TextEditingController();
+
+  //==================================================
+  // キーワード検索
+  //==================================================
+
+  /// 現在の検索キーワード
+  String _searchQuery = '';
+
+  //==================================================
+  // 日付フィルター
+  //==================================================
+
+  /// 絞り込み開始日
+  DateTime? _filterStartDate;
+
+  /// 絞り込み終了日
+  DateTime? _filterEndDate;
+
+  //==================================================
+  // 収支フィルター
+  //==================================================
+
+  /// 収支絞り込み
+  ///
+  /// all    → すべて
+  /// profit → プラス収支
+  /// loss   → マイナス収支
+  /// zero   → 収支0円
+  String _profitFilter = 'all';
+
+  //==================================================
+  // 初期化
+  //==================================================
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +72,17 @@ class _IncomeListPageState
       },
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+
+    super.dispose();
+  }
+
+  //==================================================
+  // 詳細画面
+  //==================================================
 
   /// 詳細画面を開く
   Future<void> _openDetail(
@@ -56,9 +109,181 @@ class _IncomeListPageState
         .refresh();
   }
 
+  //==================================================
+  // キーワード検索
+  //==================================================
+
+  /// 検索キーワードを変更する。
+  void _onSearchChanged(
+    String value,
+  ) {
+    setState(() {
+      _searchQuery =
+          value.trim().toLowerCase();
+    });
+  }
+
+  //==================================================
+  // 検索・フィルター
+  //==================================================
+
+  /// 検索条件に一致する収支データを取得する。
+  ///
+  /// 検索対象：
+  /// ・ホール名
+  /// ・機種名
+  /// ・メモ
+  ///
+  /// フィルター対象：
+  /// ・日付
+  /// ・収支
+  ///
+  /// キーワード・日付・収支は
+  /// すべて同時に適用する。
+  List<IncomeRecord> _filterRecords(
+    List<IncomeRecord> records,
+  ) {
+    return records.where((record) {
+      //==============================================
+      // キーワード検索
+      //==============================================
+
+      if (_searchQuery.isNotEmpty) {
+        final hall =
+            record.hall.toLowerCase();
+
+        final machine =
+            record.machine.toLowerCase();
+
+        final memo =
+            record.memo.toLowerCase();
+
+        final matchesKeyword =
+            hall.contains(
+                  _searchQuery,
+                ) ||
+                machine.contains(
+                  _searchQuery,
+                ) ||
+                memo.contains(
+                  _searchQuery,
+                );
+
+        if (!matchesKeyword) {
+          return false;
+        }
+      }
+
+      //==============================================
+      // 日付フィルター
+      //==============================================
+
+      if (_filterStartDate != null ||
+          _filterEndDate != null) {
+        DateTime? recordDate;
+
+        try {
+          recordDate =
+              DateTime.parse(
+            record.date,
+          );
+        } catch (_) {
+          return false;
+        }
+
+        // 日付だけで比較するため、
+        // 時刻を00:00:00へ統一する。
+        final date = DateTime(
+          recordDate.year,
+          recordDate.month,
+          recordDate.day,
+        );
+
+        //============================================
+        // 開始日
+        //============================================
+
+        if (_filterStartDate != null) {
+          final startDate =
+              DateTime(
+            _filterStartDate!.year,
+            _filterStartDate!.month,
+            _filterStartDate!.day,
+          );
+
+          if (date.isBefore(startDate)) {
+            return false;
+          }
+        }
+
+        //============================================
+        // 終了日
+        //============================================
+
+        if (_filterEndDate != null) {
+          final endDate =
+              DateTime(
+            _filterEndDate!.year,
+            _filterEndDate!.month,
+            _filterEndDate!.day,
+          );
+
+          if (date.isAfter(endDate)) {
+            return false;
+          }
+        }
+      }
+
+      //==============================================
+      // 収支フィルター
+      //==============================================
+
+      switch (_profitFilter) {
+        case 'profit':
+          // プラス収支
+          if (record.profit <= 0) {
+            return false;
+          }
+          break;
+
+        case 'loss':
+          // マイナス収支
+          if (record.profit >= 0) {
+            return false;
+          }
+          break;
+
+        case 'zero':
+          // 収支0円
+          if (record.profit != 0) {
+            return false;
+          }
+          break;
+
+        case 'all':
+        default:
+          break;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  /// 検索欄をクリアする。
+  void _clearSearch() {
+    _searchController.clear();
+
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
+  //==================================================
+  // 日付表示
+  //==================================================
+
   /// 日付表示
   ///
-  /// SQLiteに保存されている
   /// YYYY-MM-DD形式の日付を
   /// YYYY年M月D日(曜日)形式へ変換する。
   ///
@@ -67,7 +292,9 @@ class _IncomeListPageState
   /// 2026-08-12
   /// ↓
   /// 2026年8月12日(水)
-  String _formatDate(String date) {
+  String _formatDate(
+    String date,
+  ) {
     try {
       final parsedDate =
           DateTime.parse(date);
@@ -94,12 +321,32 @@ class _IncomeListPageState
     }
   }
 
+  /// フィルター用の日付表示
+  String _formatFilterDate(
+    DateTime? date,
+  ) {
+    if (date == null) {
+      return '指定なし';
+    }
+
+    return '${date.year}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.day.toString().padLeft(2, '0')}';
+  }
+
+  //==================================================
+  // 金額表示
+  //==================================================
+
   /// 金額表示
-  String _formatAmount(int amount) {
+  String _formatAmount(
+    int amount,
+  ) {
     final absoluteAmount =
         amount.abs().toString();
 
-    final buffer = StringBuffer();
+    final buffer =
+        StringBuffer();
 
     for (int i = 0;
         i < absoluteAmount.length;
@@ -120,8 +367,14 @@ class _IncomeListPageState
     return buffer.toString();
   }
 
+  //==================================================
+  // 収支表示
+  //==================================================
+
   /// 収支表示
-  String _formatProfit(int profit) {
+  String _formatProfit(
+    int profit,
+  ) {
     if (profit > 0) {
       return '+${_formatAmount(profit)}円';
     }
@@ -133,7 +386,10 @@ class _IncomeListPageState
     return '0円';
   }
 
-  /// 収支の色
+  //==================================================
+  // 収支カラー
+  //==================================================
+
   Color _profitColor(
     BuildContext context,
     int profit,
@@ -151,7 +407,705 @@ class _IncomeListPageState
         .onSurfaceVariant;
   }
 
-  /// 1件分の収支データカード
+  //==================================================
+  // 検索欄
+  //==================================================
+
+  /// キーワード検索欄
+  Widget _buildSearchField(
+    BuildContext context,
+  ) {
+    return TextField(
+      controller:
+          _searchController,
+      onChanged:
+          _onSearchChanged,
+      textInputAction:
+          TextInputAction.search,
+      decoration:
+          InputDecoration(
+        hintText:
+            'ホール名・機種名・メモを検索',
+        prefixIcon:
+            const Icon(
+          Icons.search,
+        ),
+        suffixIcon:
+            _searchQuery.isNotEmpty
+                ? IconButton(
+                    onPressed:
+                        _clearSearch,
+                    icon:
+                        const Icon(
+                      Icons.clear,
+                    ),
+                  )
+                : null,
+        filled: true,
+        fillColor:
+            Theme.of(context)
+                .colorScheme
+                .surface,
+        border:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
+          borderSide:
+              BorderSide(
+            color: Theme.of(context)
+                .colorScheme
+                .outline,
+          ),
+        ),
+        enabledBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
+          borderSide:
+              BorderSide(
+            color: Theme.of(context)
+                .colorScheme
+                .outline,
+          ),
+        ),
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            16,
+          ),
+          borderSide:
+              BorderSide(
+            color: Theme.of(context)
+                .colorScheme
+                .primary,
+            width: 2,
+          ),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(
+          horizontal:
+              AppSpacing.md,
+          vertical:
+              AppSpacing.md,
+        ),
+      ),
+    );
+  }
+
+  //==================================================
+  // フィルター状態
+  //==================================================
+
+  /// 日付・収支フィルターが
+  /// 設定されているか。
+  bool get _hasFilter {
+    return _filterStartDate != null ||
+        _filterEndDate != null ||
+        _profitFilter != 'all';
+  }
+
+  /// 収支フィルター表示名
+  String _profitFilterLabel() {
+    switch (_profitFilter) {
+      case 'profit':
+        return 'プラス収支';
+
+      case 'loss':
+        return 'マイナス収支';
+
+      case 'zero':
+        return '収支0円';
+
+      case 'all':
+      default:
+        return 'すべて';
+    }
+  }
+
+  //==================================================
+  // フィルター
+  //==================================================
+
+  /// 日付・収支フィルターを開く。
+  Future<void> _showFilterSheet() async {
+    DateTime? tempStartDate =
+        _filterStartDate;
+
+    DateTime? tempEndDate =
+        _filterEndDate;
+
+    String tempProfitFilter =
+        _profitFilter;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor:
+          Theme.of(context)
+              .colorScheme
+              .surface,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder:
+              (
+            context,
+            setSheetState,
+          ) {
+            return SafeArea(
+              child: Padding(
+                padding:
+                    EdgeInsets.fromLTRB(
+                  AppSpacing.page.left,
+                  AppSpacing.lg,
+                  AppSpacing.page.right,
+                  MediaQuery.of(
+                    context,
+                  ).viewInsets.bottom +
+                      AppSpacing.lg,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize:
+                        MainAxisSize.min,
+                    crossAxisAlignment:
+                        CrossAxisAlignment
+                            .stretch,
+                    children: [
+                      //========================================
+                      // タイトル
+                      //========================================
+
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.filter_alt_outlined,
+                          ),
+
+                          const SizedBox(
+                            width:
+                                AppSpacing.sm,
+                          ),
+
+                          Expanded(
+                            child: Text(
+                              '日付・収支で絞り込み',
+                              style:
+                                  Theme.of(
+                                context,
+                              )
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight:
+                                            FontWeight.bold,
+                                      ),
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(
+                                sheetContext,
+                              ).pop();
+                            },
+                            icon:
+                                const Icon(
+                              Icons.close,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      //========================================
+                      // 日付
+                      //========================================
+
+                      Text(
+                        '日付',
+                        style:
+                            Theme.of(
+                          context,
+                        )
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.sm,
+                      ),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child:
+                                OutlinedButton.icon(
+                              onPressed: () async {
+                                final picked =
+                                    await showDatePicker(
+                                  context:
+                                      context,
+                                  initialDate:
+                                      tempStartDate ??
+                                          tempEndDate ??
+                                          DateTime.now(),
+                                  firstDate:
+                                      DateTime(
+                                    2020,
+                                  ),
+                                  lastDate:
+                                      DateTime(
+                                    2100,
+                                  ),
+                                  locale:
+                                      const Locale(
+                                    'ja',
+                                    'JP',
+                                  ),
+                                );
+
+                                if (picked ==
+                                    null) {
+                                  return;
+                                }
+
+                                setSheetState(
+                                  () {
+                                    tempStartDate =
+                                        picked;
+
+                                    // 開始日が終了日より
+                                    // 後にならないようにする。
+                                    if (tempEndDate !=
+                                            null &&
+                                        tempEndDate!
+                                            .isBefore(
+                                          picked,
+                                        )) {
+                                      tempEndDate =
+                                          picked;
+                                    }
+                                  },
+                                );
+                              },
+                              icon:
+                                  const Icon(
+                                Icons
+                                    .calendar_month,
+                              ),
+                              label: Text(
+                                _formatFilterDate(
+                                  tempStartDate,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(
+                            width:
+                                AppSpacing.sm,
+                          ),
+
+                          const Text(
+                            '～',
+                          ),
+
+                          const SizedBox(
+                            width:
+                                AppSpacing.sm,
+                          ),
+
+                          Expanded(
+                            child:
+                                OutlinedButton.icon(
+                              onPressed: () async {
+                                final picked =
+                                    await showDatePicker(
+                                  context:
+                                      context,
+                                  initialDate:
+                                      tempEndDate ??
+                                          tempStartDate ??
+                                          DateTime.now(),
+                                  firstDate:
+                                      tempStartDate ??
+                                          DateTime(
+                                        2020,
+                                      ),
+                                  lastDate:
+                                      DateTime(
+                                    2100,
+                                  ),
+                                  locale:
+                                      const Locale(
+                                    'ja',
+                                    'JP',
+                                  ),
+                                );
+
+                                if (picked ==
+                                    null) {
+                                  return;
+                                }
+
+                                setSheetState(
+                                  () {
+                                    tempEndDate =
+                                        picked;
+                                  },
+                                );
+                              },
+                              icon:
+                                  const Icon(
+                                Icons
+                                    .calendar_month,
+                              ),
+                              label: Text(
+                                _formatFilterDate(
+                                  tempEndDate,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.xs,
+                      ),
+
+                      //========================================
+                      // 日付クリア
+                      //========================================
+
+                      Align(
+                        alignment:
+                            Alignment.centerRight,
+                        child:
+                            TextButton(
+                          onPressed: () {
+                            setSheetState(
+                              () {
+                                tempStartDate =
+                                    null;
+                                tempEndDate =
+                                    null;
+                              },
+                            );
+                          },
+                          child:
+                              const Text(
+                            '日付をクリア',
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.md,
+                      ),
+
+                      //========================================
+                      // 収支
+                      //========================================
+
+                      Text(
+                        '収支',
+                        style:
+                            Theme.of(
+                          context,
+                        )
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.sm,
+                      ),
+
+                      RadioGroup<String>(
+                        groupValue:
+                            tempProfitFilter,
+                        onChanged:
+                            (value) {
+                          if (value ==
+                              null) {
+                            return;
+                          }
+
+                          setSheetState(
+                            () {
+                              tempProfitFilter =
+                                  value;
+                            },
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            RadioListTile<
+                                String>(
+                              value:
+                                  'all',
+                              title:
+                                  const Text(
+                                'すべて',
+                              ),
+                              contentPadding:
+                                  EdgeInsets.zero,
+                            ),
+                            RadioListTile<
+                                String>(
+                              value:
+                                  'profit',
+                              title:
+                                  const Text(
+                                'プラス収支',
+                              ),
+                              subtitle:
+                                  const Text(
+                                '収支が0円より大きいデータ',
+                              ),
+                              contentPadding:
+                                  EdgeInsets.zero,
+                            ),
+                            RadioListTile<
+                                String>(
+                              value:
+                                  'loss',
+                              title:
+                                  const Text(
+                                'マイナス収支',
+                              ),
+                              subtitle:
+                                  const Text(
+                                '収支が0円より小さいデータ',
+                              ),
+                              contentPadding:
+                                  EdgeInsets.zero,
+                            ),
+                            RadioListTile<
+                                String>(
+                              value:
+                                  'zero',
+                              title:
+                                  const Text(
+                                '収支0円',
+                              ),
+                              contentPadding:
+                                  EdgeInsets.zero,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      //========================================
+                      // ボタン
+                      //========================================
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child:
+                                OutlinedButton(
+                              onPressed: () {
+                                setState(
+                                  () {
+                                    _filterStartDate =
+                                        null;
+                                    _filterEndDate =
+                                        null;
+                                    _profitFilter =
+                                        'all';
+                                  },
+                                );
+
+                                Navigator.of(
+                                  sheetContext,
+                                ).pop();
+                              },
+                              child:
+                                  const Text(
+                                'クリア',
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(
+                            width:
+                                AppSpacing.md,
+                          ),
+
+                          Expanded(
+                            child:
+                                FilledButton(
+                              onPressed: () {
+                                setState(
+                                  () {
+                                    _filterStartDate =
+                                        tempStartDate;
+                                    _filterEndDate =
+                                        tempEndDate;
+                                    _profitFilter =
+                                        tempProfitFilter;
+                                  },
+                                );
+
+                                Navigator.of(
+                                  sheetContext,
+                                ).pop();
+                              },
+                              child:
+                                  const Text(
+                                '適用',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  //==================================================
+  // 検索結果件数
+  //==================================================
+
+  /// 検索結果件数
+  Widget _buildResultCount(
+    BuildContext context,
+    int count,
+  ) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(
+        left: AppSpacing.xs,
+        right: AppSpacing.xs,
+      ),
+      child: Text(
+        '検索結果：$count件',
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant,
+              fontWeight:
+                  FontWeight.w600,
+            ),
+      ),
+    );
+  }
+
+  //==================================================
+  // フィルターボタン
+  //==================================================
+
+  /// 日付・収支フィルターボタン
+  Widget _buildFilterButton(
+    BuildContext context,
+  ) {
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(
+        horizontal:
+            AppSpacing.page.left,
+      ),
+      child: OutlinedButton.icon(
+        onPressed:
+            _showFilterSheet,
+        icon: Icon(
+          _hasFilter
+              ? Icons.filter_alt
+              : Icons.filter_alt_outlined,
+        ),
+        label: Text(
+          _hasFilter
+              ? '日付・収支で絞り込み中'
+              : '日付・収支で絞り込み',
+        ),
+      ),
+    );
+  }
+
+  //==================================================
+  // フィルター条件表示
+  //==================================================
+
+  /// 現在のフィルター条件を表示する。
+  Widget _buildFilterSummary(
+    BuildContext context,
+  ) {
+    if (!_hasFilter) {
+      return const SizedBox.shrink();
+    }
+
+    final dateText =
+        _filterStartDate == null &&
+                _filterEndDate == null
+            ? '日付：すべて'
+            : '日付：'
+                '${_formatFilterDate(_filterStartDate)}'
+                ' ～ '
+                '${_formatFilterDate(_filterEndDate)}';
+
+    return Padding(
+      padding:
+          const EdgeInsets.only(
+        top: AppSpacing.md,
+      ),
+      child: Text(
+        '$dateText　収支：${_profitFilterLabel()}',
+        style: Theme.of(context)
+            .textTheme
+            .bodySmall
+            ?.copyWith(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant,
+            ),
+        textAlign:
+            TextAlign.center,
+      ),
+    );
+  }
+
+  //==================================================
+  // 1件分の収支データカード
+  //==================================================
+
   Widget _buildIncomeCard(
     BuildContext context,
     IncomeRecord record,
@@ -169,82 +1123,88 @@ class _IncomeListPageState
         borderRadius:
             BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(
+          padding:
+              const EdgeInsets.all(
             AppSpacing.md,
           ),
           child: Column(
             crossAxisAlignment:
                 CrossAxisAlignment.start,
             children: [
-              // ==========================================
+              //==========================================
               // 日付
-              // ==========================================
+              //==========================================
 
               Text(
                 _formatDate(record.date),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(
-                height: AppSpacing.sm,
+                height:
+                    AppSpacing.sm,
               ),
 
-              // ==========================================
+              //==========================================
               // ホール名
-              // ==========================================
+              //==========================================
 
               if (record.hall.isNotEmpty)
                 Text(
                   record.hall,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.copyWith(
-                        fontWeight:
-                            FontWeight.w600,
-                      ),
+                  style:
+                      Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(
+                            fontWeight:
+                                FontWeight.w600,
+                          ),
                 ),
 
-              // ==========================================
+              //==========================================
               // 機種名
-              // ==========================================
+              //==========================================
 
               if (record.machine.isNotEmpty) ...[
                 const SizedBox(
-                  height: AppSpacing.xs,
+                  height:
+                      AppSpacing.xs,
                 ),
                 Text(
                   record.machine,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant,
-                      ),
+                  style:
+                      Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(
+                            color: Theme.of(
+                              context,
+                            )
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
                 ),
               ],
 
               const SizedBox(
-                height: AppSpacing.md,
+                height:
+                    AppSpacing.md,
               ),
 
               const Divider(),
 
               const SizedBox(
-                height: AppSpacing.sm,
+                height:
+                    AppSpacing.sm,
               ),
 
-              // ==========================================
+              //==========================================
               // 投資・回収・収支
-              // ==========================================
+              //==========================================
 
               Row(
                 children: [
@@ -294,7 +1254,10 @@ class _IncomeListPageState
     );
   }
 
-  /// 金額表示用Column
+  //==================================================
+  // 金額表示用Column
+  //==================================================
+
   Widget _buildAmountColumn(
     BuildContext context, {
     required String label,
@@ -318,43 +1281,63 @@ class _IncomeListPageState
       children: [
         Text(
           label,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurfaceVariant,
-              ),
+          style:
+              Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(
+                    color: Theme.of(
+                      context,
+                    )
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
         ),
 
         const SizedBox(
-          height: AppSpacing.xs,
+          height:
+              AppSpacing.xs,
         ),
+
+        //==============================================
+        // 金額
+        //==============================================
 
         Text(
           displayAmount,
-          textAlign: TextAlign.center,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(
-                color: displayColor,
-                fontWeight:
-                    FontWeight.bold,
-              ),
+          maxLines: 1,
+          overflow:
+              TextOverflow.ellipsis,
+          softWrap: false,
+          textAlign:
+              TextAlign.center,
+          style:
+              Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(
+                    color:
+                        displayColor,
+                    fontWeight:
+                        FontWeight.bold,
+                    fontSize: 16,
+                  ),
         ),
       ],
     );
   }
 
-  /// 空データ表示
+  //==================================================
+  // 空データ表示
+  //==================================================
+
   Widget _buildEmptyView(
     BuildContext context,
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(
+        padding:
+            const EdgeInsets.all(
           AppSpacing.xl,
         ),
         child: Column(
@@ -370,36 +1353,43 @@ class _IncomeListPageState
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             Text(
               '保存データがありません',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
             ),
 
             const SizedBox(
-              height: AppSpacing.sm,
+              height:
+                  AppSpacing.sm,
             ),
 
             Text(
               '入力画面からデータを保存すると、\n'
               'ここに表示されます。',
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant,
-                  ),
+              textAlign:
+                  TextAlign.center,
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(
+                        color: Theme.of(
+                          context,
+                        )
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
             ),
           ],
         ),
@@ -407,14 +1397,88 @@ class _IncomeListPageState
     );
   }
 
-  /// エラー表示
+  //==================================================
+  // 検索結果なし
+  //==================================================
+
+  Widget _buildNoSearchResultView(
+    BuildContext context,
+  ) {
+    return ListView(
+      padding:
+          const EdgeInsets.all(
+        AppSpacing.xl,
+      ),
+      children: [
+        const SizedBox(
+          height:
+              AppSpacing.xl,
+        ),
+
+        Icon(
+          Icons.search_off_rounded,
+          size: 64,
+          color: Theme.of(context)
+              .colorScheme
+              .onSurfaceVariant,
+        ),
+
+        const SizedBox(
+          height:
+              AppSpacing.md,
+        ),
+
+        Text(
+          '検索結果がありません',
+          textAlign:
+              TextAlign.center,
+          style:
+              Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+        ),
+
+        const SizedBox(
+          height:
+              AppSpacing.sm,
+        ),
+
+        Text(
+          '別のキーワード・条件で検索してください。',
+          textAlign:
+              TextAlign.center,
+          style:
+              Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(
+                    color: Theme.of(
+                      context,
+                    )
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
+        ),
+      ],
+    );
+  }
+
+  //==================================================
+  // エラー表示
+  //==================================================
+
   Widget _buildErrorView(
     BuildContext context,
     String message,
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(
+        padding:
+            const EdgeInsets.all(
           AppSpacing.xl,
         ),
         child: Column(
@@ -430,19 +1494,23 @@ class _IncomeListPageState
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             Text(
               message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge,
+              textAlign:
+                  TextAlign.center,
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .bodyLarge,
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             FilledButton(
@@ -463,15 +1531,21 @@ class _IncomeListPageState
     );
   }
 
+  //==================================================
+  // Build
+  //==================================================
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     final provider =
         context.watch<HomeProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '保存データ一覧',
+          '収支データ一覧',
         ),
         centerTitle: true,
       ),
@@ -484,25 +1558,29 @@ class _IncomeListPageState
     );
   }
 
-  /// 本文
+  //==================================================
+  // 本文
+  //==================================================
+
   Widget _buildBody(
     BuildContext context,
     HomeProvider provider,
   ) {
-    // ==========================================
+    //==========================================
     // 読み込み中
-    // ==========================================
+    //==========================================
 
     if (provider.isLoading &&
         !provider.hasData) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child:
+            CircularProgressIndicator(),
       );
     }
 
-    // ==========================================
+    //==========================================
     // エラー
-    // ==========================================
+    //==========================================
 
     if (provider.errorMessage != null &&
         !provider.hasData) {
@@ -512,9 +1590,9 @@ class _IncomeListPageState
       );
     }
 
-    // ==========================================
+    //==========================================
     // データなし
-    // ==========================================
+    //==========================================
 
     if (!provider.hasData) {
       return _buildEmptyView(
@@ -522,35 +1600,134 @@ class _IncomeListPageState
       );
     }
 
-    // ==========================================
-    // 保存データ一覧
-    // ==========================================
+    //==========================================
+    // 検索・フィルター結果
+    //==========================================
 
-    return RefreshIndicator(
-      onRefresh: provider.refresh,
-      child: ListView.separated(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.page.left,
-          AppSpacing.page.top,
-          AppSpacing.page.right,
-          AppSpacing.page.bottom,
-        ),
-        itemCount:
-            provider.incomeRecords.length,
-        separatorBuilder:
-            (context, index) =>
-                AppSpacing.gapMd,
-        itemBuilder:
-            (context, index) {
-          final record =
-              provider.incomeRecords[index];
+    final filteredRecords =
+        _filterRecords(
+      provider.incomeRecords,
+    );
 
-          return _buildIncomeCard(
+    //==========================================
+    // 検索結果一覧
+    //==========================================
+
+    return Column(
+      children: [
+        //========================================
+        // 検索欄
+        //========================================
+
+        Padding(
+          padding:
+              EdgeInsets.fromLTRB(
+            AppSpacing.page.left,
+            AppSpacing.page.top,
+            AppSpacing.page.right,
+            0,
+          ),
+          child: _buildSearchField(
             context,
-            record,
-          );
-        },
-      ),
+          ),
+        ),
+
+        const SizedBox(
+          height:
+              AppSpacing.sm,
+        ),
+
+        //========================================
+        // 検索結果件数
+        //========================================
+
+        Align(
+          alignment:
+              Alignment.centerLeft,
+          child: Padding(
+            padding:
+                EdgeInsets.symmetric(
+              horizontal:
+                  AppSpacing.page.left,
+            ),
+            child:
+                _buildResultCount(
+              context,
+              filteredRecords.length,
+            ),
+          ),
+        ),
+
+        const SizedBox(
+          height:
+              AppSpacing.sm,
+        ),
+
+        //========================================
+        // 日付・収支フィルター
+        //========================================
+
+        _buildFilterButton(
+          context,
+        ),
+
+        _buildFilterSummary(
+          context,
+        ),
+
+        const SizedBox(
+          height:
+              AppSpacing.sm,
+        ),
+
+        //========================================
+        // 検索結果
+        //========================================
+
+        Expanded(
+          child:
+              filteredRecords.isEmpty
+                  ? _buildNoSearchResultView(
+                      context,
+                    )
+                  : RefreshIndicator(
+                      onRefresh:
+                          provider.refresh,
+                      child:
+                          ListView.separated(
+                        padding:
+                            EdgeInsets.fromLTRB(
+                          AppSpacing.page.left,
+                          AppSpacing.page.top,
+                          AppSpacing.page.right,
+                          AppSpacing.page.bottom,
+                        ),
+                        itemCount:
+                            filteredRecords.length,
+                        separatorBuilder:
+                            (
+                          context,
+                          index,
+                        ) =>
+                                AppSpacing.gapMd,
+                        itemBuilder:
+                            (
+                          context,
+                          index,
+                        ) {
+                          final record =
+                              filteredRecords[
+                                  index];
+
+                          return _buildIncomeCard(
+                            context,
+                            record,
+                          );
+                        },
+                      ),
+                    ),
+        ),
+      ],
     );
   }
 }

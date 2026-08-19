@@ -357,7 +357,7 @@ class _CounterListPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '保存小役データ一覧',
+          '小役データ一覧',
         ),
         centerTitle: true,
       ),

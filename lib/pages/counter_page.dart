@@ -820,7 +820,7 @@ class _CounterPageState
                     ),
                     label:
                         const Text(
-                      '保存小役データ一覧',
+                      '小役データ一覧',
                     ),
                   ),
                 ),
