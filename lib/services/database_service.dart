@@ -514,7 +514,8 @@ class DatabaseService {
 
   /// 保存済みの小役カウンターをすべて取得
   ///
-  /// IDの新しい順。
+  /// 日付の新しい順、
+  /// 同日の場合はIDの新しい順。
   ///
   /// date・titleも取得される。
   Future<List<CounterRecord>>
@@ -526,7 +527,7 @@ class DatabaseService {
         await db.query(
       _counterTable,
       orderBy:
-          'id DESC',
+          'date DESC, id DESC',
     );
 
     return maps

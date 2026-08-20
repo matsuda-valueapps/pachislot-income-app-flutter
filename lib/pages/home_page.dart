@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/income_record.dart';
@@ -8,6 +9,7 @@ import '../pages/input_page.dart';
 import '../providers/home_provider.dart';
 import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/app_card.dart';
 import '../widgets/home/calendar_card.dart';
 import '../widgets/home/monthly_income_card.dart';
 import '../widgets/home/statistics_card.dart';
@@ -358,6 +360,261 @@ class _HomePageState
   }
 
   //==================================================
+  // 数値表示
+  //==================================================
+
+  /// 3桁区切りで数値を表示する。
+  String _formatNumber(
+    int value,
+  ) {
+    return NumberFormat(
+      '#,###',
+      'ja_JP',
+    ).format(value);
+  }
+
+  //==================================================
+  // 年間累計収支
+  //==================================================
+
+  /// 表示中の年の累計収支を取得する。
+  ///
+  /// 対象：
+  /// ・表示中の年
+  ///
+  /// 集計：
+  /// ・収支
+  /// ・投資
+  /// ・回収
+  ///
+  /// 例：
+  /// 2026年8月を表示中
+  /// ↓
+  /// 2026年1月1日～2026年12月31日の
+  /// 保存済みデータを累計する。
+  Map<String, int> _calculateYearlyIncome(
+    HomeProvider provider,
+  ) {
+    final targetYear =
+        provider.focusedMonth.year;
+
+    int income = 0;
+    int investment = 0;
+    int recovery = 0;
+
+    for (final record
+        in provider.incomeRecords) {
+      try {
+        final recordDate =
+            DateTime.parse(record.date);
+
+        if (recordDate.year != targetYear) {
+          continue;
+        }
+
+        income += record.profit;
+
+        investment +=
+            record.medalInvest +
+                record.cashInvest;
+
+        recovery +=
+            record.medalReturn +
+                record.cashReturn;
+      } catch (_) {
+        // 日付が不正なデータは無視する。
+      }
+    }
+
+    return {
+      'income': income,
+      'investment': investment,
+      'recovery': recovery,
+    };
+  }
+
+  //==================================================
+  // 年間累計収支カード
+  //==================================================
+
+  /// 表示中の年の累計収支を表示する。
+  ///
+  /// 月間収支カードよりコンパクトにし、
+  /// ・累計収支
+  /// ・投資
+  /// ・回収
+  /// の3項目を表示する。
+  Widget _buildYearlyIncomeCard(
+    BuildContext context,
+    HomeProvider provider,
+  ) {
+    final yearlyIncome =
+        _calculateYearlyIncome(
+      provider,
+    );
+
+    final income =
+        yearlyIncome['income'] ?? 0;
+
+    final investment =
+        yearlyIncome['investment'] ?? 0;
+
+    final recovery =
+        yearlyIncome['recovery'] ?? 0;
+
+    final year =
+        provider.focusedMonth.year;
+
+    final incomeColor =
+        income > 0
+            ? Colors.green.shade700
+            : income < 0
+                ? Colors.red.shade700
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurface;
+
+    return AppCard(
+      child: Padding(
+        padding:
+            const EdgeInsets.all(
+          AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            //============================================
+            // タイトル
+            //============================================
+
+            Text(
+              '$year年累計収支',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(
+                    fontWeight:
+                        FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(
+              height: AppSpacing.md,
+            ),
+
+            //============================================
+            // 累計収支
+            //============================================
+
+            Center(
+              child: Text(
+                '${income >= 0 ? '+' : ''}'
+                '${_formatNumber(income)} 円',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium
+                    ?.copyWith(
+                      color: incomeColor,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+              ),
+            ),
+
+            const SizedBox(
+              height: AppSpacing.md,
+            ),
+
+            const Divider(),
+
+            const SizedBox(
+              height: AppSpacing.md,
+            ),
+
+            //============================================
+            // 投資・回収
+            //============================================
+
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        '投資',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              )
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        '${_formatNumber(investment)} 円',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(
+                              color:
+                                  Colors.red.shade700,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        '回収',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              )
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        '${_formatNumber(recovery)} 円',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(
+                              color:
+                                  Colors.green.shade700,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //==================================================
   // Build
   //==================================================
 
@@ -431,7 +688,18 @@ class _HomePageState
               AppSpacing.gapLg,
 
               // ==========================================
-              // 保存データ一覧
+              // 年間累計収支
+              // ==========================================
+
+              _buildYearlyIncomeCard(
+                context,
+                provider,
+              ),
+
+              AppSpacing.gapLg,
+
+              // ==========================================
+              // 収支データ一覧
               // ==========================================
 
               OutlinedButton.icon(

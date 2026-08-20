@@ -810,7 +810,7 @@ class _IncomeListPageState
                           },
                           child:
                               const Text(
-                            '日付をクリア',
+                            'クリア',
                           ),
                         ),
                       ),

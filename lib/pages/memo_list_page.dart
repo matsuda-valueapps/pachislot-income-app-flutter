@@ -879,7 +879,7 @@ class _MemoListPageState
       padding:
           const EdgeInsets.only(
         top: AppSpacing.xs,
-        left: AppSpacing.md,
+        left: AppSpacing.lg,
       ),
       child: Row(
         children: [
@@ -904,7 +904,7 @@ class _MemoListPageState
             onPressed:
                 _clearDateFilter,
             child: const Text(
-              '解除',
+              'クリア',
             ),
           ),
         ],
@@ -1257,10 +1257,6 @@ class _MemoListPageState
               _buildDateFilterSummary(
             context,
           ),
-        ),
-
-        const SizedBox(
-          height: 0,
         ),
 
         //============================================
