@@ -10,6 +10,7 @@ import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
+import '../widgets/counter/koyaku_icon.dart';
 
 class CounterEditPage extends StatefulWidget {
   const CounterEditPage({
@@ -226,24 +227,148 @@ class _CounterEditPageState
   // 入力フィールド
   //==================================================
 
+  /// 数値入力フィールド
+  ///
+  /// [koyakuType] が指定されている場合は、
+  /// 小役アイコン＋小役名を入力欄の上に表示する。
+  ///
+  /// ゲーム数など、通常の入力欄では
+  /// 従来通りlabelTextを使用する。
   Widget _buildNumberField({
     required String label,
     required TextEditingController controller,
+    KoyakuType? koyakuType,
   }) {
+    //================================================
+    // 小役入力欄
+    //================================================
+
+    if (koyakuType != null) {
+      return Padding(
+        padding:
+            const EdgeInsets.only(
+          bottom: AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            //==========================================
+            // 小役アイコン＋小役名
+            //==========================================
+
+            Row(
+              children: [
+                KoyakuIcon(
+                  type: koyakuType,
+                  size: 32,
+                ),
+
+                const SizedBox(
+                  width: AppSpacing.sm,
+                ),
+
+                Text(
+                  label,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight:
+                        FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(
+              height: AppSpacing.sm,
+            ),
+
+            //==========================================
+            // 数値入力欄
+            //==========================================
+
+            TextField(
+              controller:
+                  controller,
+              keyboardType:
+                  TextInputType.number,
+              textInputAction:
+                  TextInputAction.next,
+              decoration:
+                  InputDecoration(
+                filled: true,
+                fillColor:
+                    AppColors.surface,
+                border:
+                    OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(
+                    AppRadius.md,
+                  ),
+                  borderSide:
+                      const BorderSide(
+                    color:
+                        AppColors.border,
+                  ),
+                ),
+                enabledBorder:
+                    OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(
+                    AppRadius.md,
+                  ),
+                  borderSide:
+                      const BorderSide(
+                    color:
+                        AppColors.border,
+                  ),
+                ),
+                focusedBorder:
+                    OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(
+                    AppRadius.md,
+                  ),
+                  borderSide:
+                      BorderSide(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary,
+                  ),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(
+                  horizontal:
+                      AppSpacing.md,
+                  vertical:
+                      AppSpacing.md,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    //================================================
+    // 通常の数値入力欄
+    //================================================
+
     return Padding(
       padding:
           const EdgeInsets.only(
         bottom: AppSpacing.md,
       ),
       child: TextField(
-        controller: controller,
+        controller:
+            controller,
         keyboardType:
             TextInputType.number,
         textInputAction:
             TextInputAction.next,
         decoration:
             InputDecoration(
-          labelText: label,
+          labelText:
+              label,
           filled: true,
           fillColor:
               AppColors.surface,
@@ -745,39 +870,69 @@ class _CounterEditPageState
                           AppSpacing.md,
                     ),
 
+                    //==========================================
+                    // チェリー
+                    //==========================================
+
                     _buildNumberField(
                       label:
                           'チェリー',
                       controller:
                           _cherryController,
+                      koyakuType:
+                          KoyakuType.cherry,
                     ),
+
+                    //==========================================
+                    // ベル
+                    //==========================================
 
                     _buildNumberField(
                       label:
                           'ベル',
                       controller:
                           _bellController,
+                      koyakuType:
+                          KoyakuType.bell,
                     ),
+
+                    //==========================================
+                    // スイカ
+                    //==========================================
 
                     _buildNumberField(
                       label:
                           'スイカ',
                       controller:
                           _suikaController,
+                      koyakuType:
+                          KoyakuType.watermelon,
                     ),
+
+                    //==========================================
+                    // ブドウ
+                    //==========================================
 
                     _buildNumberField(
                       label:
                           'ブドウ',
                       controller:
                           _grapeController,
+                      koyakuType:
+                          KoyakuType.grape,
                     ),
+
+                    //==========================================
+                    // チャンス目
+                    //==========================================
 
                     _buildNumberField(
                       label:
                           'チャンス目',
                       controller:
                           _chanceController,
+                      koyakuType:
+                          KoyakuType.chance,
                     ),
                   ],
                 ),

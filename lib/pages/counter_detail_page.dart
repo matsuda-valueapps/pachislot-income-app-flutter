@@ -7,6 +7,7 @@ import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
+import '../widgets/counter/koyaku_icon.dart';
 import 'counter_edit_page.dart';
 
 class CounterDetailPage extends StatelessWidget {
@@ -110,6 +111,7 @@ class CounterDetailPage extends StatelessWidget {
 
   Widget _buildCounterRow(
     BuildContext context, {
+    required KoyakuType type,
     required String label,
     required int count,
   }) {
@@ -120,6 +122,23 @@ class CounterDetailPage extends StatelessWidget {
       ),
       child: Row(
         children: [
+          //================================================
+          // 小役アイコン
+          //================================================
+
+          KoyakuIcon(
+            type: type,
+            size: 32,
+          ),
+
+          const SizedBox(
+            width: AppSpacing.sm,
+          ),
+
+          //================================================
+          // 小役名
+          //================================================
+
           Expanded(
             child: Text(
               label,
@@ -133,6 +152,11 @@ class CounterDetailPage extends StatelessWidget {
                   ),
             ),
           ),
+
+          //================================================
+          // カウント
+          //================================================
+
           Text(
             '${_formatNumber(count)}回',
             style: Theme.of(context)
@@ -141,6 +165,75 @@ class CounterDetailPage extends StatelessWidget {
                 ?.copyWith(
                   fontWeight:
                       FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //==================================================
+  // 小役確率項目
+  //==================================================
+
+  Widget _buildProbabilityRow(
+    BuildContext context, {
+    required KoyakuType type,
+    required String label,
+    required String probability,
+  }) {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          //================================================
+          // 小役アイコン
+          //================================================
+
+          KoyakuIcon(
+            type: type,
+            size: 32,
+          ),
+
+          const SizedBox(
+            width: AppSpacing.sm,
+          ),
+
+          //================================================
+          // 小役名
+          //================================================
+
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
+            ),
+          ),
+
+          //================================================
+          // 確率
+          //================================================
+
+          Text(
+            probability,
+            textAlign:
+                TextAlign.right,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(
+                  fontWeight:
+                      FontWeight.w600,
                 ),
           ),
         ],
@@ -460,6 +553,8 @@ class CounterDetailPage extends StatelessWidget {
 
                     _buildCounterRow(
                       context,
+                      type:
+                          KoyakuType.cherry,
                       label: 'チェリー',
                       count:
                           record.cherry,
@@ -469,6 +564,8 @@ class CounterDetailPage extends StatelessWidget {
 
                     _buildCounterRow(
                       context,
+                      type:
+                          KoyakuType.bell,
                       label: 'ベル',
                       count:
                           record.bell,
@@ -478,6 +575,8 @@ class CounterDetailPage extends StatelessWidget {
 
                     _buildCounterRow(
                       context,
+                      type:
+                          KoyakuType.watermelon,
                       label: 'スイカ',
                       count:
                           record.suika,
@@ -487,6 +586,8 @@ class CounterDetailPage extends StatelessWidget {
 
                     _buildCounterRow(
                       context,
+                      type:
+                          KoyakuType.grape,
                       label: 'ブドウ',
                       count:
                           record.grape,
@@ -496,6 +597,8 @@ class CounterDetailPage extends StatelessWidget {
 
                     _buildCounterRow(
                       context,
+                      type:
+                          KoyakuType.chance,
                       label: 'チャンス目',
                       count:
                           record.chance,
@@ -531,10 +634,12 @@ class CounterDetailPage extends StatelessWidget {
                           AppSpacing.md,
                     ),
 
-                    _buildDetailRow(
+                    _buildProbabilityRow(
                       context,
+                      type:
+                          KoyakuType.cherry,
                       label: 'チェリー',
-                      value:
+                      probability:
                           _probability(
                         record.cherry,
                       ),
@@ -542,10 +647,12 @@ class CounterDetailPage extends StatelessWidget {
 
                     const Divider(),
 
-                    _buildDetailRow(
+                    _buildProbabilityRow(
                       context,
+                      type:
+                          KoyakuType.bell,
                       label: 'ベル',
-                      value:
+                      probability:
                           _probability(
                         record.bell,
                       ),
@@ -553,10 +660,12 @@ class CounterDetailPage extends StatelessWidget {
 
                     const Divider(),
 
-                    _buildDetailRow(
+                    _buildProbabilityRow(
                       context,
+                      type:
+                          KoyakuType.watermelon,
                       label: 'スイカ',
-                      value:
+                      probability:
                           _probability(
                         record.suika,
                       ),
@@ -564,10 +673,12 @@ class CounterDetailPage extends StatelessWidget {
 
                     const Divider(),
 
-                    _buildDetailRow(
+                    _buildProbabilityRow(
                       context,
+                      type:
+                          KoyakuType.grape,
                       label: 'ブドウ',
-                      value:
+                      probability:
                           _probability(
                         record.grape,
                       ),
@@ -575,10 +686,12 @@ class CounterDetailPage extends StatelessWidget {
 
                     const Divider(),
 
-                    _buildDetailRow(
+                    _buildProbabilityRow(
                       context,
+                      type:
+                          KoyakuType.chance,
                       label: 'チャンス目',
-                      value:
+                      probability:
                           _probability(
                         record.chance,
                       ),

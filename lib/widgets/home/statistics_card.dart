@@ -92,7 +92,8 @@ class StatisticsCard extends StatelessWidget {
                 child: StatTile(
                   label: '遊技回数',
                   value: '$totalGames 回',
-                  icon: Icons.casino_outlined,
+                  iconAsset:
+                      'assets/images/statistics/play_count.png',
                 ),
               ),
 
@@ -102,8 +103,8 @@ class StatisticsCard extends StatelessWidget {
                 child: StatTile(
                   label: '勝利回数',
                   value: '$winGames 回',
-                  icon:
-                      Icons.emoji_events_outlined,
+                  iconAsset:
+                      'assets/images/statistics/win_count.png',
                   valueColor:
                       AppColors.profit,
                 ),
@@ -124,7 +125,8 @@ class StatisticsCard extends StatelessWidget {
                   label: '勝率',
                   value:
                       '${winRate.toStringAsFixed(1)}%',
-                  icon: Icons.percent,
+                  iconAsset:
+                      'assets/images/statistics/win_rate.png',
                   valueColor:
                       AppColors.primary,
                 ),
@@ -137,8 +139,8 @@ class StatisticsCard extends StatelessWidget {
                   label: '平均収支',
                   valueWidget:
                       _buildAverageIncome(),
-                  icon:
-                      Icons.bar_chart_outlined,
+                  iconAsset:
+                      'assets/images/statistics/average_profit.png',
                 ),
               ),
             ],

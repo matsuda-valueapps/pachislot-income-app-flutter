@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import 'counter_button.dart';
+import 'koyaku_icon.dart';
 
 class CounterCard extends StatelessWidget {
   const CounterCard({
@@ -26,6 +27,40 @@ class CounterCard extends StatelessWidget {
 
   /// －
   final VoidCallback onDecrement;
+
+  //==================================================
+  // 小役アイコン種類
+  //==================================================
+
+  /// CounterItemのIDを
+  /// KoyakuIconで使用するKoyakuTypeへ変換する。
+  KoyakuType _getKoyakuType(
+    String id,
+  ) {
+    switch (id) {
+      case 'cherry':
+        return KoyakuType.cherry;
+
+      case 'bell':
+        return KoyakuType.bell;
+
+      case 'suika':
+        return KoyakuType.watermelon;
+
+      case 'grape':
+        return KoyakuType.grape;
+
+      case 'chance':
+        return KoyakuType.chance;
+
+      default:
+        return KoyakuType.cherry;
+    }
+  }
+
+  //==================================================
+  // Build
+  //==================================================
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +85,24 @@ class CounterCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              /// 小役カラー
-              Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: item.color,
-                  shape: BoxShape.circle,
+              //================================================
+              // 小役アイコン
+              //================================================
+
+              KoyakuIcon(
+                type: _getKoyakuType(
+                  item.id,
                 ),
+                size: 36,
               ),
 
               const SizedBox(
                 width: AppSpacing.sm,
               ),
+
+              //================================================
+              // 小役名
+              //================================================
 
               Expanded(
                 child: Text(
@@ -74,10 +114,18 @@ class CounterCard extends StatelessWidget {
                 ),
               ),
 
+              //================================================
+              // －ボタン
+              //================================================
+
               CounterButton(
                 icon: Icons.remove,
                 onPressed: onDecrement,
               ),
+
+              //================================================
+              // カウント
+              //================================================
 
               SizedBox(
                 width: 52,
@@ -92,6 +140,10 @@ class CounterCard extends StatelessWidget {
                 ),
               ),
 
+              //================================================
+              // ＋ボタン
+              //================================================
+
               CounterButton(
                 icon: Icons.add,
                 onPressed: onIncrement,
@@ -102,6 +154,10 @@ class CounterCard extends StatelessWidget {
           const SizedBox(
             height: 4,
           ),
+
+          //==================================================
+          // 確率
+          //==================================================
 
           Align(
             alignment: Alignment.centerRight,
