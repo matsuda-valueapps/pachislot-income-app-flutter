@@ -90,7 +90,7 @@ class StatTile extends StatelessWidget {
             padding: AppSpacing.card,
             child: Column(
               crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  CrossAxisAlignment.center,
               children: [
                 // ==================================================
                 // アイコン
@@ -124,6 +124,7 @@ class StatTile extends StatelessWidget {
 
                 Text(
                   label,
+                  textAlign: TextAlign.center,
                   style: AppTextStyles.label,
                 ),
 
@@ -147,6 +148,7 @@ class StatTile extends StatelessWidget {
                     value!,
                     maxLines: 1,
                     softWrap: false,
+                    textAlign: TextAlign.center,
                     style:
                         AppTextStyles.statValue.copyWith(
                       color: textColor,

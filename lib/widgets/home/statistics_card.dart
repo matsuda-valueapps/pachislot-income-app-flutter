@@ -44,22 +44,29 @@ class StatisticsCard extends StatelessWidget {
   /// 平均収支表示
   ///
   /// 画面幅が狭い端末でも金額を1行に収める。
+  ///
+  /// FittedBoxをSizedBoxで横幅いっぱいに広げ、
+  /// alignmentをcenterにすることで、
+  /// 自動縮小した場合でも常に中央揃えを維持する。
   Widget _buildAverageIncome() {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '${averageIncome >= 0 ? '+' : ''}'
-        '${_format(averageIncome)}円',
-        maxLines: 1,
-        softWrap: false,
-        style: TextStyle(
-          color:
-              averageIncome >= 0
-                  ? AppColors.profit
-                  : AppColors.loss,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          '${averageIncome >= 0 ? '+' : ''}'
+          '${_format(averageIncome)}円',
+          maxLines: 1,
+          softWrap: false,
+          style: TextStyle(
+            color:
+                averageIncome >= 0
+                    ? AppColors.profit
+                    : AppColors.loss,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

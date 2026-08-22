@@ -7,6 +7,7 @@ import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../services/memo_draft_service.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/memo/calculator_bottom_sheet.dart';
 import '../widgets/memo/calculator_toggle.dart';
@@ -702,9 +703,8 @@ class _MemoPageState
                         OutlinedButton.icon(
                           onPressed:
                               _openMemoList,
-                          icon: const Icon(
-                            Icons
-                                .format_list_bulleted,
+                          icon: const ActionButtonIcon.list(
+                            size: 38,
                           ),
                           label: const Text(
                             'メモデータ一覧',

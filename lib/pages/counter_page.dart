@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/counter/counter_card.dart';
 import '../widgets/counter/game_counter.dart';
@@ -815,8 +816,8 @@ class _CounterPageState
                       OutlinedButton.icon(
                     onPressed:
                         _openCounterListPage,
-                    icon: const Icon(
-                      Icons.history,
+                    icon: const ActionButtonIcon.list(
+                      size: 38,
                     ),
                     label:
                         const Text(

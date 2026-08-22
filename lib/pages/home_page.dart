@@ -9,6 +9,7 @@ import '../pages/input_page.dart';
 import '../providers/home_provider.dart';
 import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/home/calendar_card.dart';
 import '../widgets/home/monthly_income_card.dart';
@@ -705,8 +706,8 @@ class _HomePageState
               OutlinedButton.icon(
                 onPressed:
                     _openIncomeList,
-                icon: const Icon(
-                  Icons.history,
+                icon: const ActionButtonIcon.list(
+                  size: 38,
                 ),
                 label: const Text(
                   '収支データ一覧',

@@ -57,5 +57,6 @@ flutter:
   assets:
     - assets/images/koyaku/
     - assets/images/statistics/
+    - assets/images/buttons/
     - assets/icons/
     - assets/logo/
