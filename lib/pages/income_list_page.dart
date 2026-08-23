@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/income_record.dart';
 import '../providers/home_provider.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import 'income_detail_page.dart';
 
@@ -1043,18 +1044,28 @@ class _IncomeListPageState
         horizontal:
             AppSpacing.page.left,
       ),
-      child: OutlinedButton.icon(
+      child: OutlinedButton(
         onPressed:
             _showFilterSheet,
-        icon: Icon(
-          _hasFilter
-              ? Icons.filter_alt
-              : Icons.filter_alt_outlined,
-        ),
-        label: Text(
-          _hasFilter
-              ? '日付・収支で絞り込み中'
-              : '日付・収支で絞り込み',
+        child: Row(
+          mainAxisSize:
+              MainAxisSize.min,
+          children: [
+            ActionButtonIcon.filter(
+              size: 38.0,
+            ),
+
+            const SizedBox(
+              width:
+                  AppSpacing.sm,
+            ),
+
+            Text(
+              _hasFilter
+                  ? '日付・収支で絞り込み中'
+                  : '日付・収支で絞り込み',
+            ),
+          ],
         ),
       ),
     );

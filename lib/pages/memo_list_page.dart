@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/memo_record.dart';
 import '../services/database_service.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import 'memo_detail_page.dart';
 
@@ -832,10 +833,8 @@ class _MemoListPageState
       child: OutlinedButton.icon(
         onPressed:
             _showDateFilterDialog,
-        icon: Icon(
-          _hasDateFilter
-              ? Icons.filter_alt
-              : Icons.filter_alt_outlined,
+        icon: const ActionButtonIcon.filter(
+          size: 38.0,
         ),
         label: Text(
           _hasDateFilter

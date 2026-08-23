@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
+import '../common/action_button_icon.dart';
 
 class CalculatorToggle extends StatelessWidget {
   const CalculatorToggle({
@@ -47,30 +48,45 @@ class CalculatorToggle extends StatelessWidget {
                     color: AppColors.border,
                   ),
                 ),
-                child: Row(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    const Icon(
-                      Icons.calculate_outlined,
+                    //==========================================
+                    // 電卓アイコン＋電卓
+                    //==========================================
+
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const ActionButtonIcon.calculator(
+                          size: 38,
+                        ),
+
+                        const SizedBox(
+                          width: AppSpacing.sm,
+                        ),
+
+                        const Text(
+                          '電卓',
+                          style: AppTextStyles.body,
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(
-                      width: AppSpacing.sm,
-                    ),
+                    //==========================================
+                    // 開閉アイコン
+                    //==========================================
 
-                    const Expanded(
-                      child: Text(
-                        '電卓',
-                        style: AppTextStyles.body,
-                      ),
-                    ),
-
-                    AnimatedRotation(
-                      turns: provider.isVisible ? 0.5 : 0,
-                      duration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      child: const Icon(
-                        Icons.keyboard_arrow_up,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: AnimatedRotation(
+                        turns: provider.isVisible ? 0.5 : 0,
+                        duration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        child: const Icon(
+                          Icons.keyboard_arrow_up,
+                        ),
                       ),
                     ),
                   ],

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 /// - 一覧
 /// - 削除
 /// - 絞り込み
+/// - 電卓
 ///
 /// Assetは以下のディレクトリに配置：
 /// assets/images/buttons/
@@ -21,6 +22,7 @@ import 'package:flutter/material.dart';
 /// ActionButtonIcon.list()
 /// ActionButtonIcon.delete()
 /// ActionButtonIcon.filter()
+/// ActionButtonIcon.calculator()
 class ActionButtonIcon extends StatelessWidget {
   /// 表示する操作アイコンの種類
   final ActionButtonType type;
@@ -92,6 +94,14 @@ class ActionButtonIcon extends StatelessWidget {
     this.filterQuality = FilterQuality.high,
   }) : type = ActionButtonType.filter;
 
+  /// 電卓アイコン
+  const ActionButtonIcon.calculator({
+    super.key,
+    this.size = 32.0,
+    this.fit = BoxFit.contain,
+    this.filterQuality = FilterQuality.high,
+  }) : type = ActionButtonType.calculator;
+
   /// 操作アイコンのAssetパスを取得
   String get _assetPath {
     switch (type) {
@@ -112,6 +122,9 @@ class ActionButtonIcon extends StatelessWidget {
 
       case ActionButtonType.filter:
         return 'assets/images/buttons/filter_button.png';
+
+      case ActionButtonType.calculator:
+        return 'assets/images/buttons/calculator_button.png';
     }
   }
 
@@ -135,6 +148,9 @@ class ActionButtonIcon extends StatelessWidget {
 
       case ActionButtonType.filter:
         return '絞り込み';
+
+      case ActionButtonType.calculator:
+        return '電卓';
     }
   }
 
@@ -166,4 +182,5 @@ enum ActionButtonType {
   list,
   delete,
   filter,
+  calculator,
 }
