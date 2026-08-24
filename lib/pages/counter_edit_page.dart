@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/counter/koyaku_icon.dart';
@@ -947,6 +948,9 @@ class _CounterEditPageState
               PrimaryButton(
                 text: '更新',
                 onPressed: _onUpdate,
+                iconWidget: const ActionButtonIcon.update(
+                  size: 38,
+                ),
               ),
             ],
           ),

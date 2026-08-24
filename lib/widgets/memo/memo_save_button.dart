@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
+
 import '../common/primary_button.dart';
 
 class MemoSaveButton extends StatelessWidget {
@@ -8,6 +9,7 @@ class MemoSaveButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.label = '保存',
+    this.icon,
   });
 
   /// 保存・更新ボタン押下時
@@ -22,6 +24,12 @@ class MemoSaveButton extends StatelessWidget {
   /// 「更新」
   final String label;
 
+  /// ボタン左側に表示するWidgetアイコン
+  ///
+  /// 高級3Dアイコンなど、
+  /// IconDataでは表現できないWidgetを表示する場合に使用する。
+  final Widget? icon;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -31,6 +39,7 @@ class MemoSaveButton extends StatelessWidget {
       child: PrimaryButton(
         text: label,
         onPressed: onPressed,
+        iconWidget: icon,
       ),
     );
   }

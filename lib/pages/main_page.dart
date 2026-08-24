@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/home_provider.dart';
 import '../services/dialog_service.dart';
+import '../widgets/common/bottomnavigation_icon.dart';
 import 'counter_page.dart';
 import 'home_page.dart';
 import 'input_page.dart';
@@ -699,11 +700,17 @@ class _MainPageState
             //================================================
 
             NavigationDestination(
-              icon: Icon(
-                Icons.home_outlined,
+              icon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .home,
               ),
-              selectedIcon: Icon(
-                Icons.home,
+              selectedIcon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .home,
               ),
               label: 'ホーム',
             ),
@@ -713,11 +720,17 @@ class _MainPageState
             //================================================
 
             NavigationDestination(
-              icon: Icon(
-                Icons.edit_note_outlined,
+              icon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .input,
               ),
-              selectedIcon: Icon(
-                Icons.edit_note,
+              selectedIcon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .input,
               ),
               label: '入力',
             ),
@@ -727,11 +740,17 @@ class _MainPageState
             //================================================
 
             NavigationDestination(
-              icon: Icon(
-                Icons.description_outlined,
+              icon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .memo,
               ),
-              selectedIcon: Icon(
-                Icons.description,
+              selectedIcon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .memo,
               ),
               label: 'メモ',
             ),
@@ -741,13 +760,19 @@ class _MainPageState
             //================================================
 
             NavigationDestination(
-              icon: Icon(
-                Icons.calculate_outlined,
+              icon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .counter,
               ),
-              selectedIcon: Icon(
-                Icons.calculate,
+              selectedIcon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .counter,
               ),
-              label: '小役',
+              label: 'カウンター',
             ),
 
             //================================================
@@ -755,11 +780,17 @@ class _MainPageState
             //================================================
 
             NavigationDestination(
-              icon: Icon(
-                Icons.search_outlined,
+              icon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .search,
               ),
-              selectedIcon: Icon(
-                Icons.search,
+              selectedIcon:
+                  BottomNavigationIcon(
+                type:
+                    BottomNavigationIconType
+                        .search,
               ),
               label: '検索',
             ),

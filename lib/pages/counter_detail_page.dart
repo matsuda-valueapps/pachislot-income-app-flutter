@@ -5,6 +5,7 @@ import '../models/counter_record.dart';
 import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/counter/koyaku_icon.dart';
@@ -708,10 +709,13 @@ class CounterDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '編集',
+                iconWidget: const ActionButtonIcon.edit(
+                  size: 38,
+                ),
                 onPressed: () =>
                     _openEditPage(
                   context,
-                ),
+                  ),
               ),
 
               //================================================
@@ -722,8 +726,11 @@ class CounterDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '削除',
+                iconWidget: const ActionButtonIcon.delete(
+                  size: 38,
+                ),
                 backgroundColor:
-                    Colors.red.shade700,
+                  Colors.red.shade700,
                 onPressed: () =>
                     _onDelete(
                   context,

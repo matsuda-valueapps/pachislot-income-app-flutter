@@ -7,6 +7,7 @@ import '../services/input_draft_service.dart';
 
 import '../theme/app_spacing.dart';
 
+import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/input/amount_field.dart';
@@ -982,6 +983,13 @@ class _InputPageState extends State<InputPage> {
                   text: _isEditMode
                       ? '更新'
                       : '保存',
+                  iconWidget: _isEditMode
+                      ? const ActionButtonIcon.update(
+                          size: 38,
+                        )
+                      : const ActionButtonIcon.save(
+                          size: 38,
+                        ),
                   onPressed:
                       _onSavePressed,
                 ),

@@ -12,6 +12,7 @@ class PrimaryButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     this.icon,
+    this.iconWidget,
     this.width = double.infinity,
     this.height = 52,
     this.backgroundColor,
@@ -26,12 +27,20 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   /// 左側アイコン
+  ///
+  /// 既存のMaterial Icon用。
   final IconData? icon;
+
+  /// 左側Widgetアイコン
+  ///
+  /// 高級3Dアイコンなど、
+  /// IconDataでは表現できないWidgetを表示する場合に使用する。
+  final Widget? iconWidget;
 
   /// 横幅
   final double width;
 
-  /// 高さ
+  /// ボタンの高さ
   final double height;
 
   /// 背景色
@@ -77,18 +86,44 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisSize:
                     MainAxisSize.min,
                 children: [
-                  if (icon
+                  //==================================================
+                  // Widgetアイコン
+                  //==================================================
+                  //
+                  // 高級3Dアイコンなど、
+                  // Widgetとして渡されたアイコンを優先表示する。
+                  //==================================================
+
+                  if (iconWidget != null) ...[
+                    iconWidget!,
+                    const SizedBox(
+                      width: AppSpacing.sm,
+                    ),
+                  ]
+
+                  //==================================================
+                  // Material Icon
+                  //==================================================
+                  //
+                  // iconWidgetが指定されていない場合のみ表示する。
+                  //==================================================
+
+                  else if (icon
                       case IconData iconData) ...[
                     Icon(iconData),
                     const SizedBox(
                       width: AppSpacing.sm,
                     ),
                   ],
+
+                  //==================================================
+                  // ボタン文字
+                  //==================================================
+
                   Text(
                     text,
                     style:
-                        AppTextStyles.button
-                            .copyWith(
+                        AppTextStyles.button.copyWith(
                       color: fgColor,
                     ),
                   ),

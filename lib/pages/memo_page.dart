@@ -666,12 +666,17 @@ class _MemoPageState
                             //==========================================
 
                             MemoSaveButton(
-                              onPressed:
-                                  _saveMemo,
-                              label:
-                                  _isEditMode
-                                      ? '更新'
-                                      : '保存',
+                              onPressed: _saveMemo,
+                              label: _isEditMode
+                                  ? '更新'
+                                  : '保存',
+                              icon: _isEditMode
+                                  ? const ActionButtonIcon.update(
+                                      size: 38,
+                                    )
+                                  : const ActionButtonIcon.save(
+                                      size: 38,
+                                    ),
                             ),
 
                             //==========================================
