@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
+import 'section_icon.dart';
 
 class SearchCategory extends StatelessWidget {
   const SearchCategory({
@@ -13,8 +14,8 @@ class SearchCategory extends StatelessWidget {
   /// カテゴリ名
   final String title;
 
-  /// 左アイコン
-  final IconData icon;
+  /// セクションアイコン名
+  final String icon;
 
   /// カテゴリ内Widget
   final List<Widget> children;
@@ -29,12 +30,15 @@ class SearchCategory extends StatelessWidget {
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
+          //========================================
+          // セクションタイトル
+          //========================================
+
           Row(
             children: [
-              Icon(
-                icon,
-                size: 22,
-                color: Theme.of(context).primaryColor,
+              SectionIcon(
+                icon: icon,
+                size: 38,
               ),
 
               const SizedBox(
@@ -54,6 +58,10 @@ class SearchCategory extends StatelessWidget {
           const SizedBox(
             height: AppSpacing.md,
           ),
+
+          //========================================
+          // カテゴリ内コンテンツ
+          //========================================
 
           ...children,
         ],

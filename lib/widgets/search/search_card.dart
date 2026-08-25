@@ -20,7 +20,9 @@ class SearchCard extends StatelessWidget {
   final String subtitle;
 
   /// 左アイコン
-  final IconData icon;
+  ///
+  /// 3Dサービスアイコンなど、任意のWidgetを指定できます。
+  final Widget icon;
 
   /// タップ
   final VoidCallback onTap;
@@ -55,26 +57,25 @@ class SearchCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Container(
+                  //========================================
+                  // サービスアイコン
+                  //========================================
+
+                  SizedBox(
                     width: 44,
                     height: 44,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .primaryColor
-                          .withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      icon,
-                      color: Theme.of(context)
-                          .primaryColor,
-                      size: 24,
+                    child: Center(
+                      child: icon,
                     ),
                   ),
 
                   const SizedBox(
                     width: AppSpacing.md,
                   ),
+
+                  //========================================
+                  // タイトル・説明
+                  //========================================
 
                   Expanded(
                     child: Column(
@@ -85,8 +86,7 @@ class SearchCard extends StatelessWidget {
                           title,
                           style: const TextStyle(
                             fontSize: 17,
-                            fontWeight:
-                                FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
 
@@ -98,8 +98,7 @@ class SearchCard extends StatelessWidget {
                           subtitle,
                           style: TextStyle(
                             fontSize: 13,
-                            color:
-                                Colors.grey.shade600,
+                            color: Colors.grey.shade600,
                             height: 1.35,
                           ),
                         ),
@@ -110,6 +109,10 @@ class SearchCard extends StatelessWidget {
                   const SizedBox(
                     width: AppSpacing.sm,
                   ),
+
+                  //========================================
+                  // 右矢印
+                  //========================================
 
                   Icon(
                     Icons.chevron_right,

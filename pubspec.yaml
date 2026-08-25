@@ -59,5 +59,7 @@ flutter:
     - assets/images/statistics/
     - assets/images/buttons/
     - assets/images/bottomnavigation/
+    - assets/images/sections/
+    - assets/images/servicez/       
     - assets/icons/
     - assets/logo/

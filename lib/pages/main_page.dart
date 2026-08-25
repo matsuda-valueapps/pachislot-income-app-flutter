@@ -694,6 +694,43 @@ class _MainPageState
           onDestinationSelected:
               _onItemTapped,
 
+          //================================================
+          // ラベル文字スタイル
+          //================================================
+          //
+          // 選択中のBottomNavigationラベルだけを
+          // 太字で表示する。
+          //
+          // 未選択：
+          //   FontWeight.normal
+          //
+          // 選択中：
+          //   FontWeight.bold
+          //
+          // アイコン・選択背景・文字サイズなど、
+          // 既存のNavigationBarデザインは変更しない。
+          //================================================
+
+          labelTextStyle:
+              WidgetStateProperty.resolveWith<
+                  TextStyle?>(
+            (states) {
+              final baseStyle =
+                  Theme.of(context)
+                      .textTheme
+                      .labelMedium;
+
+              return baseStyle?.copyWith(
+                fontWeight:
+                    states.contains(
+                  WidgetState.selected,
+                )
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+              );
+            },
+          ),
+
           destinations: const [
             //================================================
             // ホーム
