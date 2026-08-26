@@ -5,6 +5,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
 
+import '../search/service_icon.dart';
+
 import '../input/input_label.dart';
 
 /// メモ画面用 日付選択フィールド
@@ -95,9 +97,9 @@ class MemoDateField extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.calendar_month_rounded,
-                    color: AppColors.icon,
+                  const ServiceIcon(
+                    icon: 'google_calendar',
+                    size: 38,
                   ),
 
                   const SizedBox(

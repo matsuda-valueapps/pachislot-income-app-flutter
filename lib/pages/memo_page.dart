@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,7 +41,8 @@ class MemoPage extends StatefulWidget {
 }
 
 class _MemoPageState
-    extends State<MemoPage> {
+    extends State<MemoPage>
+    with WidgetsBindingObserver {
   //==================================================
   // メモ入力
   //==================================================
@@ -47,6 +50,17 @@ class _MemoPageState
   /// 日付
   DateTime _selectedDate =
       DateTime.now();
+
+  /// 最後に確認した「今日」の日付。
+  ///
+  /// 日付が変わったことを検知するために使用する。
+  DateTime _lastKnownDate =
+      _dateOnly(
+    DateTime.now(),
+  );
+
+  /// 日付変更監視用Timer
+  Timer? _midnightTimer;
 
   /// メモタイトル
   final TextEditingController
@@ -73,12 +87,157 @@ class _MemoPageState
       widget.record != null;
 
   //==================================================
+  // 日付共通処理
+  //==================================================
+
+  /// 時刻を切り捨てて日付だけにする。
+  static DateTime _dateOnly(
+    DateTime date,
+  ) {
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+    );
+  }
+
+  /// 2つの日付が同じ日か確認する。
+  bool _isSameDate(
+    DateTime first,
+    DateTime second,
+  ) {
+    final firstDate =
+        _dateOnly(first);
+
+    final secondDate =
+        _dateOnly(second);
+
+    return firstDate.year ==
+            secondDate.year &&
+        firstDate.month ==
+            secondDate.month &&
+        firstDate.day ==
+            secondDate.day;
+  }
+
+  //==================================================
+  // 日付変更監視
+  //==================================================
+
+  /// 日付変更監視を開始する。
+  ///
+  /// アプリを開いたまま日付が変わった場合でも、
+  /// 新規メモの日付を自動的に今日へ更新する。
+  void _startDateChangeMonitoring() {
+    _midnightTimer?.cancel();
+
+    final now =
+        DateTime.now();
+
+    final tomorrow =
+        DateTime(
+      now.year,
+      now.month,
+      now.day + 1,
+    );
+
+    final duration =
+        tomorrow.difference(now);
+
+    _midnightTimer =
+        Timer(
+      duration,
+      () {
+        _handleDateChange();
+
+        // 次の日の監視を継続する。
+        _startDateChangeMonitoring();
+      },
+    );
+  }
+
+  /// 現在の日付が変わっているか確認する。
+  void _handleDateChange() {
+    final today =
+        _dateOnly(
+      DateTime.now(),
+    );
+
+    // 日付が変わっていない場合は何もしない。
+    if (_isSameDate(
+      today,
+      _lastKnownDate,
+    )) {
+      return;
+    }
+
+    //================================================
+    // 新規作成モード
+    //================================================
+    //
+    // 「昨日まで今日だった日付」を
+    // そのまま表示している場合だけ、
+    // 新しい今日の日付へ更新する。
+    //
+    // ユーザーが過去の日付を手動選択している場合は、
+    // その日付を勝手に変更しない。
+    //================================================
+
+    if (!_isEditMode &&
+        _isSameDate(
+          _selectedDate,
+          _lastKnownDate,
+        )) {
+      if (mounted) {
+        setState(() {
+          _selectedDate =
+              today;
+        });
+
+        // 新しい今日の日付を
+        // 下書きにも保存する。
+        _saveDraft();
+      }
+    }
+
+    _lastKnownDate =
+        today;
+  }
+
+  /// アプリがバックグラウンドから復帰したときに
+  /// 日付変更を確認する。
+  void _checkDateOnResume() {
+    _handleDateChange();
+
+    _startDateChangeMonitoring();
+  }
+
+  @override
+  void didChangeAppLifecycleState(
+    AppLifecycleState state,
+  ) {
+    if (state ==
+        AppLifecycleState.resumed) {
+      _checkDateOnResume();
+    }
+  }
+
+  //==================================================
   // Init / Dispose
   //==================================================
 
   @override
   void initState() {
     super.initState();
+
+    //================================================
+    // アプリの日付変更監視を開始
+    //================================================
+
+    WidgetsBinding.instance
+        .addObserver(this);
+
+    _startDateChangeMonitoring();
 
     //================================================
     // 編集モード
@@ -115,6 +274,16 @@ class _MemoPageState
 
   @override
   void dispose() {
+    //================================================
+    // 日付変更監視を解除
+    //================================================
+
+    WidgetsBinding.instance
+        .removeObserver(this);
+
+    _midnightTimer?.cancel();
+    _midnightTimer = null;
+
     //================================================
     // 新規作成モードの場合のみ
     // 下書き保存Listenerを解除する。
@@ -158,6 +327,12 @@ class _MemoPageState
           DateTime.parse(
         record.date,
       );
+
+      // 編集モードでは既存メモの日付を基準にする。
+      _lastKnownDate =
+          _dateOnly(
+        DateTime.now(),
+      );
     } catch (_) {
       _selectedDate =
           DateTime.now();
@@ -189,10 +364,14 @@ class _MemoPageState
     final pickedDate =
         await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      locale: const Locale(
+      initialDate:
+          _selectedDate,
+      firstDate:
+          DateTime(2020),
+      lastDate:
+          DateTime(2100),
+      locale:
+          const Locale(
         'ja',
         'JP',
       ),
@@ -239,26 +418,84 @@ class _MemoPageState
     final dateString =
         draft['date'] ?? '';
 
+    final draftTitle =
+        draft['title'] ?? '';
+
+    final draftBody =
+        draft['body'] ?? '';
+
+    final today =
+        _dateOnly(
+      DateTime.now(),
+    );
+
+    //================================================
+    // 日付
+    //================================================
+
     if (dateString.isNotEmpty) {
       try {
-        _selectedDate =
-            DateTime.parse(
-          dateString,
+        final draftDate =
+            _dateOnly(
+          DateTime.parse(
+            dateString,
+          ),
         );
+
+        //================================================
+        // 古い下書きの日付について
+        //================================================
+        //
+        // タイトル・本文が空で、
+        // 下書きの日付だけが昨日以前になっている場合は、
+        // 新規メモの初期日付として今日を使用する。
+        //
+        // 既にタイトルや本文が入力されている場合は、
+        // ユーザーが意図して作業している可能性があるため、
+        // 元の日付を維持する。
+        //================================================
+
+        if (!_isSameDate(
+              draftDate,
+              today,
+            ) &&
+            draftTitle.trim().isEmpty &&
+            draftBody.trim().isEmpty) {
+          _selectedDate =
+              today;
+        } else {
+          _selectedDate =
+              draftDate;
+        }
       } catch (_) {
         _selectedDate =
-            DateTime.now();
+            today;
       }
     } else {
       _selectedDate =
-          DateTime.now();
+          today;
     }
 
+    //================================================
+    // 現在の日付を記録
+    //================================================
+
+    _lastKnownDate =
+        today;
+
+    //================================================
+    // タイトル
+    //================================================
+
     _titleController.text =
-        draft['title'] ?? '';
+        draftTitle;
+
+    //================================================
+    // 本文
+    //================================================
 
     _memoController.text =
-        draft['body'] ?? '';
+        draftBody;
 
     setState(() {});
   }
@@ -276,7 +513,8 @@ class _MemoPageState
     }
 
     await MemoDraftService.saveDraft(
-      date: _selectedDate,
+      date:
+          _selectedDate,
       title:
           _titleController.text,
       body:
@@ -378,7 +616,8 @@ class _MemoPageState
 
     final updatedRecord =
         MemoRecord(
-      id: record.id,
+      id:
+          record.id,
       date: _selectedDate
           .toIso8601String()
           .split('T')
@@ -504,9 +743,15 @@ class _MemoPageState
       // 保存後は初期状態へ戻す
       //================================================
 
+      final today =
+          DateTime.now();
+
       setState(() {
         _selectedDate =
-            DateTime.now();
+            today;
+
+        _lastKnownDate =
+            _dateOnly(today);
 
         _titleController.clear();
 
@@ -666,17 +911,20 @@ class _MemoPageState
                             //==========================================
 
                             MemoSaveButton(
-                              onPressed: _saveMemo,
-                              label: _isEditMode
-                                  ? '更新'
-                                  : '保存',
-                              icon: _isEditMode
-                                  ? const ActionButtonIcon.update(
-                                      size: 38,
-                                    )
-                                  : const ActionButtonIcon.save(
-                                      size: 38,
-                                    ),
+                              onPressed:
+                                  _saveMemo,
+                              label:
+                                  _isEditMode
+                                      ? '更新'
+                                      : '保存',
+                              icon:
+                                  _isEditMode
+                                      ? const ActionButtonIcon.update(
+                                          size: 38,
+                                        )
+                                      : const ActionButtonIcon.save(
+                                          size: 38,
+                                        ),
                             ),
 
                             //==========================================
@@ -708,10 +956,12 @@ class _MemoPageState
                         OutlinedButton.icon(
                           onPressed:
                               _openMemoList,
-                          icon: const ActionButtonIcon.list(
+                          icon:
+                              const ActionButtonIcon.list(
                             size: 38,
                           ),
-                          label: const Text(
+                          label:
+                              const Text(
                             'メモデータ一覧',
                           ),
                         ),

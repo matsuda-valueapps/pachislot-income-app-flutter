@@ -5,6 +5,7 @@ import '../services/database_service.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/search/service_icon.dart';
 import 'memo_detail_page.dart';
 
 class MemoListPage extends StatefulWidget {
@@ -321,8 +322,30 @@ class _MemoListPageState
           ) {
             return AlertDialog(
               scrollable: true,
-              title: const Text(
-                '日付で絞り込み',
+              title: Row(
+                children: [
+                  //========================================
+                  // 3D漏斗アイコン
+                  //========================================
+
+                  const ActionButtonIcon.filter(
+                    size: 38.0,
+                  ),
+
+                  const SizedBox(
+                    width: AppSpacing.sm,
+                  ),
+
+                  //========================================
+                  // タイトル
+                  //========================================
+
+                  const Expanded(
+                    child: Text(
+                      '日付で絞り込み',
+                    ),
+                  ),
+                ],
               ),
               content: Column(
                 mainAxisSize:
@@ -335,9 +358,10 @@ class _MemoListPageState
                   ListTile(
                     contentPadding:
                         EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons
-                          .calendar_month_rounded,
+                    leading:
+                        const ServiceIcon(
+                      icon: 'google_calendar',
+                      size: 36,
                     ),
                     title: const Text(
                       '開始日',
@@ -409,9 +433,10 @@ class _MemoListPageState
                   ListTile(
                     contentPadding:
                         EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons
-                          .calendar_month_rounded,
+                    leading:
+                        const ServiceIcon(
+                      icon: 'google_calendar',
+                      size: 36,
                     ),
                     title: const Text(
                       '終了日',

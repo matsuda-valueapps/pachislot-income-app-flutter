@@ -6,6 +6,7 @@ import '../providers/home_provider.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/search/service_icon.dart';
 import 'income_detail_page.dart';
 
 class IncomeListPage extends StatefulWidget {
@@ -583,8 +584,8 @@ class _IncomeListPageState
 
                       Row(
                         children: [
-                          const Icon(
-                            Icons.filter_alt_outlined,
+                          ActionButtonIcon.filter(
+                            size: 38.0,
                           ),
 
                           const SizedBox(
@@ -703,10 +704,9 @@ class _IncomeListPageState
                                   },
                                 );
                               },
-                              icon:
-                                  const Icon(
-                                Icons
-                                    .calendar_month,
+                              icon: const ServiceIcon(
+                                icon: 'google_calendar',
+                                size: 36,
                               ),
                               label: Text(
                                 _formatFilterDate(
@@ -770,10 +770,9 @@ class _IncomeListPageState
                                   },
                                 );
                               },
-                              icon:
-                                  const Icon(
-                                Icons
-                                    .calendar_month,
+                              icon: const ServiceIcon(
+                                icon: 'google_calendar',
+                                size: 36,
                               ),
                               label: Text(
                                 _formatFilterDate(

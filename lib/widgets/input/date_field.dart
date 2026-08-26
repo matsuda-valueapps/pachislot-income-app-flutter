@@ -6,6 +6,8 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
 
+import '../search/service_icon.dart';
+
 import 'input_label.dart';
 
 class DateField extends StatelessWidget {
@@ -87,14 +89,12 @@ class DateField extends StatelessWidget {
               child: Row(
                 children: [
                   //========================================
-                  // カレンダーアイコン
+                  // Googleカレンダー 3Dアイコン
                   //========================================
 
-                  const Icon(
-                    Icons
-                        .calendar_month_rounded,
-                    color:
-                        AppColors.icon,
+                  const ServiceIcon(
+                    icon: 'google_calendar',
+                    size: 38,
                   ),
 
                   const SizedBox(

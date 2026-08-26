@@ -15,6 +15,7 @@ import '../widgets/common/app_card.dart';
 import '../widgets/counter/counter_card.dart';
 import '../widgets/counter/game_counter.dart';
 import '../widgets/counter/start_game_counter.dart';
+import '../widgets/search/service_icon.dart';
 import 'counter_list_page.dart';
 
 class CounterPage extends StatefulWidget {
@@ -511,11 +512,9 @@ class _CounterPageState
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons
-                        .calendar_month_rounded,
-                    color:
-                        AppColors.icon,
+                  const ServiceIcon(
+                    icon: 'google_calendar',
+                    size: 38,
                   ),
 
                   const SizedBox(
