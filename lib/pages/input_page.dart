@@ -5,10 +5,10 @@ import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../services/input_draft_service.dart';
 
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/input/amount_field.dart';
 import '../widgets/input/date_field.dart';
@@ -803,6 +803,107 @@ class _InputPageState extends State<InputPage> {
   }
 
   //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// ホーム画面の
+  /// 「月間収支」「年間累計収支」と同じ
+  /// プレミアムガラスカード用Decoration。
+  ///
+  /// ・白～ごく薄いブルーのグラデーション
+  /// ・薄いブルーの外側Border
+  /// ・柔らかい立体シャドウ
+  ///
+  /// MonthlyIncomeCardの装飾仕様を
+  /// そのまま入力カードへ適用する。
+  BoxDecoration _buildGlassDecoration() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            247,
+            251,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            239,
+            247,
+            255,
+            0.98,
+          ),
+        ],
+        stops: [
+          0.0,
+          0.52,
+          1.0,
+        ],
+      ),
+
+      // 既存カードと同じ角丸
+      borderRadius: AppRadius.card,
+
+      // ホーム画面と同じ薄いブルーBorder
+      border: Border.all(
+        color: const Color.fromRGBO(
+          157,
+          201,
+          246,
+          0.78,
+        ),
+        width: 1.5,
+      ),
+
+      // ホーム画面と同じ柔らかい立体影
+      boxShadow: const [
+        //================================================
+        // 下方向の柔らかい影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            92,
+            143,
+            196,
+            0.18,
+          ),
+          blurRadius: 22,
+          spreadRadius: 2,
+          offset: Offset(
+            0,
+            10,
+          ),
+        ),
+
+        //================================================
+        // 近距離の立体影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            125,
+            170,
+            215,
+            0.12,
+          ),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: Offset(
+            0,
+            3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  //==================================================
   // UI
   //==================================================
 
@@ -826,7 +927,25 @@ class _InputPageState extends State<InputPage> {
               crossAxisAlignment:
                   CrossAxisAlignment.stretch,
               children: [
-                AppCard(
+                //================================================
+                // 入力カード
+                //================================================
+                //
+                // ホーム画面の
+                // 「月間収支」
+                // 「年間累計収支」
+                // と同じプレミアムガラス装飾を使用。
+                //================================================
+
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(
+                    vertical: AppSpacing.xs,
+                  ),
+                  padding:
+                      AppSpacing.card,
+                  decoration:
+                      _buildGlassDecoration(),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,

@@ -8,9 +8,9 @@ import '../providers/calculator_provider.dart';
 import '../services/database_service.dart';
 import '../services/dialog_service.dart';
 import '../services/memo_draft_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/memo/calculator_bottom_sheet.dart';
 import '../widgets/memo/calculator_toggle.dart';
 import '../widgets/memo/memo_date_field.dart';
@@ -85,6 +85,105 @@ class _MemoPageState
   /// → 新規作成モード
   bool get _isEditMode =>
       widget.record != null;
+
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// ホーム画面と同じプレミアムガラスカード用Decoration。
+  ///
+  /// ・白～ごく薄いブルーのグラデーション
+  /// ・薄いブルーの外側Border
+  /// ・柔らかい立体シャドウ
+  ///
+  /// MonthlyIncomeCardと同じデザイン言語を使用する。
+  BoxDecoration _buildGlassDecoration() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            247,
+            251,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            239,
+            247,
+            255,
+            0.98,
+          ),
+        ],
+        stops: [
+          0.0,
+          0.52,
+          1.0,
+        ],
+      ),
+
+      // 既存カードと同じ角丸
+      borderRadius:
+          AppRadius.card,
+
+      // ホーム画面と同系統の薄いブルーBorder
+      border: Border.all(
+        color: const Color.fromRGBO(
+          157,
+          201,
+          246,
+          0.78,
+        ),
+        width: 1.5,
+      ),
+
+      // ホーム画面と同系統の柔らかい立体影
+      boxShadow: const [
+        //================================================
+        // 下方向の柔らかい影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            92,
+            143,
+            196,
+            0.18,
+          ),
+          blurRadius: 22,
+          spreadRadius: 2,
+          offset: Offset(
+            0,
+            10,
+          ),
+        ),
+
+        //================================================
+        // 近距離の立体影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            125,
+            170,
+            215,
+            0.12,
+          ),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: Offset(
+            0,
+            3,
+          ),
+        ),
+      ],
+    );
+  }
 
   //==================================================
   // 日付共通処理
@@ -862,7 +961,16 @@ class _MemoPageState
                       // メモ入力
                       //==========================================
 
-                      AppCard(
+                      Container(
+                        margin:
+                            const EdgeInsets.symmetric(
+                          vertical:
+                              AppSpacing.xs,
+                        ),
+                        padding:
+                            AppSpacing.card,
+                        decoration:
+                            _buildGlassDecoration(),
                         child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment

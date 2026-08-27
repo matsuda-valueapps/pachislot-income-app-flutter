@@ -8,9 +8,9 @@ import '../pages/income_list_page.dart';
 import '../pages/input_page.dart';
 import '../providers/home_provider.dart';
 import '../services/dialog_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/home/calendar_card.dart';
 import '../widgets/home/monthly_income_card.dart';
 import '../widgets/home/statistics_card.dart';
@@ -438,6 +438,107 @@ class _HomePageState
   // 年間累計収支カード
   //==================================================
 
+  /// 薄いブルーの高級ガラスカード用Decoration。
+  ///
+  /// 「2026年8月収支カード」
+  /// 「2026年8月統計カード」
+  /// と同じデザイン言語を使用する。
+  ///
+  /// ・白～ごく薄いブルーのグラデーション
+  /// ・薄いブルーの外側Border
+  /// ・柔らかい立体シャドウ
+  ///
+  /// ※カレンダー専用の
+  /// 「内側の白いハイライト」は使用しない。
+  BoxDecoration _buildYearlyIncomeGlassDecoration() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            247,
+            251,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            239,
+            247,
+            255,
+            0.98,
+          ),
+        ],
+        stops: [
+          0.0,
+          0.52,
+          1.0,
+        ],
+      ),
+
+      // 既存カードと同じ角丸を維持
+      borderRadius: AppRadius.card,
+
+      // 月間収支・月間統計カードと
+      // 同じ薄いブルーBorder
+      border: Border.all(
+        color: const Color.fromRGBO(
+          157,
+          201,
+          246,
+          0.78,
+        ),
+        width: 1.5,
+      ),
+
+      // 月間収支・月間統計カードと
+      // 同じ柔らかい立体影
+      boxShadow: const [
+        //================================================
+        // 下方向の柔らかい影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            92,
+            143,
+            196,
+            0.18,
+          ),
+          blurRadius: 22,
+          spreadRadius: 2,
+          offset: Offset(
+            0,
+            10,
+          ),
+        ),
+
+        //================================================
+        // 近距離の立体影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            125,
+            170,
+            215,
+            0.12,
+          ),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: Offset(
+            0,
+            3,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 表示中の年の累計収支を表示する。
   ///
   /// 月間収支カードよりコンパクトにし、
@@ -475,7 +576,13 @@ class _HomePageState
                     .colorScheme
                     .onSurface;
 
-    return AppCard(
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        vertical: AppSpacing.xs,
+      ),
+      padding: AppSpacing.card,
+      decoration:
+          _buildYearlyIncomeGlassDecoration(),
       child: Padding(
         padding:
             const EdgeInsets.all(
