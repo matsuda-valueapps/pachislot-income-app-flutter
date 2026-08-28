@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/income_record.dart';
 import '../services/database_service.dart';
 import '../services/dialog_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import 'input_page.dart';
 
@@ -17,6 +17,10 @@ class IncomeDetailPage extends StatelessWidget {
 
   /// 表示する収支データ
   final IncomeRecord record;
+
+  //==================================================
+  // 日付表示
+  //==================================================
 
   /// 日付表示
   ///
@@ -55,12 +59,17 @@ class IncomeDetailPage extends StatelessWidget {
     }
   }
 
+  //==================================================
+  // 金額表示
+  //==================================================
+
   /// 金額表示
   String _formatAmount(int amount) {
     final absoluteAmount =
         amount.abs().toString();
 
-    final buffer = StringBuffer();
+    final buffer =
+        StringBuffer();
 
     for (int i = 0;
         i < absoluteAmount.length;
@@ -81,6 +90,10 @@ class IncomeDetailPage extends StatelessWidget {
     return buffer.toString();
   }
 
+  //==================================================
+  // 収支表示
+  //==================================================
+
   /// 収支表示
   String _formatProfit(int profit) {
     if (profit > 0) {
@@ -93,6 +106,10 @@ class IncomeDetailPage extends StatelessWidget {
 
     return '0円';
   }
+
+  //==================================================
+  // 収支カラー
+  //==================================================
 
   /// 収支の色
   Color _profitColor(
@@ -112,6 +129,170 @@ class IncomeDetailPage extends StatelessWidget {
         .onSurfaceVariant;
   }
 
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// 月間収支カードと同じ
+  /// プレミアムガラスカード用Decoration。
+  ///
+  /// ・白
+  /// ・ごく薄いブルー
+  /// ・薄いブルー
+  /// のグラデーションを使用する。
+  ///
+  /// 月間収支カードおよび
+  /// 収支データ一覧画面と同じデザイン仕様。
+  ///
+  /// ※「ガラス内側ハイライト」
+  /// ※「上部ガラスハイライト」
+  /// は使用しない。
+  BoxDecoration _buildGlassDecoration() {
+    return BoxDecoration(
+      //================================================
+      // ガラス調背景
+      //================================================
+      //
+      // 白をベースに、
+      // 下方向へごく薄いブルーを加える。
+      //================================================
+
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            247,
+            251,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            239,
+            247,
+            255,
+            0.98,
+          ),
+        ],
+        stops: [
+          0.0,
+          0.52,
+          1.0,
+        ],
+      ),
+
+      //================================================
+      // カード角丸
+      //================================================
+
+      borderRadius:
+          AppRadius.card,
+
+      //================================================
+      // 薄いブルーBorder
+      //================================================
+
+      border: Border.all(
+        color: const Color.fromRGBO(
+          157,
+          201,
+          246,
+          0.78,
+        ),
+        width: 1.5,
+      ),
+
+      //================================================
+      // 柔らかな立体シャドウ
+      //================================================
+
+      boxShadow: const [
+        //================================================
+        // 下方向の柔らかな影
+        //================================================
+
+        BoxShadow(
+          color: Color.fromRGBO(
+            92,
+            143,
+            196,
+            0.18,
+          ),
+          blurRadius: 22,
+          spreadRadius: 2,
+          offset: Offset(
+            0,
+            10,
+          ),
+        ),
+
+        //================================================
+        // 近距離の立体影
+        //================================================
+
+        BoxShadow(
+          color: Color.fromRGBO(
+            125,
+            170,
+            215,
+            0.12,
+          ),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: Offset(
+            0,
+            3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  //==================================================
+  // プレミアムガラスカード Widget
+  //==================================================
+
+  /// 詳細画面の各カードを
+  /// プレミアムガラスカードとして表示する。
+  ///
+  /// 対象：
+  /// ・基本情報
+  /// ・投資
+  /// ・回収
+  /// ・収支
+  /// ・メモ
+  ///
+  /// 既存のカード内部レイアウトは変更せず、
+  /// 外側の装飾だけを変更する。
+  ///
+  /// ※ガラス内側ハイライトなし
+  /// ※上部ガラスハイライトなし
+  Widget _buildGlassCard({
+    required Widget child,
+  }) {
+    return Container(
+      decoration:
+          _buildGlassDecoration(),
+      child: Padding(
+        padding:
+            const EdgeInsets.all(
+          AppSpacing.md,
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  //==================================================
+  // 詳細項目
+  //==================================================
+
   /// 項目
   Widget _buildDetailRow(
     BuildContext context, {
@@ -119,7 +300,8 @@ class IncomeDetailPage extends StatelessWidget {
     required String value,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         vertical: AppSpacing.sm,
       ),
       child: Row(
@@ -143,7 +325,8 @@ class IncomeDetailPage extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              textAlign: TextAlign.right,
+              textAlign:
+                  TextAlign.right,
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge
@@ -158,6 +341,10 @@ class IncomeDetailPage extends StatelessWidget {
     );
   }
 
+  //==================================================
+  // 金額項目
+  //==================================================
+
   /// 金額項目
   Widget _buildAmountRow(
     BuildContext context, {
@@ -166,7 +353,8 @@ class IncomeDetailPage extends StatelessWidget {
     required Color color,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         vertical: AppSpacing.sm,
       ),
       child: Row(
@@ -188,7 +376,8 @@ class IncomeDetailPage extends StatelessWidget {
           Expanded(
             child: Text(
               '${_formatAmount(amount)}円',
-              textAlign: TextAlign.right,
+              textAlign:
+                  TextAlign.right,
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge
@@ -204,6 +393,10 @@ class IncomeDetailPage extends StatelessWidget {
     );
   }
 
+  //==================================================
+  // 収支カード
+  //==================================================
+
   /// 収支表示
   Widget _buildProfitCard(
     BuildContext context,
@@ -214,7 +407,7 @@ class IncomeDetailPage extends StatelessWidget {
       record.profit,
     );
 
-    return AppCard(
+    return _buildGlassCard(
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -254,6 +447,10 @@ class IncomeDetailPage extends StatelessWidget {
     );
   }
 
+  //==================================================
+  // 編集画面
+  //==================================================
+
   /// 編集画面を開く
   Future<void> _openEditPage(
     BuildContext context,
@@ -279,6 +476,10 @@ class IncomeDetailPage extends StatelessWidget {
       Navigator.of(context).pop(true);
     }
   }
+
+  //==================================================
+  // 削除処理
+  //==================================================
 
   /// 削除処理
   Future<void> _onDelete(
@@ -354,6 +555,10 @@ class IncomeDetailPage extends StatelessWidget {
     }
   }
 
+  //==================================================
+  // Build
+  //==================================================
+
   @override
   Widget build(BuildContext context) {
     final medalInvest =
@@ -386,7 +591,7 @@ class IncomeDetailPage extends StatelessWidget {
               // 基本情報
               // ==========================================
 
-              AppCard(
+              _buildGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -446,7 +651,7 @@ class IncomeDetailPage extends StatelessWidget {
               // 投資
               // ==========================================
 
-              AppCard(
+              _buildGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -505,7 +710,7 @@ class IncomeDetailPage extends StatelessWidget {
               // 回収
               // ==========================================
 
-              AppCard(
+              _buildGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -573,7 +778,7 @@ class IncomeDetailPage extends StatelessWidget {
               if (record.memo.isNotEmpty) ...[
                 AppSpacing.gapLg,
 
-                AppCard(
+                _buildGlassCard(
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
@@ -613,13 +818,14 @@ class IncomeDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '編集',
-                iconWidget: const ActionButtonIcon.edit(
+                iconWidget:
+                    const ActionButtonIcon.edit(
                   size: 38,
                 ),
                 onPressed: () =>
                     _openEditPage(
                   context,
-                  ),
+                ),
               ),
 
               // ==========================================
@@ -630,11 +836,12 @@ class IncomeDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '削除',
-                iconWidget: const ActionButtonIcon.delete(
+                iconWidget:
+                    const ActionButtonIcon.delete(
                   size: 38,
                 ),
                 backgroundColor:
-                  Colors.red.shade700,
+                    Colors.red.shade700,
                 onPressed: () =>
                     _onDelete(
                   context,

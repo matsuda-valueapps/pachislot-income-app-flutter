@@ -9,9 +9,9 @@ import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/counter/koyaku_icon.dart';
+import '../widgets/search/service_icon.dart';
 
 class CounterEditPage extends StatefulWidget {
   const CounterEditPage({
@@ -142,6 +142,126 @@ class _CounterEditPageState
     _chanceController.dispose();
 
     super.dispose();
+  }
+
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// 小役データ一覧・詳細画面と共通の
+  /// プレミアムガラスカード。
+  ///
+  /// デザイン仕様：
+  ///
+  /// ・白
+  /// ・ごく薄いブルー
+  /// ・薄いブルー
+  /// の3段グラデーション。
+  ///
+  /// ・薄いブルーのボーダー
+  /// ・柔らかな外側シャドウ
+  ///
+  /// ※ガラス内側ハイライトは使用しない。
+  /// ※上部ガラスハイライトは使用しない。
+  /// ※Stack / Positionedによる装飾も使用しない。
+  Widget _buildPremiumGlassCard({
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        //================================================
+        // 白 → ごく薄いブルー → 薄いブルー
+        //================================================
+
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromRGBO(
+              250,
+              253,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              247,
+              251,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              239,
+              247,
+              255,
+              0.98,
+            ),
+          ],
+        ),
+
+        //================================================
+        // 角丸
+        //================================================
+
+        borderRadius: AppRadius.card,
+
+        //================================================
+        // 薄いブルーのボーダー
+        //================================================
+
+        border: Border.all(
+          color: Color.fromRGBO(
+            157,
+            201,
+            246,
+            0.78,
+          ),
+          width: 1.5,
+        ),
+
+        //================================================
+        // 外側シャドウのみ
+        //================================================
+        //
+        // ガラス内側ハイライトなし。
+        // 上部ガラスハイライトなし。
+        //================================================
+
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(
+              70,
+              120,
+              170,
+              0.10,
+            ),
+            blurRadius: 18,
+            spreadRadius: -4,
+            offset: Offset(
+              0,
+              8,
+            ),
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(
+              70,
+              130,
+              190,
+              0.08,
+            ),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: Offset(
+              0,
+              3,
+            ),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.card,
+        child: child,
+      ),
+    );
   }
 
   //==================================================
@@ -610,59 +730,186 @@ class _CounterEditPageState
               // 基本情報
               //================================================
 
-              AppCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '基本情報',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
-
-                    //==========================================
-                    // 日付
-                    //==========================================
-
-                    Text(
-                      '日付',
-                      style: AppTextStyles
-                          .body
-                          .copyWith(
-                        fontWeight:
-                            FontWeight.w600,
+              _buildPremiumGlassCard(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(
+                    AppSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '基本情報',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
                       ),
-                    ),
 
-                    const SizedBox(
-                      height:
-                          AppSpacing.sm,
-                    ),
+                      const SizedBox(
+                        height:
+                            AppSpacing.md,
+                      ),
 
-                    Material(
-                      color:
-                          Colors.transparent,
-                      child: InkWell(
-                        onTap:
-                            _selectDate,
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          AppRadius.md,
+                      //==========================================
+                      // 日付
+                      //==========================================
+
+                      Text(
+                        '日付',
+                        style: AppTextStyles
+                            .body
+                            .copyWith(
+                          fontWeight:
+                              FontWeight.w600,
                         ),
-                        child: Ink(
-                          padding:
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.sm,
+                      ),
+
+                      Material(
+                        color:
+                            Colors.transparent,
+                        child: InkWell(
+                          onTap:
+                              _selectDate,
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            AppRadius.md,
+                          ),
+                          child: Ink(
+                            padding:
+                                const EdgeInsets
+                                    .symmetric(
+                              horizontal:
+                                  AppSpacing.md,
+                              vertical:
+                                  AppSpacing.md,
+                            ),
+                            decoration:
+                                BoxDecoration(
+                              color:
+                                  AppColors.surface,
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                AppRadius.md,
+                              ),
+                              border:
+                                  Border.all(
+                                color:
+                                    AppColors.border,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const ServiceIcon(
+                                  icon: 'google_calendar',
+                                  size: 38,
+                                ),
+
+                                const SizedBox(
+                                  width:
+                                      AppSpacing.md,
+                                ),
+
+                                Expanded(
+                                  child: Text(
+                                    _formatDate(
+                                      _selectedDate,
+                                    ),
+                                    style:
+                                        AppTextStyles.body,
+                                  ),
+                                ),
+
+                                const Icon(
+                                  Icons
+                                      .arrow_drop_down_rounded,
+                                  color:
+                                      AppColors.iconDisabled,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      //==========================================
+                      // タイトル
+                      //==========================================
+
+                      TextField(
+                        controller:
+                            _titleController,
+                        textInputAction:
+                            TextInputAction.done,
+                        decoration:
+                            InputDecoration(
+                          labelText:
+                              'タイトル',
+                          hintText:
+                              'タイトルを入力してください',
+                          filled: true,
+                          fillColor:
+                              AppColors.surface,
+                          border:
+                              OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              AppRadius.md,
+                            ),
+                            borderSide:
+                                const BorderSide(
+                              color:
+                                  AppColors.border,
+                            ),
+                          ),
+                          enabledBorder:
+                              OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              AppRadius.md,
+                            ),
+                            borderSide:
+                                const BorderSide(
+                              color:
+                                  AppColors.border,
+                            ),
+                          ),
+                          focusedBorder:
+                              OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              AppRadius.md,
+                            ),
+                            borderSide:
+                                BorderSide(
+                              color: Theme.of(
+                                context,
+                              )
+                                  .colorScheme
+                                  .primary,
+                            ),
+                          ),
+                          contentPadding:
                               const EdgeInsets
                                   .symmetric(
                             horizontal:
@@ -670,133 +917,10 @@ class _CounterEditPageState
                             vertical:
                                 AppSpacing.md,
                           ),
-                          decoration:
-                              BoxDecoration(
-                            color:
-                                AppColors.surface,
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                              AppRadius.md,
-                            ),
-                            border:
-                                Border.all(
-                              color:
-                                  AppColors.border,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons
-                                    .calendar_month_rounded,
-                                color:
-                                    AppColors.icon,
-                              ),
-
-                              const SizedBox(
-                                width:
-                                    AppSpacing.md,
-                              ),
-
-                              Expanded(
-                                child: Text(
-                                  _formatDate(
-                                    _selectedDate,
-                                  ),
-                                  style:
-                                      AppTextStyles.body,
-                                ),
-                              ),
-
-                              const Icon(
-                                Icons
-                                    .arrow_drop_down_rounded,
-                                color:
-                                    AppColors.iconDisabled,
-                              ),
-                            ],
-                          ),
                         ),
                       ),
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.lg,
-                    ),
-
-                    //==========================================
-                    // タイトル
-                    //==========================================
-
-                    TextField(
-                      controller:
-                          _titleController,
-                      textInputAction:
-                          TextInputAction.done,
-                      decoration:
-                          InputDecoration(
-                        labelText:
-                            'タイトル',
-                        hintText:
-                            'タイトルを入力してください',
-                        filled: true,
-                        fillColor:
-                            AppColors.surface,
-                        border:
-                            OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            AppRadius.md,
-                          ),
-                          borderSide:
-                              const BorderSide(
-                            color:
-                                AppColors.border,
-                          ),
-                        ),
-                        enabledBorder:
-                            OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            AppRadius.md,
-                          ),
-                          borderSide:
-                              const BorderSide(
-                            color:
-                                AppColors.border,
-                          ),
-                        ),
-                        focusedBorder:
-                            OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            AppRadius.md,
-                          ),
-                          borderSide:
-                              BorderSide(
-                            color: Theme.of(
-                              context,
-                            )
-                                .colorScheme
-                                .primary,
-                          ),
-                        ),
-                        contentPadding:
-                            const EdgeInsets
-                                .symmetric(
-                          horizontal:
-                              AppSpacing.md,
-                          vertical:
-                              AppSpacing.md,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -806,41 +930,47 @@ class _CounterEditPageState
               // ゲーム数
               //================================================
 
-              AppCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ゲーム数',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
+              _buildPremiumGlassCard(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(
+                    AppSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ゲーム数',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                      ),
 
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
+                      const SizedBox(
+                        height:
+                            AppSpacing.md,
+                      ),
 
-                    _buildNumberField(
-                      label:
-                          '開始ゲーム数',
-                      controller:
-                          _startGameController,
-                    ),
+                      _buildNumberField(
+                        label:
+                            '開始ゲーム数',
+                        controller:
+                            _startGameController,
+                      ),
 
-                    _buildNumberField(
-                      label:
-                          '現在ゲーム数',
-                      controller:
-                          _currentGameController,
-                    ),
-                  ],
+                      _buildNumberField(
+                        label:
+                            '現在ゲーム数',
+                        controller:
+                            _currentGameController,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -850,92 +980,98 @@ class _CounterEditPageState
               // 小役
               //================================================
 
-              AppCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '小役カウント',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
+              _buildPremiumGlassCard(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(
+                    AppSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '小役カウント',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                      ),
 
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
+                      const SizedBox(
+                        height:
+                            AppSpacing.md,
+                      ),
 
-                    //==========================================
-                    // チェリー
-                    //==========================================
+                      //==========================================
+                      // チェリー
+                      //==========================================
 
-                    _buildNumberField(
-                      label:
-                          'チェリー',
-                      controller:
-                          _cherryController,
-                      koyakuType:
-                          KoyakuType.cherry,
-                    ),
+                      _buildNumberField(
+                        label:
+                            'チェリー',
+                        controller:
+                            _cherryController,
+                        koyakuType:
+                            KoyakuType.cherry,
+                      ),
 
-                    //==========================================
-                    // ベル
-                    //==========================================
+                      //==========================================
+                      // ベル
+                      //==========================================
 
-                    _buildNumberField(
-                      label:
-                          'ベル',
-                      controller:
-                          _bellController,
-                      koyakuType:
-                          KoyakuType.bell,
-                    ),
+                      _buildNumberField(
+                        label:
+                            'ベル',
+                        controller:
+                            _bellController,
+                        koyakuType:
+                            KoyakuType.bell,
+                      ),
 
-                    //==========================================
-                    // スイカ
-                    //==========================================
+                      //==========================================
+                      // スイカ
+                      //==========================================
 
-                    _buildNumberField(
-                      label:
-                          'スイカ',
-                      controller:
-                          _suikaController,
-                      koyakuType:
-                          KoyakuType.watermelon,
-                    ),
+                      _buildNumberField(
+                        label:
+                            'スイカ',
+                        controller:
+                            _suikaController,
+                        koyakuType:
+                            KoyakuType.watermelon,
+                      ),
 
-                    //==========================================
-                    // ブドウ
-                    //==========================================
+                      //==========================================
+                      // ブドウ
+                      //==========================================
 
-                    _buildNumberField(
-                      label:
-                          'ブドウ',
-                      controller:
-                          _grapeController,
-                      koyakuType:
-                          KoyakuType.grape,
-                    ),
+                      _buildNumberField(
+                        label:
+                            'ブドウ',
+                        controller:
+                            _grapeController,
+                        koyakuType:
+                            KoyakuType.grape,
+                      ),
 
-                    //==========================================
-                    // チャンス目
-                    //==========================================
+                      //==========================================
+                      // チャンス目
+                      //==========================================
 
-                    _buildNumberField(
-                      label:
-                          'チャンス目',
-                      controller:
-                          _chanceController,
-                      koyakuType:
-                          KoyakuType.chance,
-                    ),
-                  ],
+                      _buildNumberField(
+                        label:
+                            'チャンス目',
+                        controller:
+                            _chanceController,
+                        koyakuType:
+                            KoyakuType.chance,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/memo_record.dart';
 import '../services/database_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/search/service_icon.dart';
 import 'memo_detail_page.dart';
 
@@ -937,6 +937,114 @@ class _MemoListPageState
   }
 
   //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// 収支データ一覧・収支データ詳細画面と
+  /// 同一仕様のプレミアムガラスカード。
+  ///
+  /// グラデーション：
+  /// 白
+  /// ↓
+  /// ごく薄いブルー
+  /// ↓
+  /// 薄いブルー
+  ///
+  /// 重要：
+  ///
+  /// ・ガラス内側ハイライトは入れない
+  /// ・上部ガラスハイライトは入れない
+  /// ・外側のシャドウのみ使用する
+  Widget _buildPremiumGlassCard({
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    final card = Container(
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.card,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.fromRGBO(
+              255,
+              255,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              247,
+              251,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              239,
+              247,
+              255,
+              0.98,
+            ),
+          ],
+          stops: [
+            0.0,
+            0.52,
+            1.0,
+          ],
+        ),
+        border: Border.all(
+          color: const Color.fromRGBO(
+            157,
+            201,
+            246,
+            0.78,
+          ),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(
+              92,
+              143,
+              196,
+              0.18,
+            ),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: Offset(
+              0,
+              10,
+            ),
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(
+              125,
+              170,
+              215,
+              0.12,
+            ),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: Offset(
+              0,
+              3,
+            ),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadius.card,
+          child: child,
+        ),
+      ),
+    );
+
+    return card;
+  }
+
+  //==================================================
   // メモカード
   //==================================================
 
@@ -946,87 +1054,92 @@ class _MemoListPageState
     final body =
         record.body.trim();
 
-    return AppCard(
+    return _buildPremiumGlassCard(
       onTap: () {
         _openMemoDetail(record);
       },
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          //================================================
-          // 日付
-          //================================================
+      child: Padding(
+        padding: const EdgeInsets.all(
+          AppSpacing.lg,
+        ),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            //================================================
+            // 日付
+            //================================================
 
-          Text(
-            _formatDate(record.date),
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(
-            height: AppSpacing.sm,
-          ),
-
-          //================================================
-          // タイトル
-          //================================================
-
-          Text(
-            _displayTitle(record),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(
-            height: AppSpacing.sm,
-          ),
-
-          //================================================
-          // 本文
-          //================================================
-
-          Text(
-            body.isEmpty
-                ? '本文はありません。'
-                : body,
-            maxLines: 5,
-            overflow:
-                TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              color:
-                  Colors.grey.shade800,
-            ),
-          ),
-
-          const SizedBox(
-            height: AppSpacing.sm,
-          ),
-
-          //================================================
-          // 詳細表示案内
-          //================================================
-
-          Align(
-            alignment:
-                Alignment.centerRight,
-            child: Text(
-              'タップして詳細を見る',
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary,
+            Text(
+              _formatDate(record.date),
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(
+              height: AppSpacing.sm,
+            ),
+
+            //================================================
+            // タイトル
+            //================================================
+
+            Text(
+              _displayTitle(record),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(
+              height: AppSpacing.sm,
+            ),
+
+            //================================================
+            // 本文
+            //================================================
+
+            Text(
+              body.isEmpty
+                  ? '本文はありません。'
+                  : body,
+              maxLines: 5,
+              overflow:
+                  TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.5,
+                color:
+                    Colors.grey.shade800,
+              ),
+            ),
+
+            const SizedBox(
+              height: AppSpacing.sm,
+            ),
+
+            //================================================
+            // 詳細表示案内
+            //================================================
+
+            Align(
+              alignment:
+                  Alignment.centerRight,
+              child: Text(
+                'タップして詳細を見る',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

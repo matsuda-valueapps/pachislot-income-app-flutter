@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/memo_record.dart';
 import '../services/database_service.dart';
 import '../services/dialog_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import 'memo_page.dart';
 
@@ -66,6 +66,136 @@ class MemoDetailPage extends StatelessWidget {
     }
 
     return title;
+  }
+
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// 白〜ごく薄いブルー〜薄いブルーの
+  /// プレミアムガラスカードを生成する。
+  ///
+  /// 「メモデータ一覧画面」と同じデザイン。
+  ///
+  /// ※ガラス内側ハイライトは実装しない。
+  /// ※上部ガラスハイライトは実装しない。
+  /// ※白いハイライトラインも実装しない。
+  Widget _buildPremiumGlassCard({
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        //================================================
+        // プレミアムガラスグラデーション
+        //================================================
+
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.fromRGBO(
+              255,
+              255,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              247,
+              251,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              239,
+              247,
+              255,
+              0.98,
+            ),
+          ],
+          stops: [
+            0.0,
+            0.52,
+            1.0,
+          ],
+        ),
+
+        //================================================
+        // プレミアムガラス境界線
+        //================================================
+
+        border: Border.all(
+          color: const Color.fromRGBO(
+            157,
+            201,
+            246,
+            0.78,
+          ),
+          width: 1.5,
+        ),
+
+        //================================================
+        // 角丸
+        //================================================
+
+        borderRadius:
+            AppRadius.card,
+
+        //================================================
+        // プレミアムガラスの2層シャドウ
+        //================================================
+
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(
+              92,
+              143,
+              196,
+              0.18,
+            ),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: Offset(
+              0,
+              10,
+            ),
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(
+              125,
+              170,
+              215,
+              0.12,
+            ),
+            blurRadius: 8,
+            offset: Offset(
+              0,
+              3,
+            ),
+          ),
+        ],
+      ),
+
+      //================================================
+      // タップ可能領域
+      //================================================
+
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius:
+              AppRadius.card,
+          child: Padding(
+            padding:
+                const EdgeInsets.all(
+              AppSpacing.lg,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 
   //==================================================
@@ -205,7 +335,7 @@ class MemoDetailPage extends StatelessWidget {
     final body =
         record.body.trim();
 
-    return AppCard(
+    return _buildPremiumGlassCard(
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -215,7 +345,7 @@ class MemoDetailPage extends StatelessWidget {
           //================================================
 
           Text(
-            '本文',
+            'メモ',
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -271,7 +401,7 @@ class MemoDetailPage extends StatelessWidget {
               // 基本情報
               //================================================
 
-              AppCard(
+              _buildPremiumGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -333,13 +463,14 @@ class MemoDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '編集',
-                iconWidget: const ActionButtonIcon.edit(
+                iconWidget:
+                    const ActionButtonIcon.edit(
                   size: 38,
                 ),
                 onPressed: () =>
                     _openEditPage(
                   context,
-                  ),
+                ),
               ),
 
               const SizedBox(
@@ -352,11 +483,12 @@ class MemoDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '削除',
-                iconWidget: const ActionButtonIcon.delete(
+                iconWidget:
+                    const ActionButtonIcon.delete(
                   size: 38,
                 ),
                 backgroundColor:
-                  Colors.red.shade700,
+                    Colors.red.shade700,
                 onPressed: () =>
                     _onDelete(
                   context,

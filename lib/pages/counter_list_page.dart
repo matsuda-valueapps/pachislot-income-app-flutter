@@ -3,9 +3,9 @@ import 'package:intl/intl.dart';
 
 import '../models/counter_record.dart';
 import '../services/database_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/search/service_icon.dart';
 import 'counter_detail_page.dart';
 
@@ -896,6 +896,137 @@ class _CounterListPageState
   }
 
   //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// メモデータ一覧画面と同じ
+  /// 「プレミアムガラスカード」。
+  ///
+  /// グラデーション：
+  /// 白
+  /// ↓
+  /// ごく薄いブルー
+  /// ↓
+  /// 薄いブルー
+  ///
+  /// ※ガラス内側ハイライトは入れない。
+  /// ※上部ガラスハイライトも入れない。
+  /// ※Stack / Positionedによる
+  ///   ハイライト重ね合わせも行わない。
+  Widget _buildPremiumGlassCard({
+    required BuildContext context,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    final card = Container(
+      decoration: BoxDecoration(
+        //================================================
+        // 白〜ごく薄いブルー〜薄いブルー
+        //================================================
+
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromRGBO(
+              255,
+              255,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              247,
+              251,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              239,
+              247,
+              255,
+              0.98,
+            ),
+          ],
+          stops: [
+            0.0,
+            0.52,
+            1.0,
+          ],
+        ),
+
+        //================================================
+        // 外枠
+        //================================================
+
+        borderRadius:
+            AppRadius.card,
+
+        border: Border.all(
+          color: Color.fromRGBO(
+            157,
+            201,
+            246,
+            0.78,
+          ),
+          width: 1.5,
+        ),
+
+        //================================================
+        // 柔らかな2層シャドウ
+        //================================================
+
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(
+              92,
+              143,
+              196,
+              0.18,
+            ),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: Offset(
+              0,
+              10,
+            ),
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(
+              125,
+              170,
+              215,
+              0.12,
+            ),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: Offset(
+              0,
+              3,
+            ),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius:
+              AppRadius.card,
+          child: Padding(
+            padding:
+                const EdgeInsets.all(
+              AppSpacing.md,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+
+    return card;
+  }
+
+  //==================================================
   // 1件分のカード
   //==================================================
 
@@ -912,131 +1043,122 @@ class _CounterListPageState
         record.currentGame -
             record.startGame;
 
-    return AppCard(
-      child: InkWell(
-        onTap: () =>
-            _openDetail(record),
-        borderRadius:
-            BorderRadius.circular(16),
-        child: Padding(
-          padding:
-              const EdgeInsets.all(
-            AppSpacing.md,
-          ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              //========================================
-              // 日付
-              //========================================
+    return _buildPremiumGlassCard(
+      context: context,
+      onTap: () =>
+          _openDetail(record),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          //========================================
+          // 日付
+          //========================================
 
-              Text(
-                _formatDate(
-                  record.date,
+          Text(
+            _formatDate(
+              record.date,
+            ),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(
+                  fontWeight:
+                      FontWeight.bold,
                 ),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
+          ),
+
+          const SizedBox(
+            height: AppSpacing.sm,
+          ),
+
+          //========================================
+          // タイトル
+          //========================================
+
+          Text(
+            title,
+            maxLines: 2,
+            overflow:
+                TextOverflow.ellipsis,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+          ),
+
+          const SizedBox(
+            height: AppSpacing.md,
+          ),
+
+          const Divider(),
+
+          const SizedBox(
+            height: AppSpacing.sm,
+          ),
+
+          //========================================
+          // ゲーム数
+          //========================================
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryItem(
+                  context,
+                  label: '開始',
+                  value:
+                      '${_formatNumber(record.startGame)}G',
+                ),
               ),
-
-              const SizedBox(
-                height: AppSpacing.sm,
+              Expanded(
+                child: _buildSummaryItem(
+                  context,
+                  label: '現在',
+                  value:
+                      '${_formatNumber(record.currentGame)}G',
+                ),
               ),
-
-              //========================================
-              // タイトル
-              //========================================
-
-              Text(
-                title,
-                maxLines: 2,
-                overflow:
-                    TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.copyWith(
-                      fontWeight:
-                          FontWeight.w600,
-                    ),
-              ),
-
-              const SizedBox(
-                height: AppSpacing.md,
-              ),
-
-              const Divider(),
-
-              const SizedBox(
-                height: AppSpacing.sm,
-              ),
-
-              //========================================
-              // ゲーム数
-              //========================================
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildSummaryItem(
-                      context,
-                      label: '開始',
-                      value:
-                          '${_formatNumber(record.startGame)}G',
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildSummaryItem(
-                      context,
-                      label: '現在',
-                      value:
-                          '${_formatNumber(record.currentGame)}G',
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildSummaryItem(
-                      context,
-                      label: '遊技',
-                      value:
-                          '${_formatNumber(playGame < 0 ? 0 : playGame)}G',
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(
-                height: AppSpacing.sm,
-              ),
-
-              //========================================
-              // 小役合計
-              //========================================
-
-              Align(
-                alignment:
-                    Alignment.centerRight,
-                child: Text(
-                  '小役合計 ${_formatNumber(_totalCount(record))}回',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                        color: Theme.of(
-                          context,
-                        )
-                            .colorScheme
-                            .onSurfaceVariant,
-                      ),
+              Expanded(
+                child: _buildSummaryItem(
+                  context,
+                  label: '遊技',
+                  value:
+                      '${_formatNumber(playGame < 0 ? 0 : playGame)}G',
                 ),
               ),
             ],
           ),
-        ),
+
+          const SizedBox(
+            height: AppSpacing.sm,
+          ),
+
+          //========================================
+          // 小役合計
+          //========================================
+
+          Align(
+            alignment:
+                Alignment.centerRight,
+            child: Text(
+              '小役合計 ${_formatNumber(_totalCount(record))}回',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(
+                    color: Theme.of(
+                      context,
+                    )
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

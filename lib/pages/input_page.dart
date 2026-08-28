@@ -810,7 +810,7 @@ class _InputPageState extends State<InputPage> {
   /// 「月間収支」「年間累計収支」と同じ
   /// プレミアムガラスカード用Decoration。
   ///
-  /// ・白～ごく薄いブルーのグラデーション
+  /// ・すごく薄いブルー～ごく薄いブルー～薄いブルーのグラデーション
   /// ・薄いブルーの外側Border
   /// ・柔らかい立体シャドウ
   ///
@@ -823,8 +823,8 @@ class _InputPageState extends State<InputPage> {
         end: Alignment.bottomRight,
         colors: [
           Color.fromRGBO(
-            255,
-            255,
+            250,
+            253,
             255,
             0.98,
           ),

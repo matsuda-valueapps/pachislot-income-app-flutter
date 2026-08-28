@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import '../models/counter_record.dart';
 import '../services/database_service.dart';
 import '../services/dialog_service.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/counter/koyaku_icon.dart';
 import 'counter_edit_page.dart';
@@ -53,6 +53,137 @@ class CounterDetailPage extends StatelessWidget {
       '#,###',
       'ja_JP',
     ).format(value);
+  }
+
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// プレミアムガラスカード
+  ///
+  /// 白
+  /// ↓
+  /// ごく薄いブルー
+  /// ↓
+  /// 薄いブルー
+  ///
+  /// の自然な縦グラデーション。
+  ///
+  /// 注意：
+  /// ・ガラス内側ハイライトは入れない。
+  /// ・上部ガラスハイライトは入れない。
+  /// ・Stack / Positionedによる装飾は使用しない。
+  Widget _buildPremiumGlassCard({
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        //================================================
+        // 白〜ごく薄いブルー〜薄いブルー
+        //================================================
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromRGBO(
+              250,
+              253,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              247,
+              251,
+              255,
+              0.98,
+            ),
+            Color.fromRGBO(
+              239,
+              247,
+              255,
+              0.98,
+            ),
+          ],
+          stops: [
+            0.0,
+            0.52,
+            1.0,
+          ],
+        ),
+
+        //================================================
+        // カード角丸
+        //================================================
+        borderRadius:
+            AppRadius.card,
+
+        //================================================
+        // 薄いブルーの境界線
+        //================================================
+        border: Border.all(
+          color: Color.fromRGBO(
+            157,
+            201,
+            246,
+            0.78,
+          ),
+          width: 1.5,
+        ),
+
+        //================================================
+        // 外側シャドウ
+        //
+        // 内側ハイライトではなく、
+        // カード外側だけに自然な浮遊感を出す。
+        //================================================
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(
+              92,
+              143,
+              196,
+              0.18,
+            ),
+            blurRadius: 22,
+            spreadRadius: 2,
+            offset: Offset(
+              0,
+              10,
+            ),
+          ),
+          BoxShadow(
+            color: Color.fromRGBO(
+              125,
+              170,
+              215,
+              0.12,
+            ),
+            blurRadius: 8,
+            offset: Offset(
+              0,
+              3,
+            ),
+          ),
+        ],
+      ),
+
+      //================================================
+      // カード内部
+      //
+      // 既存AppCardと同様の余白感を維持。
+      //================================================
+      child: ClipRRect(
+        borderRadius:
+            AppRadius.card,
+        child: Padding(
+          padding:
+              const EdgeInsets.all(
+            AppSpacing.lg,
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 
   //==================================================
@@ -429,7 +560,7 @@ class CounterDetailPage extends StatelessWidget {
               // 基本情報
               //================================================
 
-              AppCard(
+              _buildPremiumGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -476,7 +607,7 @@ class CounterDetailPage extends StatelessWidget {
               // ゲーム数
               //================================================
 
-              AppCard(
+              _buildPremiumGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -531,7 +662,7 @@ class CounterDetailPage extends StatelessWidget {
               // 小役
               //================================================
 
-              AppCard(
+              _buildPremiumGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -614,7 +745,7 @@ class CounterDetailPage extends StatelessWidget {
               // 確率
               //================================================
 
-              AppCard(
+              _buildPremiumGlassCard(
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -709,13 +840,14 @@ class CounterDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '編集',
-                iconWidget: const ActionButtonIcon.edit(
+                iconWidget:
+                    const ActionButtonIcon.edit(
                   size: 38,
                 ),
                 onPressed: () =>
                     _openEditPage(
                   context,
-                  ),
+                ),
               ),
 
               //================================================
@@ -726,11 +858,12 @@ class CounterDetailPage extends StatelessWidget {
 
               PrimaryButton(
                 text: '削除',
-                iconWidget: const ActionButtonIcon.delete(
+                iconWidget:
+                    const ActionButtonIcon.delete(
                   size: 38,
                 ),
                 backgroundColor:
-                  Colors.red.shade700,
+                    Colors.red.shade700,
                 onPressed: () =>
                     _onDelete(
                   context,

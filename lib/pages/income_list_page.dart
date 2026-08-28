@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../models/income_record.dart';
 import '../providers/home_provider.dart';
+import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
-import '../widgets/common/app_card.dart';
 import '../widgets/search/service_icon.dart';
 import 'income_detail_page.dart';
 
@@ -407,6 +407,108 @@ class _IncomeListPageState
     return Theme.of(context)
         .colorScheme
         .onSurfaceVariant;
+  }
+
+  //==================================================
+  // プレミアムガラスカード
+  //==================================================
+
+  /// 月間収支カードと同じ
+  /// プレミアムガラスカード用Decoration。
+  ///
+  /// ・白
+  /// ・ごく薄いブルー
+  /// ・薄いブルー
+  /// のグラデーションを使用する。
+  ///
+  /// 月間収支カードと同じデザイン言語に
+  /// 統一するため、色・Border・Shadowを
+  /// 月間収支カードと同一仕様にしている。
+  BoxDecoration _buildGlassDecoration() {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            247,
+            251,
+            255,
+            0.98,
+          ),
+          Color.fromRGBO(
+            239,
+            247,
+            255,
+            0.98,
+          ),
+        ],
+        stops: [
+          0.0,
+          0.52,
+          1.0,
+        ],
+      ),
+
+      // 月間収支カードと同じ角丸
+      borderRadius: AppRadius.card,
+
+      // 月間収支カードと同じ薄いブルーBorder
+      border: Border.all(
+        color: const Color.fromRGBO(
+          157,
+          201,
+          246,
+          0.78,
+        ),
+        width: 1.5,
+      ),
+
+      // 月間収支カードと同じ柔らかい立体影
+      boxShadow: const [
+        //================================================
+        // 下方向の柔らかい影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            92,
+            143,
+            196,
+            0.18,
+          ),
+          blurRadius: 22,
+          spreadRadius: 2,
+          offset: Offset(
+            0,
+            10,
+          ),
+        ),
+
+        //================================================
+        // 近距離の立体影
+        //================================================
+        BoxShadow(
+          color: Color.fromRGBO(
+            125,
+            170,
+            215,
+            0.12,
+          ),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: Offset(
+            0,
+            3,
+          ),
+        ),
+      ],
+    );
   }
 
   //==================================================
@@ -1126,138 +1228,152 @@ class _IncomeListPageState
       record.profit,
     );
 
-    return AppCard(
-      child: InkWell(
-        onTap: () =>
-            _openDetail(record),
+    return Container(
+      decoration:
+          _buildGlassDecoration(),
+      child: ClipRRect(
         borderRadius:
-            BorderRadius.circular(16),
-        child: Padding(
-          padding:
-              const EdgeInsets.all(
-            AppSpacing.md,
-          ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              //==========================================
-              // 日付
-              //==========================================
-
-              Text(
-                _formatDate(record.date),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
+            AppRadius.card,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () =>
+                _openDetail(record),
+            borderRadius:
+                AppRadius.card,
+            child: Padding(
+              padding:
+                  const EdgeInsets.all(
+                AppSpacing.md,
               ),
-
-              const SizedBox(
-                height:
-                    AppSpacing.sm,
-              ),
-
-              //==========================================
-              // ホール名
-              //==========================================
-
-              if (record.hall.isNotEmpty)
-                Text(
-                  record.hall,
-                  style:
-                      Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.w600,
-                          ),
-                ),
-
-              //==========================================
-              // 機種名
-              //==========================================
-
-              if (record.machine.isNotEmpty) ...[
-                const SizedBox(
-                  height:
-                      AppSpacing.xs,
-                ),
-                Text(
-                  record.machine,
-                  style:
-                      Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
-                            color: Theme.of(
-                              context,
-                            )
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                ),
-              ],
-
-              const SizedBox(
-                height:
-                    AppSpacing.md,
-              ),
-
-              const Divider(),
-
-              const SizedBox(
-                height:
-                    AppSpacing.sm,
-              ),
-
-              //==========================================
-              // 投資・回収・収支
-              //==========================================
-
-              Row(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child:
-                        _buildAmountColumn(
-                      context,
-                      label: '投資',
-                      amount:
-                          record.medalInvest +
-                              record.cashInvest,
-                      color:
-                          Colors.red.shade700,
+                  //==========================================
+                  // 日付
+                  //==========================================
+
+                  Center(
+                    child: Text(
+                      _formatDate(record.date),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
 
-                  Expanded(
-                    child:
-                        _buildAmountColumn(
-                      context,
-                      label: '回収',
-                      amount:
-                          record.medalReturn +
-                              record.cashReturn,
-                      color:
-                          Colors.green.shade700,
-                    ),
+                  const SizedBox(
+                    height:
+                        AppSpacing.sm,
                   ),
 
-                  Expanded(
-                    child:
-                        _buildAmountColumn(
-                      context,
-                      label: '収支',
-                      amount:
-                          record.profit,
-                      profitColor:
-                          profitColor,
+                  //==========================================
+                  // ホール名
+                  //==========================================
+
+                  if (record.hall.isNotEmpty)
+                    Center(
+                      child: Text(
+                        record.hall,
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.w600,
+                                ),
+                      ),
                     ),
+
+                  //==========================================
+                  // 機種名
+                  //==========================================
+
+                  if (record.machine.isNotEmpty) ...[
+                    const SizedBox(
+                      height: AppSpacing.xs,
+                    ),
+                    Center(
+                      child: Text(
+                        record.machine,
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.w600,
+                                ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(
+                    height:
+                        AppSpacing.md,
+                  ),
+
+                  const Divider(),
+
+                  const SizedBox(
+                    height:
+                        AppSpacing.sm,
+                  ),
+
+                  //==========================================
+                  // 投資・回収・収支
+                  //==========================================
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child:
+                            _buildAmountColumn(
+                          context,
+                          label: '投資',
+                          amount:
+                              record.medalInvest +
+                                  record.cashInvest,
+                          color:
+                              Colors.red.shade700,
+                        ),
+                      ),
+
+                      Expanded(
+                        child:
+                            _buildAmountColumn(
+                          context,
+                          label: '回収',
+                          amount:
+                              record.medalReturn +
+                                  record.cashReturn,
+                          color:
+                              Colors.green.shade700,
+                        ),
+                      ),
+
+                      Expanded(
+                        child:
+                            _buildAmountColumn(
+                          context,
+                          label: '収支',
+                          amount:
+                              record.profit,
+                          profitColor:
+                              profitColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

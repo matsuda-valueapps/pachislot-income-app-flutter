@@ -52,7 +52,7 @@ class _CounterPageState
 
   /// MemoPageと同じプレミアムガラスカード用Decoration。
   ///
-  /// ・白～ごく薄いブルーのグラデーション
+  /// ・すごく薄いブルー～ごく薄いブルー～薄いブルーのグラデーション
   /// ・薄いブルーの外側Border
   /// ・柔らかい立体シャドウ
   ///
@@ -65,8 +65,8 @@ class _CounterPageState
         end: Alignment.bottomRight,
         colors: [
           Color.fromRGBO(
-            255,
-            255,
+            250,
+            253,
             255,
             0.98,
           ),
