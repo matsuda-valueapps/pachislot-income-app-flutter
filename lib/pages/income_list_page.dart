@@ -1671,7 +1671,7 @@ class _IncomeListPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '収支 Data 一覧',
+          '収支DATA一覧',
         ),
         centerTitle: true,
       ),

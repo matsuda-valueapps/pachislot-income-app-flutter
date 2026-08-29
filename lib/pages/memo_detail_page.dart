@@ -386,7 +386,7 @@ class MemoDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'メモ Data 詳細',
+          'メモDATA詳細',
         ),
         centerTitle: true,
       ),

@@ -1266,7 +1266,7 @@ class _MemoListPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'メモ Data 一覧',
+          'メモDATA一覧',
         ),
         centerTitle: true,
       ),
