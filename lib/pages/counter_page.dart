@@ -963,7 +963,7 @@ class _CounterPageState
                     ),
                     label:
                         const Text(
-                      '小役データ一覧',
+                      '小役 Data 一覧',
                     ),
                   ),
                 ),

@@ -817,7 +817,7 @@ class _HomePageState
                   size: 38,
                 ),
                 label: const Text(
-                  '収支データ一覧',
+                  '収支 Data 一覧',
                 ),
               ),
             ],

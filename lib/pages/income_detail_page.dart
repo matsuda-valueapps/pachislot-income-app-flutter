@@ -576,7 +576,7 @@ class IncomeDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '収支データ詳細',
+          '収支 Data 詳細',
         ),
         centerTitle: true,
       ),

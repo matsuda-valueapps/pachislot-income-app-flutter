@@ -769,7 +769,7 @@ class _MainPageState
                     BottomNavigationIconType
                         .input,
               ),
-              label: '入力',
+              label: '収支入力',
             ),
 
             //================================================

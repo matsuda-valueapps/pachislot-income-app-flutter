@@ -714,7 +714,7 @@ class _CounterEditPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '小役データ編集',
+          '小役 Data 編集',
         ),
         centerTitle: true,
       ),

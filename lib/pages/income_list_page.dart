@@ -1199,7 +1199,7 @@ class _IncomeListPageState
         top: AppSpacing.md,
       ),
       child: Text(
-        '$dateText　収支：${_profitFilterLabel()}',
+        '$dateText  収支：${_profitFilterLabel()}',
         style: Theme.of(context)
             .textTheme
             .bodySmall
@@ -1671,7 +1671,7 @@ class _IncomeListPageState
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '収支データ一覧',
+          '収支 Data 一覧',
         ),
         centerTitle: true,
       ),
