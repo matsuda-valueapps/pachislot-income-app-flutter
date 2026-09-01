@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/income_record.dart';
+import '../pages/annual_income_page.dart';
 import '../pages/income_detail_page.dart';
 import '../pages/income_list_page.dart';
 import '../pages/input_page.dart';
@@ -14,6 +15,7 @@ import '../widgets/common/action_button_icon.dart';
 import '../widgets/home/calendar_card.dart';
 import '../widgets/home/monthly_income_card.dart';
 import '../widgets/home/statistics_card.dart';
+import '../widgets/search/section_icon.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -435,6 +437,21 @@ class _HomePageState
   }
 
   //==================================================
+  // 年間収支グラフ画面
+  //==================================================
+
+  /// 年間収支グラフ画面を開く。
+  Future<void> _openAnnualIncomePage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            const AnnualIncomePage(),
+      ),
+    );
+  }
+
+  //==================================================
   // 年間累計収支カード
   //==================================================
 
@@ -541,11 +558,11 @@ class _HomePageState
 
   /// 表示中の年の累計収支を表示する。
   ///
-  /// 月間収支カードよりコンパクトにし、
   /// ・累計収支
   /// ・投資
   /// ・回収
-  /// の3項目を表示する。
+  /// ・年間収支グラフボタン
+  /// の4要素をカード内部に表示する。
   Widget _buildYearlyIncomeCard(
     BuildContext context,
     HomeProvider provider,
@@ -715,6 +732,29 @@ class _HomePageState
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(
+              height: AppSpacing.lg,
+            ),
+
+            //============================================
+            // 年間収支グラフボタン
+            //============================================
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed:
+                    _openAnnualIncomePage,
+                icon: const SectionIcon(
+                  icon: 'model_analysis',
+                  size: 38,
+                ),
+                label: const Text(
+                  '年間収支グラフ',
+                ),
+              ),
             ),
           ],
         ),

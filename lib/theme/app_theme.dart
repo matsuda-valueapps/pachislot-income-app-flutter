@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
@@ -8,6 +9,19 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+
+      // ==========================
+      // フォント設定
+      // ==========================
+      //
+      // アプリ全体の標準フォントを
+      // Google Fonts「Noto Sans JP」にする。
+      //
+      // 各画面で個別にTextStyleを指定している場合でも、
+      // fontFamilyを指定していなければ、
+      // 基本的にこのフォントが使用される。
+      //
+      fontFamily: GoogleFonts.notoSansJp().fontFamily,
 
       // ==========================
       // カラー設定
