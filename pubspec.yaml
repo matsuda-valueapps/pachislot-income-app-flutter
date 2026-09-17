@@ -45,6 +45,7 @@ dependencies:
 
   flutter_multi_formatter: ^2.13.9
 
+  # Google Fonts
   google_fonts: ^6.2.1
 
 dev_dependencies:
@@ -52,6 +53,9 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+
+  # アプリアイコン生成
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -62,6 +66,6 @@ flutter:
     - assets/images/buttons/
     - assets/images/bottomnavigation/
     - assets/images/sections/
-    - assets/images/servicez/       
-    - assets/icons/
+    - assets/images/servicez/
+    - assets/icon/
     - assets/logo/
