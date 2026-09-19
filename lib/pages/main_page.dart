@@ -698,17 +698,28 @@ class _MainPageState
           // ラベル文字スタイル
           //================================================
           //
-          // 選択中のBottomNavigationラベルだけを
-          // 太字で表示する。
+          // 選択中・非選択時ともに
+          // FontWeight.w900を使用する。
           //
-          // 未選択：
-          //   FontWeight.normal
+          // さらにShadowを複数方向へ重ねることで、
+          // 文字の外周を擬似的に太くする。
           //
-          // 選択中：
-          //   FontWeight.bold
+          // ・選択中
+          //     w900
+          //     ＋ 強めの疑似ストローク
           //
-          // アイコン・選択背景・文字サイズなど、
-          // 既存のNavigationBarデザインは変更しない。
+          // ・非選択時
+          //     w900
+          //     ＋ 弱めの疑似ストローク
+          //
+          // そのため、
+          //
+          //     選択中 ＞ 非選択時
+          //
+          // の太さになる。
+          //
+          // 文字サイズ・色・アイコン・
+          // NavigationBarの構造は変更しない。
           //================================================
 
           labelTextStyle:
@@ -720,13 +731,106 @@ class _MainPageState
                       .textTheme
                       .labelMedium;
 
+              final isSelected =
+                  states.contains(
+                WidgetState.selected,
+              );
+
+              final labelColor =
+                  isSelected
+                      ? const Color(0xFF0D47A1)
+                      : const Color(0xFF2962FF);
+
+              //================================================
+              // 疑似ストロークの太さ
+              //================================================
+              //
+              // 選択中を非選択時より少し太くする。
+              //================================================
+
+              final thickness =
+                  isSelected ? 0.50 : 0.22;
+
               return baseStyle?.copyWith(
+                color: labelColor,
+                //================================================
+                // フォント自体は両方ともw900
+                //================================================
+
                 fontWeight:
-                    states.contains(
-                  WidgetState.selected,
-                )
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    FontWeight.w900,
+
+                //================================================
+                // 文字の外周を8方向へ重ねて
+                // 実質的に文字を太く見せる。
+                //================================================
+
+                shadows: [
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      thickness,
+                      0,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      -thickness,
+                      0,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      0,
+                      thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      0,
+                      -thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      thickness,
+                      thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      -thickness,
+                      -thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      thickness,
+                      -thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                  Shadow(
+                    color: labelColor,
+                    offset: Offset(
+                      -thickness,
+                      thickness,
+                    ),
+                    blurRadius: 0,
+                  ),
+                ],
               );
             },
           ),
