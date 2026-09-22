@@ -361,8 +361,8 @@ class _MainPageState
         message:
             '選択したバックアップの内容で、'
             '現在の「収支・メモ・小役カウンター」データを置き換えます。\n\n'
-            '現在のデータは復元後の状態に戻せません。\n'
-            '必要であれば、先に現在のデータをバックアップしてください。',
+            '又、現在のデータは復元後、元の状態には戻せません。\n'
+            '必要であれば、先に現在のデータをバックアップして下さい。',
         confirmText: '復元',
       );
 
@@ -655,29 +655,17 @@ class _MainPageState
                   // メニューアイコン
                   //============================================
 
-                  Container(
+                  SizedBox(
                     width: 48,
                     height: 48,
-                    decoration:
-                        BoxDecoration(
-                      color: colorScheme
-                          .primary
-                          .withValues(
-                            alpha: 0.10,
-                          ),
-                      borderRadius:
-                          BorderRadius
-                              .circular(
-                        14,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/drawer/gear.png',
+                        width: 38,
+                        height: 38,
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    child: Icon(
-                      Icons
-                          .settings_rounded,
-                      color: colorScheme
-                          .primary,
-                      size: 26,
-                    ),
+                    )
                   ),
 
                   const SizedBox(
@@ -759,11 +747,11 @@ class _MainPageState
             //================================================
 
             ListTile(
-              leading: Icon(
-                Icons
-                    .backup_rounded,
-                color:
-                    colorScheme.primary,
+              leading: Image.asset(
+                'assets/images/drawer/backup.png',
+                width: 38,
+                height: 38,
+                fit: BoxFit.contain,
               ),
               title: Text(
                 'バックアップ',
@@ -779,7 +767,7 @@ class _MainPageState
               ),
               subtitle:
                   const Text(
-                '収支・メモ・小役カウンターデータを保存',
+                '「収支・メモ・小役カウンター」データを保存',
               ),
               trailing:
                   const Icon(
@@ -795,11 +783,11 @@ class _MainPageState
             //================================================
 
             ListTile(
-              leading: Icon(
-                Icons
-                    .restore_rounded,
-                color:
-                    colorScheme.primary,
+              leading: Image.asset(
+                'assets/images/drawer/restore.png',
+                width: 38,
+                height: 38,
+                fit: BoxFit.contain,
               ),
               title: Text(
                 '復元',

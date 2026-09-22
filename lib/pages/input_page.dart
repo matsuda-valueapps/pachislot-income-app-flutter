@@ -1083,7 +1083,7 @@ class _InputPageState extends State<InputPage> {
                         controller:
                             _memoController,
                         hintText:
-                            '自由にメモを入力できます',
+                            '自由にメモを入力出来ます。',
                       ),
                     ],
                   ),

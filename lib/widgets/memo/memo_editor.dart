@@ -32,7 +32,7 @@ class MemoEditor extends StatelessWidget {
           minLines: minLines,
           maxLines: maxLines,
           decoration: InputFieldDecoration.build(
-            hintText: '遊技内容を自由に入力してください',
+            hintText: '遊技内容を自由に入力して下さい。',
             alignLabelWithHint: true,
           ),
         ),
