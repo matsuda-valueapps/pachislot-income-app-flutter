@@ -41,49 +41,131 @@ class InputPage extends StatefulWidget {
   final DateTime? initialDate;
 
   @override
-  State<InputPage> createState() => _InputPageState();
+  State<InputPage> createState() =>
+      InputPageState();
 }
 
-class _InputPageState extends State<InputPage> {
+class InputPageState
+    extends State<InputPage> {
   /// 編集モードかどうか
-  bool get _isEditMode => widget.record != null;
+  bool get _isEditMode =>
+      widget.record != null;
 
   /// 保存後の画面初期化中フラグ
   bool _isResetting = false;
 
   /// Form管理
-  final _formKey = GlobalKey<FormState>();
+  final _formKey =
+      GlobalKey<FormState>();
 
+  ///==================================================
+  /// Scroll
+  ///==================================================
+
+  /// 入力画面のスクロール位置を管理するController。
+  ///
+  /// MainPageから「収支DATA入力」画面へ戻ったときに、
+  /// 必ず画面トップへ戻すために使用する。
+  final ScrollController
+      _scrollController =
+      ScrollController();
+
+  /// 入力画面をスクロールトップへ戻す。
+  ///
+  /// BottomNavigationなどから
+  /// 「収支DATA入力」画面へ戻った場合に
+  /// MainPageから呼び出す。
+  void scrollToTop() {
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+      (_) {
+        if (!mounted) {
+          return;
+        }
+
+        if (!_scrollController
+            .hasClients) {
+          return;
+        }
+
+        _scrollController.jumpTo(
+          _scrollController
+              .position
+              .minScrollExtent,
+        );
+      },
+    );
+  }
+
+  ///==================================================
   /// 日付
-  DateTime _selectedDate = DateTime.now();
+  ///==================================================
 
+  DateTime _selectedDate =
+      DateTime.now();
+
+  ///==================================================
   /// ホール名
-  final _hallController = TextEditingController();
+  ///==================================================
 
+  final _hallController =
+      TextEditingController();
+
+  ///==================================================
   /// 機種名
-  final _machineController = TextEditingController();
+  ///==================================================
 
+  final _machineController =
+      TextEditingController();
+
+  ///==================================================
   /// 貯メダル投資
+  ///==================================================
+
   final _medalInvestController =
-      TextEditingController(text: '0');
+      TextEditingController(
+    text: '0',
+  );
 
+  ///==================================================
   /// 現金投資
+  ///==================================================
+
   final _cashInvestController =
-      TextEditingController(text: '0');
+      TextEditingController(
+    text: '0',
+  );
 
+  ///==================================================
   /// 貯メダル回収
+  ///==================================================
+
   final _medalReturnController =
-      TextEditingController(text: '0');
+      TextEditingController(
+    text: '0',
+  );
 
+  ///==================================================
   /// 現金回収
-  final _cashReturnController =
-      TextEditingController(text: '0');
+  ///==================================================
 
+  final _cashReturnController =
+      TextEditingController(
+    text: '0',
+  );
+
+  ///==================================================
   /// 収支
+  ///==================================================
+
   int _profit = 0;
 
+  ///==================================================
   /// メモ
-  final _memoController = TextEditingController();
+  ///==================================================
+
+  final _memoController =
+      TextEditingController();
 
   //==================================================
   // 初期化
@@ -239,6 +321,12 @@ class _InputPageState extends State<InputPage> {
     _medalReturnController.dispose();
     _cashReturnController.dispose();
 
+    // ============================================================
+    // ScrollController破棄
+    // ============================================================
+
+    _scrollController.dispose();
+
     super.dispose();
   }
 
@@ -248,12 +336,14 @@ class _InputPageState extends State<InputPage> {
 
   /// 日付選択
   Future<void> _selectDate() async {
-    final pickedDate = await showDatePicker(
+    final pickedDate =
+        await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      locale: const Locale('ja', 'JP'),
+      locale:
+          const Locale('ja', 'JP'),
     );
 
     if (pickedDate == null) {
@@ -265,7 +355,8 @@ class _InputPageState extends State<InputPage> {
     }
 
     setState(() {
-      _selectedDate = pickedDate;
+      _selectedDate =
+          pickedDate;
     });
 
     // 新規モードのみ下書き保存。
@@ -283,7 +374,8 @@ class _InputPageState extends State<InputPage> {
     TextEditingController controller,
   ) {
     return int.tryParse(
-          controller.text.replaceAll(',', ''),
+          controller.text
+              .replaceAll(',', ''),
         ) ??
         0;
   }
@@ -293,21 +385,31 @@ class _InputPageState extends State<InputPage> {
     TextEditingController controller,
   ) {
     return int.tryParse(
-          controller.text.replaceAll(',', ''),
+          controller.text
+              .replaceAll(',', ''),
         ) ??
         0;
   }
 
   /// 整数を入力欄表示用の3桁カンマ付き文字列へ変換
-  String _formatAmount(int amount) {
-    final value = amount.abs().toString();
+  String _formatAmount(
+    int amount,
+  ) {
+    final value =
+        amount.abs().toString();
 
-    final buffer = StringBuffer();
+    final buffer =
+        StringBuffer();
 
-    for (int i = 0; i < value.length; i++) {
-      final position = value.length - i;
+    for (int i = 0;
+        i < value.length;
+        i++) {
+      final position =
+          value.length - i;
 
-      buffer.write(value[i]);
+      buffer.write(
+        value[i],
+      );
 
       if (position > 1 &&
           position % 3 == 1) {
@@ -350,7 +452,7 @@ class _InputPageState extends State<InputPage> {
 
     final newProfit =
         (medalReturn + cashReturn) -
-        (medalInvest + cashInvest);
+            (medalInvest + cashInvest);
 
     if (_profit != newProfit) {
       if (!mounted) {
@@ -373,7 +475,8 @@ class _InputPageState extends State<InputPage> {
   /// 新規入力時のみ使用する。
   Future<void> _loadDraft() async {
     final draft =
-        await InputDraftService.loadDraft();
+        await InputDraftService
+            .loadDraft();
 
     if (!mounted) {
       return;
@@ -457,8 +560,10 @@ class _InputPageState extends State<InputPage> {
 
     await InputDraftService.saveDraft(
       date: _selectedDate,
-      hall: _hallController.text,
-      machine: _machineController.text,
+      hall:
+          _hallController.text,
+      machine:
+          _machineController.text,
       medalInvest:
           _medalInvestController.text,
       cashInvest:
@@ -467,7 +572,8 @@ class _InputPageState extends State<InputPage> {
           _medalReturnController.text,
       cashReturn:
           _cashReturnController.text,
-      memo: _memoController.text,
+      memo:
+          _memoController.text,
     );
   }
 
@@ -480,7 +586,8 @@ class _InputPageState extends State<InputPage> {
   /// 編集モードではSharedPreferencesの下書きではなく、
   /// IncomeRecordの正式保存データを使用する。
   void _loadRecord() {
-    final record = widget.record;
+    final record =
+        widget.record;
 
     if (record == null) {
       return;
@@ -490,12 +597,16 @@ class _InputPageState extends State<InputPage> {
 
     try {
       parsedDate =
-          DateTime.parse(record.date);
+          DateTime.parse(
+        record.date,
+      );
     } catch (_) {
-      parsedDate = DateTime.now();
+      parsedDate =
+          DateTime.now();
     }
 
-    _selectedDate = parsedDate;
+    _selectedDate =
+        parsedDate;
 
     _hallController.text =
         record.hall;
@@ -526,7 +637,8 @@ class _InputPageState extends State<InputPage> {
     _memoController.text =
         record.memo;
 
-    _profit = record.profit;
+    _profit =
+        record.profit;
   }
 
   //==================================================
@@ -569,7 +681,8 @@ class _InputPageState extends State<InputPage> {
 
     // 正式保存が成功した後に
     // 下書きを削除する。
-    await InputDraftService.clearDraft();
+    await InputDraftService
+        .clearDraft();
   }
 
   //==================================================
@@ -580,9 +693,11 @@ class _InputPageState extends State<InputPage> {
   ///
   /// 新規モード専用。
   Future<void> _insertIncomeRecord() async {
-    final now = DateTime.now();
+    final now =
+        DateTime.now();
 
-    final record = IncomeRecord(
+    final record =
+        IncomeRecord(
       date: _selectedDate
           .toIso8601String()
           .split('T')
@@ -607,16 +722,21 @@ class _InputPageState extends State<InputPage> {
           _parseAmountText(
         _cashReturnController,
       ),
-      profit: _profit,
-      memo: _memoController.text,
+      profit:
+          _profit,
+      memo:
+          _memoController.text,
       createdAt:
           now.toIso8601String(),
       updatedAt:
           now.toIso8601String(),
     );
 
-    await DatabaseService.instance
-        .insertIncomeRecord(record);
+    await DatabaseService
+        .instance
+        .insertIncomeRecord(
+      record,
+    );
   }
 
   //==================================================
@@ -630,19 +750,22 @@ class _InputPageState extends State<InputPage> {
     final originalRecord =
         widget.record;
 
-    if (originalRecord == null) {
+    if (originalRecord ==
+        null) {
       throw StateError(
         '編集対象の収支データがありません。',
       );
     }
 
-    if (originalRecord.id == null) {
+    if (originalRecord.id ==
+        null) {
       throw StateError(
         '編集対象の収支データにIDがありません。',
       );
     }
 
-    final now = DateTime.now();
+    final now =
+        DateTime.now();
 
     final updatedRecord =
         IncomeRecord(
@@ -671,17 +794,22 @@ class _InputPageState extends State<InputPage> {
           _parseAmountText(
         _cashReturnController,
       ),
-      profit: _profit,
-      memo: _memoController.text,
+      profit:
+          _profit,
+      memo:
+          _memoController.text,
+
       // 作成日時は元データを維持する。
       createdAt:
           originalRecord.createdAt,
+
       // 更新日時だけ現在時刻へ変更する。
       updatedAt:
           now.toIso8601String(),
     );
 
-    await DatabaseService.instance
+    await DatabaseService
+        .instance
         .updateIncomeRecord(
       updatedRecord,
     );
@@ -705,7 +833,8 @@ class _InputPageState extends State<InputPage> {
     }
 
     final result =
-        await DialogService.showConfirm(
+        await DialogService
+            .showConfirm(
       context: context,
       title: _isEditMode
           ? '更新しますか？'
@@ -744,17 +873,20 @@ class _InputPageState extends State<InputPage> {
           return;
         }
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
           const SnackBar(
-            content: Text(
+            content:
+                Text(
               '更新しました',
             ),
           ),
         );
 
         // 編集完了後は詳細画面へ戻る。
-        Navigator.of(context).pop(true);
+        Navigator.of(context)
+            .pop(true);
       } else {
         // --------------------------------------------------------
         // 新規
@@ -775,10 +907,12 @@ class _InputPageState extends State<InputPage> {
           return;
         }
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
           const SnackBar(
-            content: Text(
+            content:
+                Text(
               '保存しました',
             ),
           ),
@@ -789,10 +923,12 @@ class _InputPageState extends State<InputPage> {
         return;
       }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
         SnackBar(
-          content: Text(
+          content:
+              Text(
             _isEditMode
                 ? '更新に失敗しました。もう一度お試しください。'
                 : '保存に失敗しました。もう一度お試しください。',
@@ -818,9 +954,12 @@ class _InputPageState extends State<InputPage> {
   /// そのまま入力カードへ適用する。
   BoxDecoration _buildGlassDecoration() {
     return BoxDecoration(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+      gradient:
+          const LinearGradient(
+        begin:
+            Alignment.topLeft,
+        end:
+            Alignment.bottomRight,
         colors: [
           Color.fromRGBO(
             250,
@@ -849,11 +988,14 @@ class _InputPageState extends State<InputPage> {
       ),
 
       // 既存カードと同じ角丸
-      borderRadius: AppRadius.card,
+      borderRadius:
+          AppRadius.card,
 
       // ホーム画面と同じ薄いブルーBorder
-      border: Border.all(
-        color: const Color.fromRGBO(
+      border:
+          Border.all(
+        color:
+            const Color.fromRGBO(
           157,
           201,
           246,
@@ -868,7 +1010,8 @@ class _InputPageState extends State<InputPage> {
         // 下方向の柔らかい影
         //================================================
         BoxShadow(
-          color: Color.fromRGBO(
+          color:
+              Color.fromRGBO(
             92,
             143,
             196,
@@ -876,7 +1019,8 @@ class _InputPageState extends State<InputPage> {
           ),
           blurRadius: 22,
           spreadRadius: 2,
-          offset: Offset(
+          offset:
+              Offset(
             0,
             10,
           ),
@@ -886,7 +1030,8 @@ class _InputPageState extends State<InputPage> {
         // 近距離の立体影
         //================================================
         BoxShadow(
-          color: Color.fromRGBO(
+          color:
+              Color.fromRGBO(
             125,
             170,
             215,
@@ -894,7 +1039,8 @@ class _InputPageState extends State<InputPage> {
           ),
           blurRadius: 8,
           spreadRadius: 0,
-          offset: Offset(
+          offset:
+              Offset(
             0,
             3,
           ),
@@ -908,10 +1054,13 @@ class _InputPageState extends State<InputPage> {
   //==================================================
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title:
+            Text(
           _isEditMode
               ? '収支DATA編集'
               : '収支DATA入力',
@@ -922,10 +1071,14 @@ class _InputPageState extends State<InputPage> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            padding: AppSpacing.page,
+            controller:
+                _scrollController,
+            padding:
+                AppSpacing.page,
             child: Column(
               crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
+                  CrossAxisAlignment
+                      .stretch,
               children: [
                 //================================================
                 // 入力カード
@@ -939,8 +1092,10 @@ class _InputPageState extends State<InputPage> {
 
                 Container(
                   margin:
-                      const EdgeInsets.symmetric(
-                    vertical: AppSpacing.xs,
+                      const EdgeInsets
+                          .symmetric(
+                    vertical:
+                        AppSpacing.xs,
                   ),
                   padding:
                       AppSpacing.card,
@@ -948,7 +1103,8 @@ class _InputPageState extends State<InputPage> {
                       _buildGlassDecoration(),
                   child: Column(
                     crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        CrossAxisAlignment
+                            .start,
                     children: [
                       // ==========================================
                       // 日付
@@ -971,7 +1127,8 @@ class _InputPageState extends State<InputPage> {
                       // ==========================================
 
                       TextInputField(
-                        label: 'ホール名',
+                        label:
+                            'ホール名',
                         controller:
                             _hallController,
                         hintText:
@@ -991,7 +1148,8 @@ class _InputPageState extends State<InputPage> {
                       // ==========================================
 
                       TextInputField(
-                        label: '機種名',
+                        label:
+                            '機種名',
                         controller:
                             _machineController,
                         hintText:
@@ -1072,7 +1230,8 @@ class _InputPageState extends State<InputPage> {
                       // ==========================================
 
                       ProfitCard(
-                        profit: _profit,
+                        profit:
+                            _profit,
                       ),
 
                       // ==========================================
@@ -1102,13 +1261,16 @@ class _InputPageState extends State<InputPage> {
                   text: _isEditMode
                       ? '更新'
                       : '保存',
-                  iconWidget: _isEditMode
-                      ? const ActionButtonIcon.update(
-                          size: 38,
-                        )
-                      : const ActionButtonIcon.save(
-                          size: 38,
-                        ),
+                  iconWidget:
+                      _isEditMode
+                          ? const ActionButtonIcon
+                              .update(
+                              size: 38,
+                            )
+                          : const ActionButtonIcon
+                              .save(
+                              size: 38,
+                            ),
                   onPressed:
                       _onSavePressed,
                 ),

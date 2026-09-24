@@ -23,7 +23,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState
-    extends State<MainPage> {
+    extends State<MainPage>
+    with WidgetsBindingObserver {
   //==================================================
   // Drawer
   //==================================================
@@ -75,6 +76,25 @@ class _MainPageState
   /// ダイアログが重複表示されることを防ぐ。
   bool _isExitDialogShowing = false;
 
+  //==================================================
+  // App Lifecycle
+  //==================================================
+
+  /// アプリがバックグラウンドへ移動したあと、
+  /// 再び前面へ戻ったかどうか。
+  ///
+  /// 検索画面からYouTubeなどの外部アプリを開いた場合、
+  /// Flutterアプリはいったん非アクティブになります。
+  ///
+  /// その後Androidの戻るボタンでアプリへ戻った際に、
+  /// 検索画面をトップへ戻すために使用する。
+  bool _shouldResetSearchOnResume =
+      false;
+
+  //==================================================
+  // Navigator
+  //==================================================
+
   /// 各タブ専用NavigatorのKey
   ///
   /// 各タブごとに独立したNavigatorを持たせることで、
@@ -88,6 +108,43 @@ class _MainPageState
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
   ];
+
+  //==================================================
+  // Tab Scroll Controller
+  //==================================================
+
+  /// 各タブのルート画面用ScrollController。
+  ///
+  /// ・メモDATA入力
+  /// ・小役カウンター
+  /// ・検索
+  ///
+  /// のルート画面がPrimaryScrollControllerを使用する場合、
+  /// MainPage側からスクロール位置をトップへ戻すために使用する。
+  ///
+  /// 収支DATA入力についてはInputPageStateの
+  /// scrollToTop()を使用するため、
+  /// こちらのControllerは直接使用しない。
+  final List<ScrollController>
+      _tabScrollControllers = [
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+  ];
+
+  //==================================================
+  // Input Page Key
+  //==================================================
+
+  /// 収支DATA入力画面のStateへアクセスするためのKey。
+  ///
+  /// InputPageState.scrollToTop()を
+  /// MainPageから呼び出すために使用する。
+  GlobalKey<InputPageState>
+      _inputPageKey =
+      GlobalKey<InputPageState>();
 
   //==================================================
   // Navigator Observer
@@ -125,6 +182,13 @@ class _MainPageState
     super.initState();
 
     //================================================
+    // App Lifecycle Observer
+    //================================================
+
+    WidgetsBinding.instance
+        .addObserver(this);
+
+    //================================================
     // 各タブNavigatorのObserverを作成
     //================================================
 
@@ -135,9 +199,100 @@ class _MainPageState
         return _MainTabNavigatorObserver(
           onRouteChanged:
               _scheduleMenuButtonUpdate,
+          onRoutePopped: () =>
+              _handleNavigatorRoutePopped(index),
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    //================================================
+    // App Lifecycle Observer解除
+    //================================================
+
+    WidgetsBinding.instance
+        .removeObserver(this);
+
+    //================================================
+    // Tab ScrollController破棄
+    //================================================
+
+    for (final controller
+        in _tabScrollControllers) {
+      controller.dispose();
+    }
+
+    super.dispose();
+  }
+
+  //==================================================
+  // App Lifecycle
+  //==================================================
+
+  /// アプリのライフサイクル変更を監視する。
+  ///
+  /// 検索画面からYouTubeなどの外部アプリを開いた場合、
+  ///
+  /// 検索
+  /// ↓
+  /// YouTube
+  ///
+  /// となり、Flutterアプリは一度バックグラウンドへ
+  /// 移動する。
+  ///
+  /// その後、
+  ///
+  /// YouTube
+  /// ↓ Android戻る
+  /// 検索
+  ///
+  /// と戻ってきたタイミングで、
+  /// 検索画面をトップへ戻す。
+  @override
+  void didChangeAppLifecycleState(
+    AppLifecycleState state,
+  ) {
+    super.didChangeAppLifecycleState(
+      state,
+    );
+
+    //================================================
+    // アプリが非アクティブになった
+    //================================================
+    //
+    // 外部アプリ起動やバックグラウンド移行を検知する。
+    //================================================
+
+    if (state ==
+            AppLifecycleState.inactive ||
+        state ==
+            AppLifecycleState.paused) {
+      _shouldResetSearchOnResume =
+          true;
+      return;
+    }
+
+    //================================================
+    // アプリが再び前面へ戻った
+    //================================================
+
+    if (state ==
+            AppLifecycleState.resumed &&
+        _shouldResetSearchOnResume) {
+      _shouldResetSearchOnResume =
+          false;
+
+      //================================================
+      // 検索タブの場合のみ
+      // トップへ戻す。
+      //================================================
+
+      if (_selectedIndex == 4) {
+        _resetTabScrollPosition(4);
+      }
+    }
   }
 
   //==================================================
@@ -213,6 +368,243 @@ class _MainPageState
       _showMenuButton =
           shouldShow;
     });
+  }
+
+  //==================================================
+  // Tab Scroll Reset
+  //==================================================
+
+  /// 指定されたタブのルート画面を
+  /// スクロールトップへ戻す。
+  ///
+  /// ホームは既存の
+  /// _resetHomeNavigator()
+  /// を使用する。
+  ///
+  /// 収支DATA入力は、
+  /// InputPageState.scrollToTop()
+  /// を使用する。
+  ///
+  /// メモ・小役・検索は、
+  /// PrimaryScrollControllerへ接続された
+  /// ScrollControllerを使用する。
+  void _resetTabScrollPosition(
+    int index,
+  ) {
+    //================================================
+    // ホーム
+    //================================================
+    //
+    // ホームは既存仕様どおり、
+    // HomePageを再生成する。
+    //================================================
+
+    if (index == 0) {
+      return;
+    }
+
+    //================================================
+    // 次のフレームで実行
+    //================================================
+    //
+    // BottomNavigation切り替え直後や、
+    // Navigator.pop()直後は、
+    // 対象画面のWidget構築が完了していない
+    // 可能性があるため、
+    // addPostFrameCallback()を使用する。
+    //================================================
+
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+      (_) {
+        if (!mounted) {
+          return;
+        }
+
+        //================================================
+        // 収支DATA入力
+        //================================================
+
+        if (index == 1) {
+          _inputPageKey.currentState
+              ?.scrollToTop();
+
+          return;
+        }
+
+        //================================================
+        // メモ / 小役 / 検索
+        //================================================
+
+        final controller =
+            _tabScrollControllers[
+                index];
+
+        if (!controller.hasClients) {
+          return;
+        }
+
+        controller.jumpTo(
+          controller.position
+              .minScrollExtent,
+        );
+      },
+    );
+  }
+
+  //==================================================
+  // Child Route Back Scroll Reset
+  //==================================================
+
+  /// 子画面からAndroid戻るで
+  /// タブのルート画面へ戻った場合に、
+  /// そのルート画面をトップへ戻す。
+  ///
+  /// 重要：
+  ///
+  /// Navigatorを追加でpopすることはしない。
+  ///
+  /// すでに実行された1回のpop後に、
+  /// Navigatorがルート画面になったかだけを確認する。
+  void _resetScrollAfterChildPop(
+    int index,
+  ) {
+    //================================================
+    // 今回トップへ戻したい対象タブ
+    //================================================
+    //
+    // 収支入力については、
+    // 編集 → 詳細 → 一覧 → ホーム
+    // などの既存Navigator階層を
+    // 絶対に壊さないため、
+    // ここでは対象外とする。
+    //================================================
+
+    if (index != 2 &&
+        index != 3 &&
+        index != 4) {
+      return;
+    }
+
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+      (_) {
+        if (!mounted) {
+          return;
+        }
+
+        final currentNavigator =
+            _navigatorKeys[index]
+                .currentState;
+
+        if (currentNavigator == null) {
+          return;
+        }
+
+        //================================================
+        // まだ子画面が残っている場合
+        //================================================
+        //
+        // 例：
+        //
+        // メモDATA一覧
+        // ↓
+        // メモDATA詳細
+        //
+        // 詳細から戻って一覧になっただけなら、
+        // まだcanPop() == trueなので
+        // スクロールリセットしない。
+        //================================================
+
+        if (currentNavigator
+            .canPop()) {
+          return;
+        }
+
+        //================================================
+        // ルート画面へ戻った場合のみ
+        // トップへ戻す。
+        //================================================
+
+        _resetTabScrollPosition(
+          index,
+        );
+      },
+    );
+  }
+
+  //==================================================
+  // Navigator Route Pop
+  //==================================================
+
+  /// Navigatorのpopによってタブのルート画面へ戻った場合、
+  /// 対象タブのスクロール位置をトップへ戻す。
+  ///
+  /// Androidの戻るだけでなく、
+  /// AppBarの「←戻る」などNavigator.pop()を直接呼ぶ
+  /// 操作にも対応する。
+  ///
+  /// メモ・小役・検索のみを対象とし、
+  /// 収支DATA入力とホームの既存動作は変更しない。
+  void _handleNavigatorRoutePopped(
+    int index,
+  ) {
+    //================================================
+    // 対象タブ
+    //================================================
+
+    if (index != 2 &&
+        index != 3 &&
+        index != 4) {
+      return;
+    }
+
+    //================================================
+    // pop直後は次のフレームで判定
+    //================================================
+
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+      (_) {
+        if (!mounted) {
+          return;
+        }
+
+        final navigator =
+            _navigatorKeys[index]
+                .currentState;
+
+        if (navigator == null) {
+          return;
+        }
+
+        //================================================
+        // まだ子画面が残っている場合
+        //================================================
+        //
+        // 例：
+        // メモDATA詳細
+        // ↓ AppBar戻る
+        // メモDATA一覧
+        //
+        // この時点ではcanPop() == trueなので、
+        // 一覧画面のスクロール位置は変更しない。
+        //================================================
+
+        if (navigator.canPop()) {
+          return;
+        }
+
+        //================================================
+        // ルート画面へ戻った場合のみ
+        // トップへ戻す。
+        //================================================
+
+        _resetTabScrollPosition(
+          index,
+        );
+      },
+    );
   }
 
   //==================================================
@@ -525,6 +917,22 @@ class _MainPageState
     }
 
     //================================================
+    // すべてのScrollControllerをトップへ戻す
+    //================================================
+
+    for (final controller
+        in _tabScrollControllers) {
+      if (!controller.hasClients) {
+        continue;
+      }
+
+      controller.jumpTo(
+        controller.position
+            .minScrollExtent,
+      );
+    }
+
+    //================================================
     // State更新
     //================================================
 
@@ -540,54 +948,89 @@ class _MainPageState
   }
 
   /// 指定されたタブのルート画面を作成する。
+  ///
+  /// ルート画面の縦スクロールをMainPageから
+  /// 制御できるよう、PrimaryScrollControllerを
+  /// 各タブ専用Controllerへ接続する。
   Widget _buildRootPage(
     int index,
   ) {
+    late final Widget page;
+
     switch (index) {
       //================================================
       // ホーム
       //================================================
 
       case 0:
-        return HomePage(
+        page = HomePage(
           key: UniqueKey(),
         );
+        break;
 
       //================================================
       // 入力
       //================================================
 
       case 1:
-        return const InputPage();
+        //================================================
+        // InputPageStateへアクセスするKeyを
+        // 毎回新しく生成する。
+        //
+        // 復元時などにNavigatorのルートを
+        // 再生成する場合でも、
+        // 既存RouteとのGlobalKey重複を防ぐ。
+        //================================================
+
+        _inputPageKey =
+            GlobalKey<InputPageState>();
+
+        page = InputPage(
+          key: _inputPageKey,
+        );
+        break;
 
       //================================================
       // メモ
       //================================================
 
       case 2:
-        return const MemoPage();
+        page = const MemoPage();
+        break;
 
       //================================================
       // 小役
       //================================================
 
       case 3:
-        return const CounterPage();
+        page = const CounterPage();
+        break;
 
       //================================================
       // 検索
       //================================================
 
       case 4:
-        return const SearchPage();
+        page = const SearchPage();
+        break;
 
       //================================================
       // その他
       //================================================
 
       default:
-        return const HomePage();
+        page = const HomePage();
     }
+
+    //================================================
+    // ルート画面へScrollControllerを接続
+    //================================================
+
+    return PrimaryScrollController(
+      controller:
+          _tabScrollControllers[index],
+      child: page,
+    );
   }
 
   //==================================================
@@ -665,7 +1108,7 @@ class _MainPageState
                         height: 38,
                         fit: BoxFit.contain,
                       ),
-                    )
+                    ),
                   ),
 
                   const SizedBox(
@@ -803,7 +1246,7 @@ class _MainPageState
               ),
               subtitle:
                   const Text(
-                'JSONバックアップからデータを復元',
+                'バックアップデータからデータを復元',
               ),
               trailing:
                   const Icon(
@@ -903,9 +1346,7 @@ class _MainPageState
     navigator.pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) =>
-            HomePage(
-          key: UniqueKey(),
-        ),
+            _buildRootPage(0),
       ),
       (route) => false,
     );
@@ -952,6 +1393,18 @@ class _MainPageState
       _selectedIndex =
           previousIndex;
     });
+
+    //================================================
+    // タブ復帰時はトップへ戻す
+    //================================================
+
+    if (previousIndex == 0) {
+      _resetHomeNavigator();
+    } else {
+      _resetTabScrollPosition(
+        previousIndex,
+      );
+    }
 
     _scheduleMenuButtonUpdate();
 
@@ -1016,6 +1469,7 @@ class _MainPageState
       // ホームを再度タップ
       // ↓
       // HomePage
+
       final navigator =
           _navigatorKeys[index]
               .currentState;
@@ -1024,11 +1478,25 @@ class _MainPageState
         (route) => route.isFirst,
       );
 
-      // ホームの場合は、
-      // 現在年月＋今日へ戻す。
+      //================================================
+      // ホーム
+      //================================================
+
       if (index == 0) {
         _resetHomeNavigator();
+
+        _scheduleMenuButtonUpdate();
+
+        return;
       }
+
+      //================================================
+      // その他のタブ
+      //================================================
+
+      _resetTabScrollPosition(
+        index,
+      );
 
       _scheduleMenuButtonUpdate();
 
@@ -1074,6 +1542,14 @@ class _MainPageState
     setState(() {
       _selectedIndex = index;
     });
+
+    //================================================
+    // タブ復帰時はトップへ戻す
+    //================================================
+
+    _resetTabScrollPosition(
+      index,
+    );
 
     _scheduleMenuButtonUpdate();
   }
@@ -1196,6 +1672,10 @@ class _MainPageState
   ///    ↓
   ///    子画面を1つ戻る
   ///
+  ///    ※ メモ・小役・検索は、
+  ///       ルート画面まで戻った場合のみ
+  ///       スクロールをトップへ戻す。
+  ///
   /// ③ 現在タブがルート画面
   ///    ↓
   ///    BottomNavigationの直前のタブへ戻る
@@ -1203,7 +1683,7 @@ class _MainPageState
   /// ④ 現在タブがホーム以外で、
   ///    タブ履歴がない
   ///    ↓
-  ///    ホームへ戻る
+  ///    ホームへ戻す
   ///
   /// ⑤ ホームのルート画面で、
   ///    タブ履歴もない
@@ -1279,11 +1759,37 @@ class _MainPageState
     // IncomeDetailPage
     //
     // となる。
+    //
+    // ※ Navigator.pop()は必ず1回だけ。
     //==================================================
 
     if (navigator != null &&
         navigator.canPop()) {
       navigator.pop();
+
+      //================================================
+      // 子画面からメモ・小役・検索の
+      // ルート画面へ戻った場合のみ、
+      // スクロールをトップへ戻す。
+      //
+      // 収支DATA入力をここでリセットしないことで、
+      // 既存の
+      //
+      // 編集
+      // ↓
+      // 詳細
+      // ↓
+      // 一覧
+      // ↓
+      // ホーム
+      //
+      // の階層を維持する。
+      //================================================
+
+      _resetScrollAfterChildPop(
+        _selectedIndex,
+      );
+
       _scheduleMenuButtonUpdate();
       return;
     }
@@ -1368,56 +1874,8 @@ class _MainPageState
       onGenerateRoute: (
         settings,
       ) {
-        Widget page;
-
-        switch (index) {
-          //================================================
-          // ホーム
-          //================================================
-
-          case 0:
-            page = const HomePage();
-            break;
-
-          //================================================
-          // 入力
-          //================================================
-
-          case 1:
-            page = const InputPage();
-            break;
-
-          //================================================
-          // メモ
-          //================================================
-
-          case 2:
-            page = const MemoPage();
-            break;
-
-          //================================================
-          // 小役
-          //================================================
-
-          case 3:
-            page = const CounterPage();
-            break;
-
-          //================================================
-          // 検索
-          //================================================
-
-          case 4:
-            page = const SearchPage();
-            break;
-
-          //================================================
-          // その他
-          //================================================
-
-          default:
-            page = const HomePage();
-        }
+        final page =
+            _buildRootPage(index);
 
         return MaterialPageRoute(
           builder: (context) =>
@@ -1658,6 +2116,7 @@ class _MainPageState
 
               return baseStyle?.copyWith(
                 color: labelColor,
+
                 //================================================
                 // フォント自体は両方ともw900
                 //================================================
@@ -1859,9 +2318,11 @@ class _MainPageState
 class _MainTabNavigatorObserver
     extends NavigatorObserver {
   final VoidCallback onRouteChanged;
+  final VoidCallback onRoutePopped;
 
   _MainTabNavigatorObserver({
     required this.onRouteChanged,
+    required this.onRoutePopped,
   });
 
   @override
@@ -1878,6 +2339,7 @@ class _MainTabNavigatorObserver
     Route<dynamic>? previousRoute,
   ) {
     onRouteChanged();
+    onRoutePopped();
   }
 
   @override
