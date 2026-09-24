@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -370,6 +371,118 @@ class _CounterPageState
   }
 
   //==================================================
+  // 保存後の完全初期化
+  //==================================================
+
+  /// 小役カウンターの保存成功後に、
+  /// 入力画面を完全に初期状態へ戻す。
+  ///
+  /// ・フォーカス解除
+  /// ・キーボード非表示
+  /// ・Provider初期化
+  /// ・TextField初期化
+  /// ・スクロールトップ
+  Future<void> _resetAfterSave(
+    CounterProvider provider,
+  ) async {
+    //================================================
+    // フォーカス解除
+    //================================================
+    //
+    // 最後に入力していた
+    // タイトル・ゲーム数欄などに
+    // フォーカスが残るのを防ぐ。
+    //================================================
+
+    FocusManager.instance
+        .primaryFocus
+        ?.unfocus();
+
+    //================================================
+    // ソフトウェアキーボードを閉じる
+    //================================================
+    //
+    // フォーカス解除に加えて、
+    // TextInputへ明示的に非表示を通知する。
+    //
+    // キーボード非表示処理そのものに失敗しても、
+    // 既にSQLite保存済みのデータを
+    // 「保存失敗」と扱わないようにする。
+    //================================================
+
+    try {
+      await SystemChannels.textInput
+          .invokeMethod<void>(
+        'TextInput.hide',
+      );
+    } catch (_) {
+      // キーボード非表示に失敗しても、
+      // 保存済みデータの処理には影響させない。
+    }
+
+    //================================================
+    // Providerをリセット
+    //================================================
+    //
+    // provider.reset()の中で
+    // CounterDraftService.clearDraft()
+    // も実行される。
+    //================================================
+
+    await provider.reset();
+
+    if (!mounted) {
+      return;
+    }
+
+    //================================================
+    // TextFieldも初期状態へ戻す
+    //================================================
+
+    _startGameController.clear();
+    _currentGameController.clear();
+    _titleController.clear();
+
+    //================================================
+    // 次のフレームでスクロールトップ
+    //================================================
+    //
+    // MainPageからCounterPageへ接続されている
+    // PrimaryScrollControllerを使用する。
+    //
+    // PostFrameCallbackを使用することで、
+    // provider.reset()による画面更新後に
+    // スクロール位置をトップへ戻す。
+    //================================================
+
+    WidgetsBinding.instance
+        .addPostFrameCallback(
+      (_) {
+        if (!mounted) {
+          return;
+        }
+
+        final controller =
+            PrimaryScrollController
+                .maybeOf(context);
+
+        if (controller == null) {
+          return;
+        }
+
+        if (!controller.hasClients) {
+          return;
+        }
+
+        controller.jumpTo(
+          controller.position
+              .minScrollExtent,
+        );
+      },
+    );
+  }
+
+  //==================================================
   // 保存
   //==================================================
 
@@ -379,6 +492,9 @@ class _CounterPageState
   /// 2. SQLiteへ正式保存
   /// 3. 下書き削除
   /// 4. カウンター初期化
+  /// 5. フォーカス解除
+  /// 6. キーボード非表示
+  /// 7. スクロールトップ
   Future<void> _onSave(
     CounterProvider provider,
   ) async {
@@ -425,26 +541,16 @@ class _CounterPageState
 
       //================================================
       // SQLite保存成功後に
-      // カウンターを初期化
-      //
-      // provider.reset()の中で
-      // CounterDraftService.clearDraft()
-      // も実行される。
+      // 画面を完全初期化
       //================================================
 
-      await provider.reset();
+      await _resetAfterSave(
+        provider,
+      );
 
       if (!mounted) {
         return;
       }
-
-      //================================================
-      // TextFieldも初期状態へ戻す
-      //================================================
-
-      _startGameController.clear();
-      _currentGameController.clear();
-      _titleController.clear();
 
       //================================================
       // 保存完了
