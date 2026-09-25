@@ -10,6 +10,7 @@ import '../providers/home_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/common/section_title.dart';
 import '../widgets/common/stat_tile.dart';
 import '../widgets/search/service_icon.dart';
@@ -66,7 +67,8 @@ class _AnnualIncomePageState
 
   /// 収支表示
   String _formatIncome(int value) {
-    final prefix = value > 0 ? '+' : '';
+    final prefix =
+        value > 0 ? '+' : '';
 
     return '$prefix${_formatNumber(value)} 円';
   }
@@ -94,13 +96,17 @@ class _AnnualIncomePageState
     // 保存済みデータから年を取得
     //================================================
 
-    for (final record in provider.incomeRecords) {
+    for (final record
+        in provider.incomeRecords) {
       try {
-        final date = DateTime.parse(
+        final date =
+            DateTime.parse(
           record.date,
         );
 
-        years.add(date.year);
+        years.add(
+          date.year,
+        );
       } catch (_) {
         // 不正な日付は無視
       }
@@ -110,7 +116,8 @@ class _AnnualIncomePageState
     // 年をListへ変換
     //================================================
 
-    final result = years.toList();
+    final result =
+        years.toList();
 
     //================================================
     // 新しい年 → 古い年の順に並べる
@@ -135,11 +142,13 @@ class _AnnualIncomePageState
         .where(
           (record) {
             try {
-              final date = DateTime.parse(
+              final date =
+                  DateTime.parse(
                 record.date,
               );
 
-              return date.year == _selectedYear;
+              return date.year ==
+                  _selectedYear;
             } catch (_) {
               return false;
             }
@@ -158,7 +167,8 @@ class _AnnualIncomePageState
   ) {
     return records.fold(
       0,
-      (sum, record) => sum + record.profit,
+      (sum, record) =>
+          sum + record.profit,
     );
   }
 
@@ -202,7 +212,8 @@ class _AnnualIncomePageState
     List<IncomeRecord> records,
   ) {
     return records.where(
-      (record) => record.profit > 0,
+      (record) =>
+          record.profit > 0,
     ).length;
   }
 
@@ -212,13 +223,15 @@ class _AnnualIncomePageState
   double _yearlyWinRate(
     List<IncomeRecord> records,
   ) {
-    final games = _yearlyGames(records);
+    final games =
+        _yearlyGames(records);
 
     if (games == 0) {
       return 0.0;
     }
 
-    final wins = _yearlyWinGames(records);
+    final wins =
+        _yearlyWinGames(records);
 
     return wins / games * 100;
   }
@@ -231,13 +244,15 @@ class _AnnualIncomePageState
   int _yearlyAverageIncome(
     List<IncomeRecord> records,
   ) {
-    final games = _yearlyGames(records);
+    final games =
+        _yearlyGames(records);
 
     if (games == 0) {
       return 0;
     }
 
-    final income = _yearlyIncome(records);
+    final income =
+        _yearlyIncome(records);
 
     return (income / games).round();
   }
@@ -255,11 +270,13 @@ class _AnnualIncomePageState
         .where(
           (record) {
             try {
-              final date = DateTime.parse(
+              final date =
+                  DateTime.parse(
                 record.date,
               );
 
-              return date.month == month;
+              return date.month ==
+                  month;
             } catch (_) {
               return false;
             }
@@ -267,7 +284,8 @@ class _AnnualIncomePageState
         )
         .fold(
           0,
-          (sum, record) => sum + record.profit,
+          (sum, record) =>
+              sum + record.profit,
         );
   }
 
@@ -280,11 +298,13 @@ class _AnnualIncomePageState
         .where(
           (record) {
             try {
-              final date = DateTime.parse(
+              final date =
+                  DateTime.parse(
                 record.date,
               );
 
-              return date.month == month;
+              return date.month ==
+                  month;
             } catch (_) {
               return false;
             }
@@ -308,11 +328,13 @@ class _AnnualIncomePageState
         .where(
           (record) {
             try {
-              final date = DateTime.parse(
+              final date =
+                  DateTime.parse(
                 record.date,
               );
 
-              return date.month == month;
+              return date.month ==
+                  month;
             } catch (_) {
               return false;
             }
@@ -336,11 +358,13 @@ class _AnnualIncomePageState
         .where(
           (record) {
             try {
-              final date = DateTime.parse(
+              final date =
+                  DateTime.parse(
                 record.date,
               );
 
-              return date.month == month;
+              return date.month ==
+                  month;
             } catch (_) {
               return false;
             }
@@ -359,9 +383,12 @@ class _AnnualIncomePageState
   /// 同じデザイン言語を使用する。
   BoxDecoration _buildGlassDecoration() {
     return BoxDecoration(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+      gradient:
+          const LinearGradient(
+        begin:
+            Alignment.topLeft,
+        end:
+            Alignment.bottomRight,
         colors: [
           Color.fromRGBO(
             250,
@@ -388,9 +415,11 @@ class _AnnualIncomePageState
           1.0,
         ],
       ),
-      borderRadius: AppRadius.card,
+      borderRadius:
+          AppRadius.card,
       border: Border.all(
-        color: const Color.fromRGBO(
+        color:
+            const Color.fromRGBO(
           157,
           201,
           246,
@@ -400,7 +429,8 @@ class _AnnualIncomePageState
       ),
       boxShadow: const [
         BoxShadow(
-          color: Color.fromRGBO(
+          color:
+              Color.fromRGBO(
             92,
             143,
             196,
@@ -408,13 +438,15 @@ class _AnnualIncomePageState
           ),
           blurRadius: 22,
           spreadRadius: 2,
-          offset: Offset(
+          offset:
+              Offset(
             0,
             10,
           ),
         ),
         BoxShadow(
-          color: Color.fromRGBO(
+          color:
+              Color.fromRGBO(
             125,
             170,
             215,
@@ -422,7 +454,8 @@ class _AnnualIncomePageState
           ),
           blurRadius: 8,
           spreadRadius: 0,
-          offset: Offset(
+          offset:
+              Offset(
             0,
             3,
           ),
@@ -439,14 +472,17 @@ class _AnnualIncomePageState
     BuildContext context,
     HomeProvider provider,
   ) {
-    final years = _availableYears(provider);
+    final years =
+        _availableYears(provider);
 
     //================================================
     // 現在の選択年が一覧に存在するか確認
     //================================================
 
     final selectedYear =
-        years.contains(_selectedYear)
+        years.contains(
+                _selectedYear,
+              )
             ? _selectedYear
             : years.first;
 
@@ -454,31 +490,37 @@ class _AnnualIncomePageState
     // 選択年を補正
     //================================================
 
-    if (_selectedYear != selectedYear) {
-      _selectedYear = selectedYear;
+    if (_selectedYear !=
+        selectedYear) {
+      _selectedYear =
+          selectedYear;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal:
+            AppSpacing.lg,
+        vertical:
+            AppSpacing.sm,
       ),
-      decoration: _buildGlassDecoration(),
+      decoration:
+          _buildGlassDecoration(),
       child: Row(
         children: [
           //========================================
-                  // Googleカレンダー 3Dアイコン
-                  //========================================
+          // Googleカレンダー 3Dアイコン
+          //========================================
 
-                  const ServiceIcon(
-                    icon: 'google_calendar',
-                    size: 38,
-                  ),
+          const ServiceIcon(
+            icon: 'google_calendar',
+            size: 38,
+          ),
 
-                  const SizedBox(
-                    width:
-                        AppSpacing.md,
-                  ),
+          const SizedBox(
+            width:
+                AppSpacing.md,
+          ),
 
           //============================================
           // 表示する年
@@ -487,14 +529,16 @@ class _AnnualIncomePageState
           Expanded(
             child: Text(
               '表示年を選択',
-              textAlign: TextAlign.center,
+              textAlign:
+                  TextAlign.center,
               style: Theme.of(
                 context,
               )
                   .textTheme
                   .titleMedium
                   ?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                   ),
             ),
           ),
@@ -504,41 +548,55 @@ class _AnnualIncomePageState
           //============================================
 
           DropdownButtonHideUnderline(
-            child: DropdownButton<int>(
-              value: selectedYear,
-              isDense: true,
-              alignment: Alignment.centerRight,
+            child:
+                DropdownButton<int>(
+              value:
+                  selectedYear,
+              isDense:
+                  true,
+              alignment:
+                  Alignment.centerRight,
               items: years
                   .map(
-                    (year) => DropdownMenuItem<int>(
+                    (
+                      year,
+                    ) =>
+                        DropdownMenuItem<int>(
                       value: year,
                       child: Text(
                         '$year年',
-                        style: Theme.of(
+                        style:
+                            Theme.of(
                           context,
                         )
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight:
-                                  FontWeight.bold,
-                            ),
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                       ),
                     ),
                   )
                   .toList(),
-              onChanged: (value) {
-                if (value == null) {
+              onChanged:
+                  (value) {
+                if (value ==
+                    null) {
                   return;
                 }
 
-                if (value == _selectedYear) {
+                if (value ==
+                    _selectedYear) {
                   return;
                 }
 
-                setState(() {
-                  _selectedYear = value;
-                });
+                setState(
+                  () {
+                    _selectedYear =
+                        value;
+                  },
+                );
               },
             ),
           ),
@@ -555,11 +613,16 @@ class _AnnualIncomePageState
     BuildContext context,
     List<IncomeRecord> records,
   ) {
-    final income = _yearlyIncome(records);
+    final income =
+        _yearlyIncome(records);
 
-    final investment = _yearlyInvestment(records);
+    final investment =
+        _yearlyInvestment(
+      records,
+    );
 
-    final recovery = _yearlyRecovery(records);
+    final recovery =
+        _yearlyRecovery(records);
 
     final incomeColor =
         income > 0
@@ -571,10 +634,13 @@ class _AnnualIncomePageState
                     .onSurface;
 
     return Container(
-      padding: AppSpacing.card,
-      decoration: _buildGlassDecoration(),
+      padding:
+          AppSpacing.card,
+      decoration:
+          _buildGlassDecoration(),
       child: Padding(
-        padding: const EdgeInsets.all(
+        padding:
+            const EdgeInsets.all(
           AppSpacing.md,
         ),
         child: Column(
@@ -583,43 +649,53 @@ class _AnnualIncomePageState
           children: [
             Text(
               '$_selectedYear年累計収支',
-              style: Theme.of(
+              style:
+                  Theme.of(
                 context,
               )
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             Center(
               child: Text(
-                _formatIncome(income),
-                style: Theme.of(
+                _formatIncome(
+                  income,
+                ),
+                style:
+                    Theme.of(
                   context,
                 )
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(
-                      color: incomeColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(
+                          color:
+                              incomeColor,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
               ),
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             const Divider(),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             Row(
@@ -716,18 +792,25 @@ class _AnnualIncomePageState
     BuildContext context,
     List<IncomeRecord> records,
   ) {
-    final games = _yearlyGames(records);
+    final games =
+        _yearlyGames(records);
 
-    final winGames = _yearlyWinGames(records);
+    final winGames =
+        _yearlyWinGames(records);
 
-    final winRate = _yearlyWinRate(records);
+    final winRate =
+        _yearlyWinRate(records);
 
     final averageIncome =
-        _yearlyAverageIncome(records);
+        _yearlyAverageIncome(
+      records,
+    );
 
     return Container(
-      padding: AppSpacing.card,
-      decoration: _buildGlassDecoration(),
+      padding:
+          AppSpacing.card,
+      decoration:
+          _buildGlassDecoration(),
 
       //================================================
       // ホーム画面のStatisticsCardと同じ構造にする。
@@ -746,7 +829,8 @@ class _AnnualIncomePageState
       // 同じ横幅・同じサイズになる。
       //================================================
 
-      child: Column(
+      child:
+          Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
@@ -755,7 +839,8 @@ class _AnnualIncomePageState
           // ==========================================
 
           SectionTitle(
-            title: '$_selectedYear年統計',
+            title:
+                '$_selectedYear年統計',
           ),
 
           AppSpacing.gapLg,
@@ -767,9 +852,12 @@ class _AnnualIncomePageState
           Row(
             children: [
               Expanded(
-                child: StatTile(
-                  label: '遊技回数',
-                  value: '$games 回',
+                child:
+                    StatTile(
+                  label:
+                      '遊技回数',
+                  value:
+                      '$games 回',
                   iconAsset:
                       'assets/images/statistics/play_count.png',
                 ),
@@ -778,9 +866,12 @@ class _AnnualIncomePageState
               AppSpacing.gapMd,
 
               Expanded(
-                child: StatTile(
-                  label: '勝利回数',
-                  value: '$winGames 回',
+                child:
+                    StatTile(
+                  label:
+                      '勝利回数',
+                  value:
+                      '$winGames 回',
                   iconAsset:
                       'assets/images/statistics/win_count.png',
                   valueColor:
@@ -799,8 +890,10 @@ class _AnnualIncomePageState
           Row(
             children: [
               Expanded(
-                child: StatTile(
-                  label: '勝率',
+                child:
+                    StatTile(
+                  label:
+                      '勝率',
                   value:
                       '${winRate.toStringAsFixed(1)}%',
                   iconAsset:
@@ -813,8 +906,10 @@ class _AnnualIncomePageState
               AppSpacing.gapMd,
 
               Expanded(
-                child: StatTile(
-                  label: '平均収支',
+                child:
+                    StatTile(
+                  label:
+                      '平均収支',
                   valueWidget:
                       _buildAverageIncome(
                     averageIncome,
@@ -845,22 +940,28 @@ class _AnnualIncomePageState
     int averageIncome,
   ) {
     return SizedBox(
-      width: double.infinity,
+      width:
+          double.infinity,
       child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.center,
-        child: Text(
+        fit:
+            BoxFit.scaleDown,
+        alignment:
+            Alignment.center,
+        child:
+            Text(
           '${averageIncome >= 0 ? '+' : ''}'
           '${_formatNumber(averageIncome)}円',
           maxLines: 1,
           softWrap: false,
-          style: TextStyle(
+          style:
+              TextStyle(
             color:
                 averageIncome >= 0
                     ? AppColors.profit
                     : AppColors.loss,
             fontSize: 22,
-            fontWeight: FontWeight.bold,
+            fontWeight:
+                FontWeight.bold,
           ),
         ),
       ),
@@ -877,11 +978,14 @@ class _AnnualIncomePageState
     final maxValue =
         monthlyValues.fold<double>(
       0,
-      (current, value) =>
+      (
+        current,
+        value,
+      ) =>
           math.max(
-            current,
-            value.abs().toDouble(),
-          ),
+        current,
+        value.abs().toDouble(),
+      ),
     );
 
     if (maxValue == 0) {
@@ -897,11 +1001,14 @@ class _AnnualIncomePageState
     final maxValue =
         monthlyValues.fold<double>(
       0,
-      (current, value) =>
+      (
+        current,
+        value,
+      ) =>
           math.max(
-            current,
-            value.abs().toDouble(),
-          ),
+        current,
+        value.abs().toDouble(),
+      ),
     );
 
     if (maxValue == 0) {
@@ -918,15 +1025,18 @@ class _AnnualIncomePageState
   String _formatAxisValue(
     double value,
   ) {
-    final absValue = value.abs();
+    final absValue =
+        value.abs();
 
     String result;
 
-    if (absValue >= 10000) {
+    if (absValue >=
+        10000) {
       result =
           '${(absValue / 10000).round()}万';
     } else {
-      result = '${absValue.round()}';
+      result =
+          '${absValue.round()}';
     }
 
     if (value < 0) {
@@ -950,23 +1060,26 @@ class _AnnualIncomePageState
     double minY,
     double maxY,
   ) {
-    const tolerance = 0.001;
+    const tolerance =
+        0.001;
 
     final isMax =
-        (value - maxY).abs() <=
-            math.max(
-              maxY.abs(),
-              1,
-            ) *
-            tolerance;
+        (value - maxY)
+                    .abs() <=
+                math.max(
+                  maxY.abs(),
+                  1,
+                ) *
+                    tolerance;
 
     final isMin =
-        (value - minY).abs() <=
-            math.max(
-              minY.abs(),
-              1,
-            ) *
-            tolerance;
+        (value - minY)
+                    .abs() <=
+                math.max(
+                  minY.abs(),
+                  1,
+                ) *
+                    tolerance;
 
     return isMax || isMin;
   }
@@ -982,7 +1095,8 @@ class _AnnualIncomePageState
     final monthlyValues =
         List<int>.generate(
       12,
-      (index) => _monthlyIncome(
+      (index) =>
+          _monthlyIncome(
         records,
         index + 1,
       ),
@@ -999,10 +1113,13 @@ class _AnnualIncomePageState
     );
 
     return Container(
-      padding: AppSpacing.card,
-      decoration: _buildGlassDecoration(),
+      padding:
+          AppSpacing.card,
+      decoration:
+          _buildGlassDecoration(),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding:
+            const EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.md,
           AppSpacing.md,
@@ -1014,18 +1131,21 @@ class _AnnualIncomePageState
           children: [
             Text(
               '$_selectedYear年月別収支',
-              style: Theme.of(
+              style:
+                  Theme.of(
                 context,
               )
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             SizedBox(
@@ -1040,7 +1160,8 @@ class _AnnualIncomePageState
               // 1月～12月の上下間隔を確保する。
               //================================================
               height: 400,
-              child: BarChart(
+              child:
+                  BarChart(
                 BarChartData(
                   //================================================
                   // 横棒グラフ
@@ -1050,49 +1171,35 @@ class _AnnualIncomePageState
                   // 横棒グラフとして表示する。
                   //================================================
 
-                  rotationQuarterTurns: 1,
+                  rotationQuarterTurns:
+                      1,
 
-                  minY: minY,
-                  maxY: maxY,
+                  minY:
+                      minY,
+                  maxY:
+                      maxY,
 
-                  baselineY: 0,
+                  baselineY:
+                      0,
 
                   alignment:
-                      BarChartAlignment.spaceAround,
+                      BarChartAlignment
+                          .spaceAround,
 
                   //================================================
                   // グリッド
                   //================================================
-                  //
-                  // rotationQuarterTurns: 1 のため、
-                  //
-                  // Chart上の「横線」
-                  //       ↓ 90度回転
-                  // 画面上の「縦線」
-                  //
-                  // となる。
-                  //
-                  // 金額目盛りはY軸の値なので、
-                  // drawHorizontalLineを使用する。
-                  //
-                  // 画面上では縦方向の点線として表示される。
-                  //
-                  // 月ごとの横線は表示しない。
-                  //================================================
 
-                  gridData: FlGridData(
-                    show: true,
+                  gridData:
+                      FlGridData(
+                    show:
+                        true,
 
-                    //================================================
-                    // 画面上で金額目盛りを
-                    // 「縦の点線」にするため、
-                    // Chart内部では横線を描画する。
-                    //================================================
+                    drawHorizontalLine:
+                        true,
 
-                    drawHorizontalLine: true,
-
-                    // Chart内部の縦線は非表示。
-                    drawVerticalLine: false,
+                    drawVerticalLine:
+                        false,
 
                     getDrawingHorizontalLine:
                         (value) {
@@ -1104,7 +1211,8 @@ class _AnnualIncomePageState
                           194,
                           0.65,
                         ),
-                        strokeWidth: 1,
+                        strokeWidth:
+                            1,
                         dashArray: [
                           8,
                           6,
@@ -1113,16 +1221,20 @@ class _AnnualIncomePageState
                     },
                   ),
 
-                  borderData: FlBorderData(
-                    show: false,
+                  borderData:
+                      FlBorderData(
+                    show:
+                        false,
                   ),
 
                   //================================================
                   // Tooltip
                   //================================================
 
-                  barTouchData: BarTouchData(
-                    enabled: true,
+                  barTouchData:
+                      BarTouchData(
+                    enabled:
+                        true,
 
                     touchTooltipData:
                         BarTouchTooltipData(
@@ -1131,7 +1243,9 @@ class _AnnualIncomePageState
                       //================================================
 
                       getTooltipColor:
-                          (group) {
+                          (
+                        group,
+                      ) {
                         return const Color.fromRGBO(
                           185,
                           220,
@@ -1147,19 +1261,24 @@ class _AnnualIncomePageState
 
                       tooltipPadding:
                           const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
+                        horizontal:
+                            14,
+                        vertical:
+                            10,
                       ),
 
-                      tooltipMargin: 8,
+                      tooltipMargin:
+                          8,
 
                       //================================================
                       // 5.0インチ端末でTooltipが
                       // 画面外へはみ出すことを防ぐ。
                       //================================================
 
-                      fitInsideHorizontally: true,
-                      fitInsideVertically: true,
+                      fitInsideHorizontally:
+                          true,
+                      fitInsideVertically:
+                          true,
 
                       getTooltipItem: (
                         group,
@@ -1168,7 +1287,8 @@ class _AnnualIncomePageState
                         rodIndex,
                       ) {
                         final month =
-                            group.x + 1;
+                            group.x +
+                                1;
 
                         final value =
                             monthlyValues[
@@ -1194,7 +1314,8 @@ class _AnnualIncomePageState
                                 incomeColor,
                             fontWeight:
                                 FontWeight.bold,
-                            fontSize: 16,
+                            fontSize:
+                                16,
                           ),
                         );
                       },
@@ -1205,7 +1326,8 @@ class _AnnualIncomePageState
                   // 目盛り
                   //================================================
 
-                  titlesData: FlTitlesData(
+                  titlesData:
+                      FlTitlesData(
                     //================================================
                     // 上側
                     //================================================
@@ -1214,34 +1336,31 @@ class _AnnualIncomePageState
                         const AxisTitles(
                       sideTitles:
                           SideTitles(
-                        showTitles: false,
+                        showTitles:
+                            false,
                       ),
                     ),
 
                     //================================================
                     // 右側
                     //================================================
-                    //
-                    // rotationQuarterTurns: 1
-                    // により、rightTitlesは画面下側へ
-                    // 回転して表示される。
-                    //
-                    // ここへ金額目盛りを配置する。
-                    //================================================
 
                     rightTitles:
                         AxisTitles(
                       sideTitles:
                           SideTitles(
-                        showTitles: true,
+                        showTitles:
+                            true,
 
                         //================================================
                         // 金額ラベルの領域。
                         //================================================
 
-                        reservedSize: 32,
+                        reservedSize:
+                            32,
 
-                        getTitlesWidget: (
+                        getTitlesWidget:
+                            (
                           value,
                           meta,
                         ) {
@@ -1263,9 +1382,12 @@ class _AnnualIncomePageState
                           //================================================
 
                           return SideTitleWidget(
-                            meta: meta,
-                            space: 4,
-                            child: Text(
+                            meta:
+                                meta,
+                            space:
+                                4,
+                            child:
+                                Text(
                               _formatAxisValue(
                                 value,
                               ),
@@ -1273,9 +1395,11 @@ class _AnnualIncomePageState
                                   TextAlign.center,
                               style:
                                   const TextStyle(
-                                fontSize: 11,
+                                fontSize:
+                                    11,
                                 fontWeight:
-                                    FontWeight.normal,
+                                    FontWeight
+                                        .normal,
                               ),
                             ),
                           );
@@ -1286,48 +1410,36 @@ class _AnnualIncomePageState
                     //================================================
                     // 左側
                     //================================================
-                    //
-                    // 月表示はbottomTitlesへ設定する。
-                    // rotationQuarterTurns: 1 により
-                    // 実際の画面では左側へ回転して表示される。
-                    //================================================
 
                     leftTitles:
                         const AxisTitles(
                       sideTitles:
                           SideTitles(
-                        showTitles: false,
+                        showTitles:
+                            false,
                       ),
                     ),
 
                     //================================================
                     // 下側
                     //================================================
-                    //
-                    // 月表示を設定する。
-                    //
-                    // rotationQuarterTurns: 1 により、
-                    // 実際の画面ではグラフ左側へ
-                    // 配置される。
-                    //================================================
 
                     bottomTitles:
                         AxisTitles(
                       sideTitles:
                           SideTitles(
-                        showTitles: true,
+                        showTitles:
+                            true,
 
                         //================================================
                         // 月ラベル用の領域をさらに縮小。
-                        //
-                        // 22にすることで、
-                        // カード左端から月ラベルまでの
-                        // 余白を縮める。
                         //================================================
 
-                        reservedSize: 22,
+                        reservedSize:
+                            22,
 
-                        getTitlesWidget: (
+                        getTitlesWidget:
+                            (
                           value,
                           meta,
                         ) {
@@ -1342,22 +1454,28 @@ class _AnnualIncomePageState
                           }
 
                           return SideTitleWidget(
-                            meta: meta,
+                            meta:
+                                meta,
 
                             //================================================
                             // 月ラベルとグラフとの距離を
                             // できるだけ小さくする。
                             //================================================
 
-                            space: 0,
+                            space:
+                                0,
 
-                            child: Text(
+                            child:
+                                Text(
                               '$month月',
-                              maxLines: 1,
-                              softWrap: false,
+                              maxLines:
+                                  1,
+                              softWrap:
+                                  false,
                               style:
                                   const TextStyle(
-                                fontSize: 11,
+                                fontSize:
+                                    11,
                               ),
                             ),
                           );
@@ -1397,13 +1515,15 @@ class _AnnualIncomePageState
                         x: index,
                         barRods: [
                           BarChartRodData(
-                            toY: value
-                                .toDouble(),
+                            toY:
+                                value.toDouble(),
 
                             // 横棒の太さ
-                            width: 16,
+                            width:
+                                16,
 
-                            color: rodColor,
+                            color:
+                                rodColor,
 
                             borderRadius:
                                 BorderRadius
@@ -1433,10 +1553,13 @@ class _AnnualIncomePageState
     List<IncomeRecord> records,
   ) {
     return Container(
-      padding: AppSpacing.card,
-      decoration: _buildGlassDecoration(),
+      padding:
+          AppSpacing.card,
+      decoration:
+          _buildGlassDecoration(),
       child: Padding(
-        padding: const EdgeInsets.all(
+        padding:
+            const EdgeInsets.all(
           AppSpacing.md,
         ),
         child: Column(
@@ -1445,33 +1568,46 @@ class _AnnualIncomePageState
           children: [
             Text(
               '$_selectedYear年月別収支一覧',
-              style: Theme.of(
+              style:
+                  Theme.of(
                 context,
               )
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
             ),
 
             const SizedBox(
-              height: AppSpacing.md,
+              height:
+                  AppSpacing.md,
             ),
 
             ListView.separated(
-              shrinkWrap: true,
+              shrinkWrap:
+                  true,
               physics:
                   const NeverScrollableScrollPhysics(),
-              itemCount: 12,
+              itemCount:
+                  12,
               separatorBuilder:
-                  (context, index) =>
+                  (
+                context,
+                index,
+              ) =>
                       const Divider(
-                height: 1,
+                height:
+                    1,
               ),
               itemBuilder:
-                  (context, index) {
-                final month = index + 1;
+                  (
+                context,
+                index,
+              ) {
+                final month =
+                    index + 1;
 
                 final income =
                     _monthlyIncome(
@@ -1518,13 +1654,16 @@ class _AnnualIncomePageState
                     vertical:
                         AppSpacing.sm,
                   ),
-                  child: Column(
+                  child:
+                      Column(
                     children: [
                       Row(
                         children: [
                           SizedBox(
-                            width: 48,
-                            child: Text(
+                            width:
+                                48,
+                            child:
+                                Text(
                               '$month月',
                               style:
                                   const TextStyle(
@@ -1535,7 +1674,8 @@ class _AnnualIncomePageState
                           ),
 
                           Expanded(
-                            child: Text(
+                            child:
+                                Text(
                               _formatIncome(
                                 income,
                               ),
@@ -1554,27 +1694,30 @@ class _AnnualIncomePageState
                       ),
 
                       const SizedBox(
-                        height: 6,
+                        height:
+                            6,
                       ),
 
                       Row(
                         children: [
                           //================================================
                           // 投資
-                          //
-                          // FittedBox + scaleDown により、
-                          // 5.0インチ端末など横幅が狭い場合でも
-                          // 文字を自動縮小して必ず1行に収める。
                           //================================================
+
                           Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
+                            child:
+                                FittedBox(
+                              fit:
+                                  BoxFit.scaleDown,
                               alignment:
                                   Alignment.centerLeft,
-                              child: Text(
+                              child:
+                                  Text(
                                 '投資${_formatNumber(investment)}円',
-                                maxLines: 1,
-                                softWrap: false,
+                                maxLines:
+                                    1,
+                                softWrap:
+                                    false,
                                 style:
                                     Theme.of(
                                   context,
@@ -1587,20 +1730,22 @@ class _AnnualIncomePageState
 
                           //================================================
                           // 回収
-                          //
-                          // 「回収1,022,000円」のように
-                          // 金額が大きくなった場合でも
-                          // 2行にならないようにする。
                           //================================================
+
                           Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
+                            child:
+                                FittedBox(
+                              fit:
+                                  BoxFit.scaleDown,
                               alignment:
                                   Alignment.center,
-                              child: Text(
+                              child:
+                                  Text(
                                 '回収${_formatNumber(recovery)}円',
-                                maxLines: 1,
-                                softWrap: false,
+                                maxLines:
+                                    1,
+                                softWrap:
+                                    false,
                                 style:
                                     Theme.of(
                                   context,
@@ -1613,18 +1758,22 @@ class _AnnualIncomePageState
 
                           //================================================
                           // 遊技回数
-                          //
-                          // こちらも念のため1行固定。
                           //================================================
+
                           Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
+                            child:
+                                FittedBox(
+                              fit:
+                                  BoxFit.scaleDown,
                               alignment:
                                   Alignment.centerRight,
-                              child: Text(
+                              child:
+                                  Text(
                                 '$games回',
-                                maxLines: 1,
-                                softWrap: false,
+                                maxLines:
+                                    1,
+                                softWrap:
+                                    false,
                                 style:
                                     Theme.of(
                                   context,
@@ -1662,7 +1811,8 @@ class _AnnualIncomePageState
         _yearlyRecords(provider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar:
+          AppBar(
         title: const Text(
           '年間収支グラフ',
         ),
@@ -1670,76 +1820,115 @@ class _AnnualIncomePageState
       ),
 
       body: SafeArea(
-        child: provider.isLoading
-            ? const Center(
-                child:
-                    CircularProgressIndicator(),
-              )
-            : SingleChildScrollView(
-                padding: AppSpacing.page,
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
-                  children: [
-                    //================================
-                    // 年選択
-                    //================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // 年間収支グラフは閲覧・分析系画面なので、
+            // AppBar直下に広告を表示する。
+            //
+            // 広告はスクロールコンテンツの外側に配置するため、
+            // グラフや一覧をスクロールしても
+            // 広告エリア自体は固定される。
+            //================================================
 
-                    _buildYearSelector(
-                      context,
-                      provider,
-                    ),
+            const AdBanner(),
 
-                    AppSpacing.gapLg,
+            //================================================
+            // 既存の年間収支コンテンツ
+            //================================================
+            //
+            // Expandedの中に既存の
+            // SingleChildScrollViewを配置する。
+            //
+            // これにより、広告追加後も
+            // 年選択・年間累計・グラフ・統計・月別一覧の
+            // 既存スクロール動作を維持する。
+            //================================================
 
-                    //================================
-                    // 年間累計収支
-                    //================================
+            Expanded(
+              child:
+                  provider.isLoading
+                      ? const Center(
+                          child:
+                              CircularProgressIndicator(),
+                        )
+                      : SingleChildScrollView(
+                          padding:
+                              AppSpacing.page,
+                          child:
+                              Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment
+                                    .stretch,
+                            children: [
+                              //================================
+                              // 年選択
+                              //================================
 
-                    _buildYearlyIncomeCard(
-                      context,
-                      records,
-                    ),
+                              _buildYearSelector(
+                                context,
+                                provider,
+                              ),
 
-                    AppSpacing.gapLg,
+                              AppSpacing.gapLg,
 
-                    //================================
-                    // 月別収支横棒グラフ
-                    //================================
+                              //================================
+                              // 年間累計収支
+                              //================================
 
-                    _buildMonthlyBarChart(
-                      context,
-                      records,
-                    ),
+                              _buildYearlyIncomeCard(
+                                context,
+                                records,
+                              ),
 
-                    AppSpacing.gapLg,
+                              AppSpacing.gapLg,
 
-                    //================================
-                    // 年間統計
-                    //================================
+                              //================================
+                              // 月別収支横棒グラフ
+                              //================================
 
-                    _buildAnnualStatisticsCard(
-                      context,
-                      records,
-                    ),
+                              _buildMonthlyBarChart(
+                                context,
+                                records,
+                              ),
 
-                    AppSpacing.gapLg,
+                              AppSpacing.gapLg,
 
-                    //================================
-                    // 月別収支一覧
-                    //================================
+                              //================================
+                              // 年間統計
+                              //================================
 
-                    _buildMonthlyIncomeList(
-                      context,
-                      records,
-                    ),
+                              _buildAnnualStatisticsCard(
+                                context,
+                                records,
+                              ),
 
-                    const SizedBox(
-                      height: AppSpacing.lg,
-                    ),
-                  ],
-                ),
-              ),
+                              AppSpacing.gapLg,
+
+                              //================================
+                              // 月別収支一覧
+                              //================================
+
+                              _buildMonthlyIncomeList(
+                                context,
+                                records,
+                              ),
+
+                              const SizedBox(
+                                height:
+                                    AppSpacing.lg,
+                              ),
+                            ],
+                          ),
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }

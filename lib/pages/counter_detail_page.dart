@@ -7,6 +7,7 @@ import '../services/dialog_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/counter/koyaku_icon.dart';
 import 'counter_edit_page.dart';
@@ -549,328 +550,358 @@ class CounterDetailPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding:
-              AppSpacing.page,
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
-            children: [
-              //================================================
-              // 基本情報
-              //================================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // 小役DATA詳細は閲覧・分析系画面のため、
+            // AppBar直下に広告を表示する。
+            //
+            // 編集画面はCounterEditPageとして
+            // 別画面で管理されているため、
+            // この画面のみ広告を表示する。
+            //================================================
 
-              _buildPremiumGlassCard(
+            const AdBanner(),
+
+            //================================================
+            // 詳細コンテンツ
+            //================================================
+            //
+            // Expandedの中に既存の
+            // SingleChildScrollViewを配置する。
+            //================================================
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    AppSpacing.page,
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      '基本情報',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
+                    //================================================
+                    // 基本情報
+                    //================================================
+
+                    _buildPremiumGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '基本情報',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                           ),
-                    ),
 
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
+                          const SizedBox(
+                            height:
+                                AppSpacing.md,
+                          ),
 
-                    _buildDetailRow(
-                      context,
-                      label: '日付',
-                      value:
-                          _formatDate(
-                        record.date,
+                          _buildDetailRow(
+                            context,
+                            label: '日付',
+                            value:
+                                _formatDate(
+                              record.date,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          _buildDetailRow(
+                            context,
+                            label: 'タイトル',
+                            value: title,
+                          ),
+                        ],
                       ),
                     ),
 
-                    const Divider(),
+                    AppSpacing.gapLg,
 
-                    _buildDetailRow(
-                      context,
-                      label: 'タイトル',
-                      value: title,
+                    //================================================
+                    // ゲーム数
+                    //================================================
+
+                    _buildPremiumGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ゲーム数',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height:
+                                AppSpacing.md,
+                          ),
+
+                          _buildDetailRow(
+                            context,
+                            label: '開始ゲーム数',
+                            value:
+                                '${_formatNumber(record.startGame)}G',
+                          ),
+
+                          const Divider(),
+
+                          _buildDetailRow(
+                            context,
+                            label: '現在ゲーム数',
+                            value:
+                                '${_formatNumber(record.currentGame)}G',
+                          ),
+
+                          const Divider(),
+
+                          _buildDetailRow(
+                            context,
+                            label: '遊技ゲーム数',
+                            value:
+                                '${_formatNumber(playGame)}G',
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    //================================================
+                    // 小役
+                    //================================================
+
+                    _buildPremiumGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '小役カウント',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height:
+                                AppSpacing.md,
+                          ),
+
+                          _buildCounterRow(
+                            context,
+                            type:
+                                KoyakuType.cherry,
+                            label: 'チェリー',
+                            count:
+                                record.cherry,
+                          ),
+
+                          const Divider(),
+
+                          _buildCounterRow(
+                            context,
+                            type:
+                                KoyakuType.bell,
+                            label: 'ベル',
+                            count:
+                                record.bell,
+                          ),
+
+                          const Divider(),
+
+                          _buildCounterRow(
+                            context,
+                            type:
+                                KoyakuType.watermelon,
+                            label: 'スイカ',
+                            count:
+                                record.suika,
+                          ),
+
+                          const Divider(),
+
+                          _buildCounterRow(
+                            context,
+                            type:
+                                KoyakuType.grape,
+                            label: 'ブドウ',
+                            count:
+                                record.grape,
+                          ),
+
+                          const Divider(),
+
+                          _buildCounterRow(
+                            context,
+                            type:
+                                KoyakuType.chance,
+                            label: 'チャンス目',
+                            count:
+                                record.chance,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    //================================================
+                    // 確率
+                    //================================================
+
+                    _buildPremiumGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '出現確率',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height:
+                                AppSpacing.md,
+                          ),
+
+                          _buildProbabilityRow(
+                            context,
+                            type:
+                                KoyakuType.cherry,
+                            label: 'チェリー',
+                            probability:
+                                _probability(
+                              record.cherry,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          _buildProbabilityRow(
+                            context,
+                            type:
+                                KoyakuType.bell,
+                            label: 'ベル',
+                            probability:
+                                _probability(
+                              record.bell,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          _buildProbabilityRow(
+                            context,
+                            type:
+                                KoyakuType.watermelon,
+                            label: 'スイカ',
+                            probability:
+                                _probability(
+                              record.suika,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          _buildProbabilityRow(
+                            context,
+                            type:
+                                KoyakuType.grape,
+                            label: 'ブドウ',
+                            probability:
+                                _probability(
+                              record.grape,
+                            ),
+                          ),
+
+                          const Divider(),
+
+                          _buildProbabilityRow(
+                            context,
+                            type:
+                                KoyakuType.chance,
+                            label: 'チャンス目',
+                            probability:
+                                _probability(
+                              record.chance,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    //================================================
+                    // 編集
+                    //================================================
+
+                    AppSpacing.gapLg,
+
+                    PrimaryButton(
+                      text: '編集',
+                      iconWidget:
+                          const ActionButtonIcon.edit(
+                        size: 38,
+                      ),
+                      onPressed: () =>
+                          _openEditPage(
+                        context,
+                      ),
+                    ),
+
+                    //================================================
+                    // 削除
+                    //================================================
+
+                    AppSpacing.gapMd,
+
+                    PrimaryButton(
+                      text: '削除',
+                      iconWidget:
+                          const ActionButtonIcon.delete(
+                        size: 38,
+                      ),
+                      backgroundColor:
+                          Colors.red.shade700,
+                      onPressed: () =>
+                          _onDelete(
+                        context,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              AppSpacing.gapLg,
-
-              //================================================
-              // ゲーム数
-              //================================================
-
-              _buildPremiumGlassCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ゲーム数',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
-
-                    _buildDetailRow(
-                      context,
-                      label: '開始ゲーム数',
-                      value:
-                          '${_formatNumber(record.startGame)}G',
-                    ),
-
-                    const Divider(),
-
-                    _buildDetailRow(
-                      context,
-                      label: '現在ゲーム数',
-                      value:
-                          '${_formatNumber(record.currentGame)}G',
-                    ),
-
-                    const Divider(),
-
-                    _buildDetailRow(
-                      context,
-                      label: '遊技ゲーム数',
-                      value:
-                          '${_formatNumber(playGame)}G',
-                    ),
-                  ],
-                ),
-              ),
-
-              AppSpacing.gapLg,
-
-              //================================================
-              // 小役
-              //================================================
-
-              _buildPremiumGlassCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '小役カウント',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
-
-                    _buildCounterRow(
-                      context,
-                      type:
-                          KoyakuType.cherry,
-                      label: 'チェリー',
-                      count:
-                          record.cherry,
-                    ),
-
-                    const Divider(),
-
-                    _buildCounterRow(
-                      context,
-                      type:
-                          KoyakuType.bell,
-                      label: 'ベル',
-                      count:
-                          record.bell,
-                    ),
-
-                    const Divider(),
-
-                    _buildCounterRow(
-                      context,
-                      type:
-                          KoyakuType.watermelon,
-                      label: 'スイカ',
-                      count:
-                          record.suika,
-                    ),
-
-                    const Divider(),
-
-                    _buildCounterRow(
-                      context,
-                      type:
-                          KoyakuType.grape,
-                      label: 'ブドウ',
-                      count:
-                          record.grape,
-                    ),
-
-                    const Divider(),
-
-                    _buildCounterRow(
-                      context,
-                      type:
-                          KoyakuType.chance,
-                      label: 'チャンス目',
-                      count:
-                          record.chance,
-                    ),
-                  ],
-                ),
-              ),
-
-              AppSpacing.gapLg,
-
-              //================================================
-              // 確率
-              //================================================
-
-              _buildPremiumGlassCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '出現確率',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
-
-                    const SizedBox(
-                      height:
-                          AppSpacing.md,
-                    ),
-
-                    _buildProbabilityRow(
-                      context,
-                      type:
-                          KoyakuType.cherry,
-                      label: 'チェリー',
-                      probability:
-                          _probability(
-                        record.cherry,
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    _buildProbabilityRow(
-                      context,
-                      type:
-                          KoyakuType.bell,
-                      label: 'ベル',
-                      probability:
-                          _probability(
-                        record.bell,
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    _buildProbabilityRow(
-                      context,
-                      type:
-                          KoyakuType.watermelon,
-                      label: 'スイカ',
-                      probability:
-                          _probability(
-                        record.suika,
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    _buildProbabilityRow(
-                      context,
-                      type:
-                          KoyakuType.grape,
-                      label: 'ブドウ',
-                      probability:
-                          _probability(
-                        record.grape,
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    _buildProbabilityRow(
-                      context,
-                      type:
-                          KoyakuType.chance,
-                      label: 'チャンス目',
-                      probability:
-                          _probability(
-                        record.chance,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              //================================================
-              // 編集
-              //================================================
-
-              AppSpacing.gapLg,
-
-              PrimaryButton(
-                text: '編集',
-                iconWidget:
-                    const ActionButtonIcon.edit(
-                  size: 38,
-                ),
-                onPressed: () =>
-                    _openEditPage(
-                  context,
-                ),
-              ),
-
-              //================================================
-              // 削除
-              //================================================
-
-              AppSpacing.gapMd,
-
-              PrimaryButton(
-                text: '削除',
-                iconWidget:
-                    const ActionButtonIcon.delete(
-                  size: 38,
-                ),
-                backgroundColor:
-                    Colors.red.shade700,
-                onPressed: () =>
-                    _onDelete(
-                  context,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

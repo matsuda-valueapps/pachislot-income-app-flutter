@@ -6,6 +6,7 @@ import '../services/database_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/search/service_icon.dart';
 import 'counter_detail_page.dart';
 
@@ -1335,7 +1336,38 @@ class _CounterListPageState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: _buildBody(),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // 小役DATA一覧は閲覧系の子画面なので、
+            // AppBar直下に広告を表示する。
+            //
+            // 広告はSingleChildScrollView / ListViewの
+            // 外側に配置することで、
+            // 一覧をスクロールしても上部に固定する。
+            //================================================
+
+            const AdBanner(),
+
+            //================================================
+            // 既存の一覧コンテンツ
+            //================================================
+            //
+            // Expandedの中に既存のBodyを配置し、
+            // AdBannerの下に残った領域を
+            // これまで通り利用する。
+            //================================================
+
+            Expanded(
+              child: _buildBody(),
+            ),
+          ],
+        ),
       ),
     );
   }

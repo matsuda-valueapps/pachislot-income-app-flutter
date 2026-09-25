@@ -6,6 +6,7 @@ import '../services/dialog_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/common/primary_button.dart';
 import 'memo_page.dart';
 
@@ -391,37 +392,114 @@ class MemoDetailPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSpacing.page,
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
-            children: [
-              //================================================
-              // 基本情報
-              //================================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // メモDATA詳細は閲覧系の子画面なので、
+            // AppBar直下に広告を表示する。
+            //
+            // 編集画面はMemoPageとして
+            // 別画面で管理されているため、
+            // この画面のみ広告を表示する。
+            //================================================
 
-              _buildPremiumGlassCard(
+            const AdBanner(),
+
+            //================================================
+            // 詳細コンテンツ
+            //================================================
+            //
+            // Expandedの中に既存の
+            // SingleChildScrollViewを配置する。
+            //================================================
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    AppSpacing.page,
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment.stretch,
                   children: [
                     //================================================
-                    // 日付
+                    // 基本情報
                     //================================================
 
-                    Text(
-                      _formatDate(
-                        record.date,
-                      ),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontSize: 17,
-                            fontWeight:
-                                FontWeight.bold,
+                    _buildPremiumGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          //================================================
+                          // 日付
+                          //================================================
+
+                          Text(
+                            _formatDate(
+                              record.date,
+                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontSize: 17,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                           ),
+
+                          const SizedBox(
+                            height: AppSpacing.md,
+                          ),
+
+                          //================================================
+                          // タイトル
+                          //================================================
+
+                          Text(
+                            _displayTitle(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontSize: 16,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    //================================================
+                    // 本文
+                    //================================================
+
+                    _buildBodyCard(context),
+
+                    AppSpacing.gapLg,
+
+                    //================================================
+                    // 編集ボタン
+                    //================================================
+
+                    PrimaryButton(
+                      text: '編集',
+                      iconWidget:
+                          const ActionButtonIcon.edit(
+                        size: 38,
+                      ),
+                      onPressed: () =>
+                          _openEditPage(
+                        context,
+                      ),
                     ),
 
                     const SizedBox(
@@ -429,77 +507,31 @@ class MemoDetailPage extends StatelessWidget {
                     ),
 
                     //================================================
-                    // タイトル
+                    // 削除ボタン
                     //================================================
 
-                    Text(
-                      _displayTitle(),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontSize: 16,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
+                    PrimaryButton(
+                      text: '削除',
+                      iconWidget:
+                          const ActionButtonIcon.delete(
+                        size: 38,
+                      ),
+                      backgroundColor:
+                          Colors.red.shade700,
+                      onPressed: () =>
+                          _onDelete(
+                        context,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: AppSpacing.md,
                     ),
                   ],
                 ),
               ),
-
-              AppSpacing.gapLg,
-
-              //================================================
-              // 本文
-              //================================================
-
-              _buildBodyCard(context),
-
-              AppSpacing.gapLg,
-
-              //================================================
-              // 編集ボタン
-              //================================================
-
-              PrimaryButton(
-                text: '編集',
-                iconWidget:
-                    const ActionButtonIcon.edit(
-                  size: 38,
-                ),
-                onPressed: () =>
-                    _openEditPage(
-                  context,
-                ),
-              ),
-
-              const SizedBox(
-                height: AppSpacing.md,
-              ),
-
-              //================================================
-              // 削除ボタン
-              //================================================
-
-              PrimaryButton(
-                text: '削除',
-                iconWidget:
-                    const ActionButtonIcon.delete(
-                  size: 38,
-                ),
-                backgroundColor:
-                    Colors.red.shade700,
-                onPressed: () =>
-                    _onDelete(
-                  context,
-                ),
-              ),
-
-              const SizedBox(
-                height: AppSpacing.md,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

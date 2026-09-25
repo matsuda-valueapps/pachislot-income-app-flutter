@@ -6,6 +6,7 @@ import '../services/dialog_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/common/primary_button.dart';
 import 'input_page.dart';
 
@@ -581,274 +582,305 @@ class IncomeDetailPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSpacing.page,
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
-            children: [
-              // ==========================================
-              // 基本情報
-              // ==========================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // 収支DATA詳細は閲覧系の子画面なので、
+            // AppBar直下に広告を表示する。
+            //
+            // 編集画面はInputPageとして
+            // 別画面で管理されているため、
+            // この画面のみ広告を表示する。
+            //================================================
 
-              _buildGlassCard(
+            const AdBanner(),
+
+            //================================================
+            // 詳細コンテンツ
+            //================================================
+            //
+            // Expandedの中に既存の
+            // SingleChildScrollViewを配置する。
+            //================================================
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    AppSpacing.page,
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      '基本情報',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
+                    // ==========================================
+                    // 基本情報
+                    // ==========================================
+
+                    _buildGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '基本情報',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                           ),
-                    ),
 
-                    const SizedBox(
-                      height: AppSpacing.md,
-                    ),
-
-                    _buildDetailRow(
-                      context,
-                      label: '日付',
-                      value:
-                          _formatDate(
-                        record.date,
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    _buildDetailRow(
-                      context,
-                      label: 'ホール名',
-                      value:
-                          record.hall.isEmpty
-                              ? '―'
-                              : record.hall,
-                    ),
-
-                    const Divider(),
-
-                    _buildDetailRow(
-                      context,
-                      label: '機種名',
-                      value:
-                          record.machine.isEmpty
-                              ? '―'
-                              : record.machine,
-                    ),
-                  ],
-                ),
-              ),
-
-              AppSpacing.gapLg,
-
-              // ==========================================
-              // 投資
-              // ==========================================
-
-              _buildGlassCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '投資',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
+                          const SizedBox(
+                            height: AppSpacing.md,
                           ),
-                    ),
 
-                    const SizedBox(
-                      height: AppSpacing.md,
-                    ),
-
-                    _buildAmountRow(
-                      context,
-                      label: '貯メダル投資',
-                      amount: medalInvest,
-                      color:
-                          Colors.red.shade700,
-                    ),
-
-                    const Divider(),
-
-                    _buildAmountRow(
-                      context,
-                      label: '現金投資',
-                      amount: cashInvest,
-                      color:
-                          Colors.red.shade700,
-                    ),
-
-                    const Divider(),
-
-                    _buildAmountRow(
-                      context,
-                      label: '投資合計',
-                      amount:
-                          medalInvest +
-                              cashInvest,
-                      color:
-                          Colors.red.shade700,
-                    ),
-                  ],
-                ),
-              ),
-
-              AppSpacing.gapLg,
-
-              // ==========================================
-              // 回収
-              // ==========================================
-
-              _buildGlassCard(
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '回収',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                    ),
-
-                    const SizedBox(
-                      height: AppSpacing.md,
-                    ),
-
-                    _buildAmountRow(
-                      context,
-                      label: '貯メダル回収',
-                      amount: medalReturn,
-                      color:
-                          Colors.green.shade700,
-                    ),
-
-                    const Divider(),
-
-                    _buildAmountRow(
-                      context,
-                      label: '現金回収',
-                      amount: cashReturn,
-                      color:
-                          Colors.green.shade700,
-                    ),
-
-                    const Divider(),
-
-                    _buildAmountRow(
-                      context,
-                      label: '回収合計',
-                      amount:
-                          medalReturn +
-                              cashReturn,
-                      color:
-                          Colors.green.shade700,
-                    ),
-                  ],
-                ),
-              ),
-
-              AppSpacing.gapLg,
-
-              // ==========================================
-              // 収支
-              // ==========================================
-
-              _buildProfitCard(context),
-
-              // ==========================================
-              // メモ
-              // ==========================================
-
-              if (record.memo.isNotEmpty) ...[
-                AppSpacing.gapLg,
-
-                _buildGlassCard(
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'メモ',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(
-                              fontWeight:
-                                  FontWeight.bold,
+                          _buildDetailRow(
+                            context,
+                            label: '日付',
+                            value:
+                                _formatDate(
+                              record.date,
                             ),
-                      ),
+                          ),
 
-                      const SizedBox(
-                        height:
-                            AppSpacing.md,
-                      ),
+                          const Divider(),
 
-                      Text(
-                        record.memo,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge,
+                          _buildDetailRow(
+                            context,
+                            label: 'ホール名',
+                            value:
+                                record.hall.isEmpty
+                                    ? '―'
+                                    : record.hall,
+                          ),
+
+                          const Divider(),
+
+                          _buildDetailRow(
+                            context,
+                            label: '機種名',
+                            value:
+                                record.machine.isEmpty
+                                    ? '―'
+                                    : record.machine,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    // ==========================================
+                    // 投資
+                    // ==========================================
+
+                    _buildGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '投資',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height: AppSpacing.md,
+                          ),
+
+                          _buildAmountRow(
+                            context,
+                            label: '貯メダル投資',
+                            amount: medalInvest,
+                            color:
+                                Colors.red.shade700,
+                          ),
+
+                          const Divider(),
+
+                          _buildAmountRow(
+                            context,
+                            label: '現金投資',
+                            amount: cashInvest,
+                            color:
+                                Colors.red.shade700,
+                          ),
+
+                          const Divider(),
+
+                          _buildAmountRow(
+                            context,
+                            label: '投資合計',
+                            amount:
+                                medalInvest +
+                                    cashInvest,
+                            color:
+                                Colors.red.shade700,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    // ==========================================
+                    // 回収
+                    // ==========================================
+
+                    _buildGlassCard(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '回収',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height: AppSpacing.md,
+                          ),
+
+                          _buildAmountRow(
+                            context,
+                            label: '貯メダル回収',
+                            amount: medalReturn,
+                            color:
+                                Colors.green.shade700,
+                          ),
+
+                          const Divider(),
+
+                          _buildAmountRow(
+                            context,
+                            label: '現金回収',
+                            amount: cashReturn,
+                            color:
+                                Colors.green.shade700,
+                          ),
+
+                          const Divider(),
+
+                          _buildAmountRow(
+                            context,
+                            label: '回収合計',
+                            amount:
+                                medalReturn +
+                                    cashReturn,
+                            color:
+                                Colors.green.shade700,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    // ==========================================
+                    // 収支
+                    // ==========================================
+
+                    _buildProfitCard(context),
+
+                    // ==========================================
+                    // メモ
+                    // ==========================================
+
+                    if (record.memo.isNotEmpty) ...[
+                      AppSpacing.gapLg,
+
+                      _buildGlassCard(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'メモ',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
+                            ),
+
+                            const SizedBox(
+                              height:
+                                  AppSpacing.md,
+                            ),
+
+                            Text(
+                              record.memo,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                  ),
-                ),
-              ],
 
-              // ==========================================
-              // 編集
-              // ==========================================
+                    // ==========================================
+                    // 編集
+                    // ==========================================
 
-              AppSpacing.gapLg,
+                    AppSpacing.gapLg,
 
-              PrimaryButton(
-                text: '編集',
-                iconWidget:
-                    const ActionButtonIcon.edit(
-                  size: 38,
-                ),
-                onPressed: () =>
-                    _openEditPage(
-                  context,
+                    PrimaryButton(
+                      text: '編集',
+                      iconWidget:
+                          const ActionButtonIcon.edit(
+                        size: 38,
+                      ),
+                      onPressed: () =>
+                          _openEditPage(
+                        context,
+                      ),
+                    ),
+
+                    // ==========================================
+                    // 削除
+                    // ==========================================
+
+                    AppSpacing.gapMd,
+
+                    PrimaryButton(
+                      text: '削除',
+                      iconWidget:
+                          const ActionButtonIcon.delete(
+                        size: 38,
+                      ),
+                      backgroundColor:
+                          Colors.red.shade700,
+                      onPressed: () =>
+                          _onDelete(
+                        context,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              // ==========================================
-              // 削除
-              // ==========================================
-
-              AppSpacing.gapMd,
-
-              PrimaryButton(
-                text: '削除',
-                iconWidget:
-                    const ActionButtonIcon.delete(
-                  size: 38,
-                ),
-                backgroundColor:
-                    Colors.red.shade700,
-                onPressed: () =>
-                    _onDelete(
-                  context,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

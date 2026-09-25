@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/url_launcher_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/search/search_card.dart';
 import '../widgets/search/search_category.dart';
 import '../widgets/search/service_icon.dart';
@@ -128,231 +129,307 @@ class SearchPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSpacing.page,
-          child: Container(
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
             //================================================
-            // カード位置
+            // AdMobバナー
             //================================================
             //
-            // MemoPageと同じAppSpacing.xsを設定。
+            // 「検索」画面はメイン画面のため、
+            // AppBar直下に広告を表示する。
             //
-            // AppBarからカード上端までの距離を
-            // メモ画面と統一する。
+            // SingleChildScrollViewの外側に配置することで、
+            // 検索画面をスクロールしても広告エリアは
+            // 画面上部に固定される。
             //================================================
 
-            margin: const EdgeInsets.symmetric(
-              vertical: AppSpacing.xs,
-            ),
+            const AdBanner(),
 
             //================================================
-            // プレミアムガラスカード
+            // 既存の検索画面
+            //================================================
+            //
+            // Expandedの中に既存の
+            // SingleChildScrollViewを配置する。
             //================================================
 
-            decoration:
-                _buildGlassDecoration(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: AppSpacing.page,
+                child: Container(
+                  //================================================
+                  // カード位置
+                  //================================================
+                  //
+                  // MemoPageと同じAppSpacing.xsを設定。
+                  //
+                  // AppBarからカード上端までの距離を
+                  // メモ画面と統一する。
+                  //================================================
 
-            child: Padding(
-              padding: AppSpacing.card,
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
-                children: [
-                  //==========================================
-                  // ホール検索
-                  //==========================================
-
-                  SearchCategory(
-                    title: 'ホール検索',
-                    icon: 'hall_search',
-                    children: [
-                      SearchCard(
-                        title: 'P-WORLD',
-                        subtitle:
-                            '全国のホール・設置機種を検索',
-                        icon: const ServiceIcon(
-                          icon: 'p_world',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'P-WORLD',
-                            'https://www.p-world.co.jp/',
-                          );
-                        },
-                      ),
-                      SearchCard(
-                        title: 'DMMぱちタウン',
-                        subtitle:
-                            'ホール情報・機種情報を検索',
-                        icon: const ServiceIcon(
-                          icon: 'dmm_pachitown',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'DMMぱちタウン',
-                            'https://p-town.dmm.com/',
-                          );
-                        },
-                      ),
-                    ],
+                  margin:
+                      const EdgeInsets.symmetric(
+                    vertical:
+                        AppSpacing.xs,
                   ),
 
-                  //==========================================
-                  // 機種解析
-                  //==========================================
+                  //================================================
+                  // プレミアムガラスカード
+                  //================================================
 
-                  SearchCategory(
-                    title: '機種解析',
-                    icon: 'model_analysis',
-                    children: [
-                      SearchCard(
-                        title: '一撃',
-                        subtitle:
-                            '設定差・小役確率・天井情報',
-                        icon: const ServiceIcon(
-                          icon: 'ichigeki',
-                          size: 38,
+                  decoration:
+                      _buildGlassDecoration(),
+
+                  child: Padding(
+                    padding:
+                        AppSpacing.card,
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment
+                              .stretch,
+                      children: [
+                        //==========================================
+                        // ホール検索
+                        //==========================================
+
+                        SearchCategory(
+                          title:
+                              'ホール検索',
+                          icon:
+                              'hall_search',
+                          children: [
+                            SearchCard(
+                              title:
+                                  'P-WORLD',
+                              subtitle:
+                                  '全国のホール・設置機種を検索',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'p_world',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'P-WORLD',
+                                  '[https://www.p-world.co.jp/](https://www.p-world.co.jp/)',
+                                );
+                              },
+                            ),
+                            SearchCard(
+                              title:
+                                  'DMMぱちタウン',
+                              subtitle:
+                                  'ホール情報・機種情報を検索',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'dmm_pachitown',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'DMMぱちタウン',
+                                  '[https://p-town.dmm.com/](https://p-town.dmm.com/)',
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            '一撃',
-                            'https://1geki.jp/',
-                          );
-                        },
-                      ),
-                      SearchCard(
-                        title: 'パチ７',
-                        subtitle:
-                            '初心者向けの機種解説',
-                        icon: const ServiceIcon(
-                          icon: 'pachi7',
-                          size: 38,
+
+                        //==========================================
+                        // 機種解析
+                        //==========================================
+
+                        SearchCategory(
+                          title:
+                              '機種解析',
+                          icon:
+                              'model_analysis',
+                          children: [
+                            SearchCard(
+                              title:
+                                  '一撃',
+                              subtitle:
+                                  '設定差・小役確率・天井情報',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'ichigeki',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  '一撃',
+                                  '[https://1geki.jp/](https://1geki.jp/)',
+                                );
+                              },
+                            ),
+                            SearchCard(
+                              title:
+                                  'パチ７',
+                              subtitle:
+                                  '初心者向けの機種解説',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'pachi7',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'パチ７',
+                                  '[https://pachiseven.jp/](https://pachiseven.jp/)',
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'パチ７',
-                            'https://pachiseven.jp/',
-                          );
-                        },
-                      ),
-                    ],
+
+                        //==========================================
+                        // イベント検索
+                        //==========================================
+
+                        SearchCategory(
+                          title:
+                              'イベント検索',
+                          icon:
+                              'event_search',
+                          children: [
+                            SearchCard(
+                              title:
+                                  'X（旧Twitter）',
+                              subtitle:
+                                  'イベント情報・店舗情報を検索',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'x',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'X（旧Twitter）',
+                                  '[https://x.com/](https://x.com/)',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        //==========================================
+                        // 便利ツール
+                        //==========================================
+
+                        SearchCategory(
+                          title:
+                              '便利ツール',
+                          icon:
+                              'useful_tools',
+                          children: [
+                            //========================================
+                            // Googleマップ
+                            //========================================
+
+                            SearchCard(
+                              title:
+                                  'Googleマップ',
+                              subtitle:
+                                  '現在地からホールを探す',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'google_map',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'Googleマップ',
+                                  '[https://maps.google.com/](https://maps.google.com/)',
+                                );
+                              },
+                            ),
+
+                            //========================================
+                            // Googleカレンダー
+                            //========================================
+
+                            SearchCard(
+                              title:
+                                  'Googleカレンダー',
+                              subtitle:
+                                  'イベント予定を確認する',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'google_calendar',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'Googleカレンダー',
+                                  '[https://calendar.google.com/](https://calendar.google.com/)',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        //==========================================
+                        // 動画視聴
+                        //==========================================
+
+                        SearchCategory(
+                          title:
+                              '動画視聴',
+                          icon:
+                              'watch_video',
+                          children: [
+                            SearchCard(
+                              title:
+                                  'YouTube',
+                              subtitle:
+                                  '実戦動画・設定判別・解説動画',
+                              icon:
+                                  const ServiceIcon(
+                                icon:
+                                    'youtube',
+                                size:
+                                    38,
+                              ),
+                              onTap: () {
+                                UrlLauncherService.open(
+                                  context,
+                                  'YouTube',
+                                  '[https://www.youtube.com/](https://www.youtube.com/)',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-
-                  //==========================================
-                  // イベント検索
-                  //==========================================
-
-                  SearchCategory(
-                    title: 'イベント検索',
-                    icon: 'event_search',
-                    children: [
-                      SearchCard(
-                        title: 'X（旧Twitter）',
-                        subtitle:
-                            'イベント情報・店舗情報を検索',
-                        icon: const ServiceIcon(
-                          icon: 'x',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'X（旧Twitter）',
-                            'https://x.com/',
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-
-                  //==========================================
-                  // 便利ツール
-                  //==========================================
-
-                  SearchCategory(
-                    title: '便利ツール',
-                    icon: 'useful_tools',
-                    children: [
-                      //========================================
-                      // Googleマップ
-                      //========================================
-
-                      SearchCard(
-                        title: 'Googleマップ',
-                        subtitle:
-                            '現在地からホールを探す',
-                        icon: const ServiceIcon(
-                          icon: 'google_map',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'Googleマップ',
-                            'https://maps.google.com/',
-                          );
-                        },
-                      ),
-
-                      //========================================
-                      // Googleカレンダー
-                      //========================================
-
-                      SearchCard(
-                        title: 'Googleカレンダー',
-                        subtitle:
-                            'イベント予定を確認する',
-                        icon: const ServiceIcon(
-                          icon: 'google_calendar',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'Googleカレンダー',
-                            'https://calendar.google.com/',
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-
-                  //==========================================
-                  // 動画視聴
-                  //==========================================
-
-                  SearchCategory(
-                    title: '動画視聴',
-                    icon: 'watch_video',
-                    children: [
-                      SearchCard(
-                        title: 'YouTube',
-                        subtitle:
-                            '実戦動画・設定判別・解説動画',
-                        icon: const ServiceIcon(
-                          icon: 'youtube',
-                          size: 38,
-                        ),
-                        onTap: () {
-                          UrlLauncherService.open(
-                            context,
-                            'YouTube',
-                            'https://www.youtube.com/',
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -10,6 +10,7 @@ import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/common/primary_button.dart';
 import '../widgets/input/amount_field.dart';
 import '../widgets/input/date_field.dart';
@@ -1151,215 +1152,250 @@ class InputPageState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            controller:
-                _scrollController,
-            padding:
-                AppSpacing.page,
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .stretch,
-              children: [
-                //================================================
-                // 入力カード
-                //================================================
-                //
-                // ホーム画面の
-                // 「月間収支」
-                // 「年間累計収支」
-                // と同じプレミアムガラス装飾を使用。
-                //================================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            //================================================
+            // AdMobバナー
+            //================================================
+            //
+            // 新規入力画面のみ表示する。
+            //
+            // 「収支DATA入力」
+            //   → 広告あり
+            //
+            // 「収支DATA編集」
+            //   → 広告なし
+            //
+            // AppBar直下に独立した広告領域を配置する。
+            //================================================
 
-                Container(
-                  margin:
-                      const EdgeInsets
-                          .symmetric(
-                    vertical:
-                        AppSpacing.xs,
-                  ),
+            if (!_isEditMode)
+              const AdBanner(),
+
+            //================================================
+            // 既存の入力フォーム
+            //================================================
+            //
+            // Expandedの中に入れることで、
+            // AppBarとAdBannerの下に残った領域を
+            // これまで通りスクロール可能なフォームとして使用する。
+            //================================================
+
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  controller:
+                      _scrollController,
                   padding:
-                      AppSpacing.card,
-                  decoration:
-                      _buildGlassDecoration(),
+                      AppSpacing.page,
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment
-                            .start,
+                            .stretch,
                     children: [
-                      // ==========================================
-                      // 日付
-                      // ==========================================
+                      //================================================
+                      // 入力カード
+                      //================================================
+                      //
+                      // ホーム画面の
+                      // 「月間収支」
+                      // 「年間累計収支」
+                      // と同じプレミアムガラス装飾を使用。
+                      //================================================
 
-                      DateField(
-                        selectedDate:
-                            _selectedDate,
-                        onTap:
-                            _selectDate,
+                      Container(
+                        margin:
+                            const EdgeInsets
+                                .symmetric(
+                          vertical:
+                              AppSpacing.xs,
+                        ),
+                        padding:
+                            AppSpacing.card,
+                        decoration:
+                            _buildGlassDecoration(),
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
+                          children: [
+                            // ==========================================
+                            // 日付
+                            // ==========================================
+
+                            DateField(
+                              selectedDate:
+                                  _selectedDate,
+                              onTap:
+                                  _selectDate,
+                            ),
+
+                            const SizedBox(
+                              height:
+                                  AppSpacing.lg,
+                            ),
+
+                            // ==========================================
+                            // ホール名
+                            // ==========================================
+
+                            TextInputField(
+                              label:
+                                  'ホール名',
+                              controller:
+                                  _hallController,
+                              hintText:
+                                  '例：マルハン○○店',
+                              validator:
+                                  (value) =>
+                                      InputValidators
+                                          .required(
+                                value,
+                                fieldName:
+                                    'ホール名',
+                              ),
+                            ),
+
+                            // ==========================================
+                            // 機種名
+                            // ==========================================
+
+                            TextInputField(
+                              label:
+                                  '機種名',
+                              controller:
+                                  _machineController,
+                              hintText:
+                                  '例：L北斗の拳',
+                              validator:
+                                  (value) =>
+                                      InputValidators
+                                          .required(
+                                value,
+                                fieldName:
+                                    '機種名',
+                              ),
+                            ),
+
+                            // ==========================================
+                            // 貯メダル投資
+                            // ==========================================
+
+                            AmountField(
+                              label:
+                                  '貯メダル投資（円）',
+                              controller:
+                                  _medalInvestController,
+                              validator:
+                                  InputValidators
+                                      .amount,
+                            ),
+
+                            // ==========================================
+                            // 現金投資
+                            // ==========================================
+
+                            AmountField(
+                              label:
+                                  '現金投資（円）',
+                              controller:
+                                  _cashInvestController,
+                              validator:
+                                  InputValidators
+                                      .amount,
+                            ),
+
+                            // ==========================================
+                            // 貯メダル回収
+                            // ==========================================
+
+                            AmountField(
+                              label:
+                                  '貯メダル回収（円）',
+                              controller:
+                                  _medalReturnController,
+                              validator:
+                                  InputValidators
+                                      .amount,
+                            ),
+
+                            // ==========================================
+                            // 現金回収
+                            // ==========================================
+
+                            AmountField(
+                              label:
+                                  '現金回収（円）',
+                              controller:
+                                  _cashReturnController,
+                              validator:
+                                  InputValidators
+                                      .amount,
+                            ),
+
+                            const SizedBox(
+                              height:
+                                  AppSpacing.lg,
+                            ),
+
+                            // ==========================================
+                            // 収支
+                            // ==========================================
+
+                            ProfitCard(
+                              profit:
+                                  _profit,
+                            ),
+
+                            // ==========================================
+                            // メモ
+                            // ==========================================
+
+                            MemoField(
+                              controller:
+                                  _memoController,
+                              hintText:
+                                  '自由にメモを入力出来ます。',
+                            ),
+                          ],
+                        ),
                       ),
 
                       const SizedBox(
                         height:
-                            AppSpacing.lg,
+                            AppSpacing.xl,
                       ),
 
                       // ==========================================
-                      // ホール名
+                      // 保存 / 更新
                       // ==========================================
 
-                      TextInputField(
-                        label:
-                            'ホール名',
-                        controller:
-                            _hallController,
-                        hintText:
-                            '例：マルハン○○店',
-                        validator:
-                            (value) =>
-                                InputValidators
-                                    .required(
-                          value,
-                          fieldName:
-                              'ホール名',
-                        ),
-                      ),
-
-                      // ==========================================
-                      // 機種名
-                      // ==========================================
-
-                      TextInputField(
-                        label:
-                            '機種名',
-                        controller:
-                            _machineController,
-                        hintText:
-                            '例：L北斗の拳',
-                        validator:
-                            (value) =>
-                                InputValidators
-                                    .required(
-                          value,
-                          fieldName:
-                              '機種名',
-                        ),
-                      ),
-
-                      // ==========================================
-                      // 貯メダル投資
-                      // ==========================================
-
-                      AmountField(
-                        label:
-                            '貯メダル投資（円）',
-                        controller:
-                            _medalInvestController,
-                        validator:
-                            InputValidators
-                                .amount,
-                      ),
-
-                      // ==========================================
-                      // 現金投資
-                      // ==========================================
-
-                      AmountField(
-                        label:
-                            '現金投資（円）',
-                        controller:
-                            _cashInvestController,
-                        validator:
-                            InputValidators
-                                .amount,
-                      ),
-
-                      // ==========================================
-                      // 貯メダル回収
-                      // ==========================================
-
-                      AmountField(
-                        label:
-                            '貯メダル回収（円）',
-                        controller:
-                            _medalReturnController,
-                        validator:
-                            InputValidators
-                                .amount,
-                      ),
-
-                      // ==========================================
-                      // 現金回収
-                      // ==========================================
-
-                      AmountField(
-                        label:
-                            '現金回収（円）',
-                        controller:
-                            _cashReturnController,
-                        validator:
-                            InputValidators
-                                .amount,
-                      ),
-
-                      const SizedBox(
-                        height:
-                            AppSpacing.lg,
-                      ),
-
-                      // ==========================================
-                      // 収支
-                      // ==========================================
-
-                      ProfitCard(
-                        profit:
-                            _profit,
-                      ),
-
-                      // ==========================================
-                      // メモ
-                      // ==========================================
-
-                      MemoField(
-                        controller:
-                            _memoController,
-                        hintText:
-                            '自由にメモを入力出来ます。',
+                      PrimaryButton(
+                        text: _isEditMode
+                            ? '更新'
+                            : '保存',
+                        iconWidget:
+                            _isEditMode
+                                ? const ActionButtonIcon
+                                    .update(
+                                    size: 38,
+                                  )
+                                : const ActionButtonIcon
+                                    .save(
+                                    size: 38,
+                                  ),
+                        onPressed:
+                            _onSavePressed,
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(
-                  height:
-                      AppSpacing.xl,
-                ),
-
-                // ==========================================
-                // 保存 / 更新
-                // ==========================================
-
-                PrimaryButton(
-                  text: _isEditMode
-                      ? '更新'
-                      : '保存',
-                  iconWidget:
-                      _isEditMode
-                          ? const ActionButtonIcon
-                              .update(
-                              size: 38,
-                            )
-                          : const ActionButtonIcon
-                              .save(
-                              size: 38,
-                            ),
-                  onPressed:
-                      _onSavePressed,
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

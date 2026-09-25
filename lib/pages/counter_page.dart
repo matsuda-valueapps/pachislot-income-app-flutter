@@ -12,6 +12,7 @@ import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/counter/counter_card.dart';
 import '../widgets/counter/game_counter.dart';
 import '../widgets/counter/start_game_counter.dart';
@@ -880,202 +881,238 @@ class _CounterPageState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding:
-              AppSpacing.page,
-          child: Container(
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
             //================================================
-            // MemoPageと同じカード外側余白
+            // AdMobバナー
+            //================================================
             //
-            // AppBarとカードの距離をMemoPageと揃える。
-            //================================================
-
-            margin:
-                const EdgeInsets.symmetric(
-              vertical:
-                  AppSpacing.xs,
-            ),
-
-            //================================================
-            // MemoPageと同じカード内側余白
-            //================================================
-
-            padding:
-                AppSpacing.card,
-
-            //================================================
-            // プレミアムガラス装飾
+            // このCounterPageは
+            // 「小役カウンター」入力画面のため、
+            // AppBar直下に広告を表示する。
             //
-            // ・グラデーション
-            // ・外側Border
-            // ・柔らかな立体影
-            //
-            // ※ガラス内側ハイライトなし
-            // ※上部ガラスハイライトなし
+            // 編集画面が別Pageの場合は、
+            // そちらにはAdBannerを配置しない。
             //================================================
 
-            decoration:
-                _buildGlassDecoration(),
+            const AdBanner(),
 
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .stretch,
-              children: [
-                //================================================
-                // 日付
-                //================================================
+            //================================================
+            // 既存の小役カウンター画面
+            //================================================
+            //
+            // Expandedに入れることで、
+            // AppBarとAdBannerの下に残った領域を
+            // 既存どおりスクロール可能な領域として使用する。
+            //
+            // ScrollControllerを明示指定せず、
+            // MainPageから提供されている
+            // PrimaryScrollControllerをそのまま使用する。
+            //================================================
 
-                _buildDateField(
-                  context,
-                  provider,
-                ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    AppSpacing.page,
+                child: Container(
+                  //================================================
+                  // MemoPageと同じカード外側余白
+                  //
+                  // AppBarとカードの距離をMemoPageと揃える。
+                  //================================================
 
-                const SizedBox(
-                  height:
-                      AppSpacing.lg,
-                ),
-
-                //================================================
-                // タイトル
-                //================================================
-
-                _buildTitleField(
-                  context,
-                  provider,
-                ),
-
-                const SizedBox(
-                  height:
-                      AppSpacing.lg,
-                ),
-
-                //================================================
-                // 開始ゲーム数
-                //================================================
-
-                StartGameCounter(
-                  controller:
-                      _startGameController,
-                  onChanged:
-                      provider
-                          .updateStartGame,
-                ),
-
-                //================================================
-                // 現在ゲーム数
-                //================================================
-
-                GameCounter(
-                  controller:
-                      _currentGameController,
-                  onChanged:
-                      provider
-                          .updateCurrentGame,
-                ),
-
-                //================================================
-                // 小役カウンター
-                //================================================
-
-                ...provider.items.map(
-                  (item) =>
-                      CounterCard(
-                    item: item,
-                    probability:
-                        provider
-                            .probability(
-                      item.id,
-                    ),
-                    onIncrement: () {
-                      provider
-                          .increment(
-                        item.id,
-                      );
-                    },
-                    onDecrement: () {
-                      provider
-                          .decrement(
-                        item.id,
-                      );
-                    },
+                  margin:
+                      const EdgeInsets.symmetric(
+                    vertical:
+                        AppSpacing.xs,
                   ),
-                ),
 
-                const SizedBox(
-                  height:
-                      AppSpacing.lg,
-                ),
+                  //================================================
+                  // MemoPageと同じカード内側余白
+                  //================================================
 
-                //================================================
-                // リセット・保存
-                //================================================
+                  padding:
+                      AppSpacing.card,
 
-                Row(
-                  children: [
-                    Expanded(
-                      child:
-                          OutlinedButton(
-                        onPressed: () =>
-                            _onReset(
-                          provider,
-                        ),
-                        child:
-                            const Text(
-                          'リセット',
+                  //================================================
+                  // プレミアムガラス装飾
+                  //
+                  // ・グラデーション
+                  // ・外側Border
+                  // ・柔らかな立体影
+                  //
+                  // ※ガラス内側ハイライトなし
+                  // ※上部ガラスハイライトなし
+                  //================================================
+
+                  decoration:
+                      _buildGlassDecoration(),
+
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment
+                            .stretch,
+                    children: [
+                      //================================================
+                      // 日付
+                      //================================================
+
+                      _buildDateField(
+                        context,
+                        provider,
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      //================================================
+                      // タイトル
+                      //================================================
+
+                      _buildTitleField(
+                        context,
+                        provider,
+                      ),
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
+
+                      //================================================
+                      // 開始ゲーム数
+                      //================================================
+
+                      StartGameCounter(
+                        controller:
+                            _startGameController,
+                        onChanged:
+                            provider
+                                .updateStartGame,
+                      ),
+
+                      //================================================
+                      // 現在ゲーム数
+                      //================================================
+
+                      GameCounter(
+                        controller:
+                            _currentGameController,
+                        onChanged:
+                            provider
+                                .updateCurrentGame,
+                      ),
+
+                      //================================================
+                      // 小役カウンター
+                      //================================================
+
+                      ...provider.items.map(
+                        (item) =>
+                            CounterCard(
+                          item: item,
+                          probability:
+                              provider
+                                  .probability(
+                            item.id,
+                          ),
+                          onIncrement: () {
+                            provider
+                                .increment(
+                              item.id,
+                            );
+                          },
+                          onDecrement: () {
+                            provider
+                                .decrement(
+                              item.id,
+                            );
+                          },
                         ),
                       ),
-                    ),
 
-                    const SizedBox(
-                      width:
-                          AppSpacing.md,
-                    ),
+                      const SizedBox(
+                        height:
+                            AppSpacing.lg,
+                      ),
 
-                    Expanded(
-                      child:
-                          FilledButton(
-                        onPressed: () =>
-                            _onSave(
-                          provider,
-                        ),
+                      //================================================
+                      // リセット・保存
+                      //================================================
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child:
+                                OutlinedButton(
+                              onPressed: () =>
+                                  _onReset(
+                                provider,
+                              ),
+                              child:
+                                  const Text(
+                                'リセット',
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(
+                            width:
+                                AppSpacing.md,
+                          ),
+
+                          Expanded(
+                            child:
+                                FilledButton(
+                              onPressed: () =>
+                                  _onSave(
+                                provider,
+                              ),
+                              child:
+                                  const Text(
+                                '保存',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      //================================================
+                      // 保存小役データ一覧
+                      //================================================
+
+                      const SizedBox(
+                        height:
+                            AppSpacing.md,
+                      ),
+
+                      SizedBox(
+                        width:
+                            double.infinity,
                         child:
-                            const Text(
-                          '保存',
+                            OutlinedButton.icon(
+                          onPressed:
+                              _openCounterListPage,
+                          icon:
+                              const ActionButtonIcon.list(
+                            size: 38,
+                          ),
+                          label:
+                              const Text(
+                            '小役DATA一覧',
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-
-                //================================================
-                // 保存小役データ一覧
-                //================================================
-
-                const SizedBox(
-                  height:
-                      AppSpacing.md,
-                ),
-
-                SizedBox(
-                  width:
-                      double.infinity,
-                  child:
-                      OutlinedButton.icon(
-                    onPressed:
-                        _openCounterListPage,
-                    icon: const ActionButtonIcon.list(
-                      size: 38,
-                    ),
-                    label:
-                        const Text(
-                      '小役DATA一覧',
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

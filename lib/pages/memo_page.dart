@@ -12,6 +12,7 @@ import '../services/memo_draft_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/memo/calculator_bottom_sheet.dart';
 import '../widgets/memo/calculator_toggle.dart';
 import '../widgets/memo/memo_date_field.dart';
@@ -107,7 +108,8 @@ class _MemoPageState
   /// MonthlyIncomeCardと同じデザイン言語を使用する。
   BoxDecoration _buildGlassDecoration() {
     return BoxDecoration(
-      gradient: const LinearGradient(
+      gradient:
+          const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
@@ -1077,143 +1079,190 @@ class _MemoPageState
           body: Stack(
             children: [
               SafeArea(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.page.left,
-                    AppSpacing.page.top,
-                    AppSpacing.page.right,
-                    AppSpacing.page.bottom +
-                        (calculator
-                                .isVisible
-                            ? CalculatorBottomSheet
-                                    .height +
-                                AppSpacing.lg
-                            : 0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .stretch,
-                    children: [
-                      //==========================================
-                      // メモ入力
-                      //==========================================
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
+                  children: [
+                    //==========================================
+                    // AdMobバナー
+                    //==========================================
+                    //
+                    // 新規メモ入力画面のみ表示する。
+                    //
+                    // 「メモDATA入力」
+                    //   → 広告あり
+                    //
+                    // 「メモDATA編集」
+                    //   → 広告なし
+                    //
+                    // AppBar直下に独立した広告領域を配置する。
+                    //==========================================
 
-                      Container(
-                        margin:
-                            const EdgeInsets.symmetric(
-                          vertical:
-                              AppSpacing.xs,
-                        ),
+                    if (!_isEditMode)
+                      const AdBanner(),
+
+                    //==========================================
+                    // 既存メモ画面
+                    //==========================================
+                    //
+                    // Expandedの中に入れることで、
+                    // AppBarとAdBannerの下に残った領域を
+                    // これまで通りスクロール可能な領域として使用する。
+                    //
+                    // SingleChildScrollViewには
+                    // 明示的なScrollControllerを指定せず、
+                    // MainPageから提供されている
+                    // PrimaryScrollControllerをそのまま使用する。
+                    //==========================================
+
+                    Expanded(
+                      child:
+                          SingleChildScrollView(
                         padding:
-                            AppSpacing.card,
-                        decoration:
-                            _buildGlassDecoration(),
+                            EdgeInsets.fromLTRB(
+                          AppSpacing.page.left,
+                          AppSpacing.page.top,
+                          AppSpacing.page.right,
+                          AppSpacing.page.bottom +
+                              (calculator
+                                      .isVisible
+                                  ? CalculatorBottomSheet
+                                          .height +
+                                      AppSpacing
+                                          .lg
+                                  : 0),
+                        ),
                         child: Column(
                           crossAxisAlignment:
                               CrossAxisAlignment
-                                  .start,
+                                  .stretch,
                           children: [
                             //==========================================
-                            // 日付
+                            // メモ入力
                             //==========================================
 
-                            MemoDateField(
-                              selectedDate:
-                                  _selectedDate,
-                              onTap:
-                                  _selectDate,
+                            Container(
+                              margin:
+                                  const EdgeInsets
+                                      .symmetric(
+                                vertical:
+                                    AppSpacing.xs,
+                              ),
+                              padding:
+                                  AppSpacing.card,
+                              decoration:
+                                  _buildGlassDecoration(),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+                                children: [
+                                  //==========================================
+                                  // 日付
+                                  //==========================================
+
+                                  MemoDateField(
+                                    selectedDate:
+                                        _selectedDate,
+                                    onTap:
+                                        _selectDate,
+                                  ),
+
+                                  //==========================================
+                                  // タイトル
+                                  //==========================================
+
+                                  MemoTitleField(
+                                    controller:
+                                        _titleController,
+                                  ),
+
+                                  //==========================================
+                                  // 本文
+                                  //==========================================
+
+                                  MemoEditor(
+                                    controller:
+                                        _memoController,
+                                  ),
+
+                                  //==========================================
+                                  // クイック入力
+                                  //==========================================
+
+                                  QuickInputBar(
+                                    controller:
+                                        _memoController,
+                                  ),
+
+                                  //==========================================
+                                  // 保存・更新
+                                  //==========================================
+
+                                  MemoSaveButton(
+                                    onPressed:
+                                        _saveMemo,
+                                    label:
+                                        _isEditMode
+                                            ? '更新'
+                                            : '保存',
+                                    icon:
+                                        _isEditMode
+                                            ? const ActionButtonIcon
+                                                .update(
+                                                size: 38,
+                                              )
+                                            : const ActionButtonIcon
+                                                .save(
+                                                size: 38,
+                                              ),
+                                  ),
+
+                                  //==========================================
+                                  // 電卓表示切替
+                                  //==========================================
+
+                                  const CalculatorToggle(),
+                                ],
+                              ),
                             ),
 
                             //==========================================
-                            // タイトル
+                            // 保存済みメモ一覧
+                            //==========================================
+                            //
+                            // 編集モードでは、
+                            // 「保存したメモを見る」は表示しない。
+                            //
+                            // 編集画面から一覧へ戻るには、
+                            // Android戻るまたは画面戻るを使用する。
                             //==========================================
 
-                            MemoTitleField(
-                              controller:
-                                  _titleController,
-                            ),
+                            if (!_isEditMode) ...[
+                              const SizedBox(
+                                height:
+                                    AppSpacing.lg,
+                              ),
 
-                            //==========================================
-                            // 本文
-                            //==========================================
-
-                            MemoEditor(
-                              controller:
-                                  _memoController,
-                            ),
-
-                            //==========================================
-                            // クイック入力
-                            //==========================================
-
-                            QuickInputBar(
-                              controller:
-                                  _memoController,
-                            ),
-
-                            //==========================================
-                            // 保存・更新
-                            //==========================================
-
-                            MemoSaveButton(
-                              onPressed:
-                                  _saveMemo,
-                              label:
-                                  _isEditMode
-                                      ? '更新'
-                                      : '保存',
-                              icon:
-                                  _isEditMode
-                                      ? const ActionButtonIcon.update(
-                                          size: 38,
-                                        )
-                                      : const ActionButtonIcon.save(
-                                          size: 38,
-                                        ),
-                            ),
-
-                            //==========================================
-                            // 電卓表示切替
-                            //==========================================
-
-                            const CalculatorToggle(),
+                              OutlinedButton.icon(
+                                onPressed:
+                                    _openMemoList,
+                                icon:
+                                    const ActionButtonIcon
+                                        .list(
+                                  size: 38,
+                                ),
+                                label:
+                                    const Text(
+                                  'メモDATA一覧',
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
-
-                      //==========================================
-                      // 保存済みメモ一覧
-                      //==========================================
-                      //
-                      // 編集モードでは、
-                      // 「保存したメモを見る」は表示しない。
-                      //
-                      // 編集画面から一覧へ戻るには、
-                      // Android戻るまたは画面戻るを使用する。
-                      //==========================================
-
-                      if (!_isEditMode) ...[
-                        const SizedBox(
-                          height:
-                              AppSpacing.lg,
-                        ),
-
-                        OutlinedButton.icon(
-                          onPressed:
-                              _openMemoList,
-                          icon:
-                              const ActionButtonIcon.list(
-                            size: 38,
-                          ),
-                          label:
-                              const Text(
-                            'メモDATA一覧',
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 

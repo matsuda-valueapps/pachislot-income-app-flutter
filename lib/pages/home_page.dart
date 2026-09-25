@@ -12,6 +12,7 @@ import '../services/dialog_service.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 import '../widgets/common/action_button_icon.dart';
+import '../widgets/common/ad_banner.dart';
 import '../widgets/home/calendar_card.dart';
 import '../widgets/home/monthly_income_card.dart';
 import '../widgets/home/statistics_card.dart';
@@ -467,7 +468,8 @@ class _HomePageState
   ///
   /// ※カレンダー専用の
   /// 「内側の白いハイライト」は使用しない。
-  BoxDecoration _buildYearlyIncomeGlassDecoration() {
+  BoxDecoration
+      _buildYearlyIncomeGlassDecoration() {
     return BoxDecoration(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -779,89 +781,119 @@ class _HomePageState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: AppSpacing.page,
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch,
-            children: [
-              // ==========================================
-              // カレンダー
-              // ==========================================
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch,
+          children: [
+            // ==========================================
+            // AdMobバナー
+            // ==========================================
+            //
+            // AppBarの直下に独立した広告領域を配置する。
+            //
+            // AdBanner自身が広告読み込み前後の
+            // 表示領域を確保するため、
+            // 広告読み込みによって既存コンテンツが
+            // 大きく移動することを防ぐ。
+            //
+            // SingleChildScrollViewの外側に置くことで、
+            // Home画面をスクロールしても
+            // バナー広告は上部に固定される。
+            // ==========================================
 
-              CalendarCard(
-                key: _calendarKey,
-                onDateSelected:
-                    _handleCalendarDateSelected,
-              ),
+            const AdBanner(),
 
-              AppSpacing.gapLg,
+            // ==========================================
+            // 既存コンテンツ
+            // ==========================================
 
-              // ==========================================
-              // 表示中の月の収支
-              // ==========================================
+            Expanded(
+              child: SingleChildScrollView(
+                padding: AppSpacing.page,
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
+                  children: [
+                    // ==========================================
+                    // カレンダー
+                    // ==========================================
 
-              MonthlyIncomeCard(
-                year:
-                    provider.focusedMonth.year,
-                month:
-                    provider.focusedMonth.month,
-                income:
-                    provider.monthlyIncome,
-                investment:
-                    provider.monthlyInvestment,
-                recovery:
-                    provider.monthlyRecovery,
-              ),
+                    CalendarCard(
+                      key: _calendarKey,
+                      onDateSelected:
+                          _handleCalendarDateSelected,
+                    ),
 
-              AppSpacing.gapLg,
+                    AppSpacing.gapLg,
 
-              // ==========================================
-              // 表示中の月の統計
-              // ==========================================
+                    // ==========================================
+                    // 表示中の月の収支
+                    // ==========================================
 
-              StatisticsCard(
-                monthLabel:
-                    provider.focusedMonthLabel,
-                totalGames:
-                    provider.monthlyTotalGames,
-                winGames:
-                    provider.monthlyWinGames,
-                winRate:
-                    provider.monthlyWinRate,
-                averageIncome:
-                    provider.monthlyAverageIncome,
-              ),
+                    MonthlyIncomeCard(
+                      year:
+                          provider.focusedMonth.year,
+                      month:
+                          provider.focusedMonth.month,
+                      income:
+                          provider.monthlyIncome,
+                      investment:
+                          provider.monthlyInvestment,
+                      recovery:
+                          provider.monthlyRecovery,
+                    ),
 
-              AppSpacing.gapLg,
+                    AppSpacing.gapLg,
 
-              // ==========================================
-              // 年間累計収支
-              // ==========================================
+                    // ==========================================
+                    // 表示中の月の統計
+                    // ==========================================
 
-              _buildYearlyIncomeCard(
-                context,
-                provider,
-              ),
+                    StatisticsCard(
+                      monthLabel:
+                          provider.focusedMonthLabel,
+                      totalGames:
+                          provider.monthlyTotalGames,
+                      winGames:
+                          provider.monthlyWinGames,
+                      winRate:
+                          provider.monthlyWinRate,
+                      averageIncome:
+                          provider.monthlyAverageIncome,
+                    ),
 
-              AppSpacing.gapLg,
+                    AppSpacing.gapLg,
 
-              // ==========================================
-              // 収支データ一覧
-              // ==========================================
+                    // ==========================================
+                    // 年間累計収支
+                    // ==========================================
 
-              OutlinedButton.icon(
-                onPressed:
-                    _openIncomeList,
-                icon: const ActionButtonIcon.list(
-                  size: 38,
+                    _buildYearlyIncomeCard(
+                      context,
+                      provider,
+                    ),
+
+                    AppSpacing.gapLg,
+
+                    // ==========================================
+                    // 収支データ一覧
+                    // ==========================================
+
+                    OutlinedButton.icon(
+                      onPressed:
+                          _openIncomeList,
+                      icon: const ActionButtonIcon.list(
+                        size: 38,
+                      ),
+                      label: const Text(
+                        '収支DATA一覧',
+                      ),
+                    ),
+                  ],
                 ),
-                label: const Text(
-                  '収支DATA一覧',
-                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
