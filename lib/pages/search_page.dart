@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../services/url_launcher_service.dart';
+
 import '../theme/app_radius.dart';
+
 import '../theme/app_spacing.dart';
+
 import '../widgets/common/ad_banner.dart';
+
 import '../widgets/search/search_card.dart';
+
 import '../widgets/search/search_category.dart';
+
 import '../widgets/search/service_icon.dart';
 
 class SearchPage extends StatelessWidget {
@@ -216,7 +222,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'P-WORLD',
-                                  '[https://www.p-world.co.jp/](https://www.p-world.co.jp/)',
+                                  'https://www.p-world.co.jp/',
                                 );
                               },
                             ),
@@ -236,7 +242,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'DMMぱちタウン',
-                                  '[https://p-town.dmm.com/](https://p-town.dmm.com/)',
+                                  'https://p-town.dmm.com/',
                                 );
                               },
                             ),
@@ -269,7 +275,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   '一撃',
-                                  '[https://1geki.jp/](https://1geki.jp/)',
+                                  'https://1geki.jp/',
                                 );
                               },
                             ),
@@ -289,7 +295,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'パチ７',
-                                  '[https://pachiseven.jp/](https://pachiseven.jp/)',
+                                  'https://pachiseven.jp/',
                                 );
                               },
                             ),
@@ -322,7 +328,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'X（旧Twitter）',
-                                  '[https://x.com/](https://x.com/)',
+                                  'https://x.com/',
                                 );
                               },
                             ),
@@ -359,7 +365,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'Googleマップ',
-                                  '[https://maps.google.com/](https://maps.google.com/)',
+                                  'https://maps.google.com/',
                                 );
                               },
                             ),
@@ -384,7 +390,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'Googleカレンダー',
-                                  '[https://calendar.google.com/](https://calendar.google.com/)',
+                                  'https://calendar.google.com/',
                                 );
                               },
                             ),
@@ -417,7 +423,7 @@ class SearchPage extends StatelessWidget {
                                 UrlLauncherService.open(
                                   context,
                                   'YouTube',
-                                  '[https://www.youtube.com/](https://www.youtube.com/)',
+                                  'https://www.youtube.com/',
                                 );
                               },
                             ),
