@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
+
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 ///==================================================
@@ -53,6 +55,22 @@ class AdBanner extends StatefulWidget {
 }
 
 class _AdBannerState extends State<AdBanner> {
+  //==================================================
+  // 表示／非表示
+  //==================================================
+
+  /// AdMobバナーを表示するかどうか。
+  ///
+  /// true：
+  ///   AdMobバナーを表示する。
+  ///
+  /// false：
+  ///   AdMobバナーを非表示にする。
+  ///
+  /// Google Play掲載用スクリーンショット撮影時など、
+  /// 一時的に広告を非表示にする場合はfalseにする。
+  static const bool showAd = false;
+
   //==================================================
   // BannerAd
   //==================================================
@@ -176,6 +194,14 @@ class _AdBannerState extends State<AdBanner> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    //================================================
+    // 広告非表示の場合は読み込まない。
+    //================================================
+
+    if (!showAd) {
+      return;
+    }
 
     //================================================
     // すでに広告作成済みの場合は何もしない。
@@ -366,6 +392,14 @@ class _AdBannerState extends State<AdBanner> {
   Widget build(
     BuildContext context,
   ) {
+    //================================================
+    // 広告非表示の場合
+    //================================================
+
+    if (!showAd) {
+      return const SizedBox.shrink();
+    }
+
     //================================================
     // 広告高さ
     //================================================
