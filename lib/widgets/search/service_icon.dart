@@ -44,6 +44,7 @@ class ServiceIcon extends StatelessWidget {
     'x': 'assets/images/servicez/x.png',
     'google_map': 'assets/images/servicez/google_map.png',
     'google_calendar': 'assets/images/servicez/google_calendar.png',
+    'google_calendar2': 'assets/images/servicez/google_calendar2.png',
     'youtube': 'assets/images/servicez/youtube.png',
   };
 

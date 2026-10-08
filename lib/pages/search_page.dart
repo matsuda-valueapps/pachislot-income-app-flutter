@@ -216,7 +216,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'p_world',
                                 size:
-                                    38,
+                                    44,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -236,7 +236,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'dmm_pachitown',
                                 size:
-                                    38,
+                                    44,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -289,7 +289,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'pachi7',
                                 size:
-                                    38,
+                                    42,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -322,7 +322,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'x',
                                 size:
-                                    38,
+                                    34,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -359,7 +359,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'google_map',
                                 size:
-                                    38,
+                                    42,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -382,9 +382,9 @@ class SearchPage extends StatelessWidget {
                               icon:
                                   const ServiceIcon(
                                 icon:
-                                    'google_calendar',
+                                    'google_calendar2',
                                 size:
-                                    38,
+                                    48,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
@@ -417,7 +417,7 @@ class SearchPage extends StatelessWidget {
                                 icon:
                                     'youtube',
                                 size:
-                                    38,
+                                    48,
                               ),
                               onTap: () {
                                 UrlLauncherService.open(
