@@ -21,34 +21,42 @@ import 'database_service.dart';
 class DataBackupService {
   DataBackupService._();
 
-  static final DataBackupService instance = DataBackupService._();
+  static final DataBackupService instance =
+      DataBackupService._();
 
   //==================================================
   // Backup Format
   //==================================================
 
   /// バックアップ形式の識別子
-  static const String _backupFormat = 'pachislot_income_backup';
+  static const String _backupFormat =
+      'pachislot_income_backup';
 
   /// バックアップ形式のバージョン
   ///
   /// DB Versionとは別管理する。
+  ///
+  /// 既存のJSONバックアップとの互換性を維持するため、
+  /// 現在の形式Version 1を維持する。
   static const int _backupVersion = 1;
 
   /// 現在のSQLite DB Version
   ///
-  /// DatabaseServiceと同じVersion 4。
-  static const int _databaseVersion = 4;
+  /// DatabaseServiceと同じVersion 5。
+  static const int _databaseVersion = 5;
 
   //==================================================
   // Table
   //==================================================
 
-  static const String _incomeTable = 'income_records';
+  static const String _incomeTable =
+      'income_records';
 
-  static const String _memoTable = 'memo_records';
+  static const String _memoTable =
+      'memo_records';
 
-  static const String _counterTable = 'counter_records';
+  static const String _counterTable =
+      'counter_records';
 
   //==================================================
   // Backup
@@ -60,17 +68,27 @@ class DataBackupService {
   /// 返り値：
   /// JSON形式のString
   Future<String> createBackupJson() async {
-    final db = await DatabaseService.instance.database;
+    final db =
+        await DatabaseService.instance.database;
 
     //================================================
     // SQLiteから全データ取得
     //================================================
 
-    final incomeRecords = await db.query(_incomeTable, orderBy: 'id ASC');
+    final incomeRecords = await db.query(
+      _incomeTable,
+      orderBy: 'id ASC',
+    );
 
-    final memoRecords = await db.query(_memoTable, orderBy: 'id ASC');
+    final memoRecords = await db.query(
+      _memoTable,
+      orderBy: 'id ASC',
+    );
 
-    final counterRecords = await db.query(_counterTable, orderBy: 'id ASC');
+    final counterRecords = await db.query(
+      _counterTable,
+      orderBy: 'id ASC',
+    );
 
     //================================================
     // バックアップデータ作成
@@ -109,7 +127,9 @@ class DataBackupService {
   Future<String?> saveBackup() async {
     final json = await createBackupJson();
 
-    final bytes = Uint8List.fromList(utf8.encode(json));
+    final bytes = Uint8List.fromList(
+      utf8.encode(json),
+    );
 
     final fileName = _createBackupFileName();
 
@@ -160,7 +180,10 @@ class DataBackupService {
 
     final bytes = await file.readAsBytes();
 
-    return utf8.decode(bytes, allowMalformed: false);
+    return utf8.decode(
+      bytes,
+      allowMalformed: false,
+    );
   }
 
   //==================================================
@@ -183,7 +206,13 @@ class DataBackupService {
   /// 途中でエラーが発生した場合は、
   /// SQLiteトランザクションにより
   /// 途中までの復元結果を確定しない。
-  Future<DataBackupRestoreResult> restoreFromJson(String json) async {
+  ///
+  /// 旧バージョンのバックアップに
+  /// ATタイプ用の項目がない場合は、
+  /// Aタイプとして扱い、追加項目を0にする。
+  Future<DataBackupRestoreResult> restoreFromJson(
+    String json,
+  ) async {
     //================================================
     // JSON解析
     //================================================
@@ -191,7 +220,9 @@ class DataBackupService {
     final decoded = jsonDecode(json);
 
     if (decoded is! Map<String, dynamic>) {
-      throw FormatException('バックアップ形式が正しくありません。');
+      throw FormatException(
+        'バックアップ形式が正しくありません。',
+      );
     }
 
     //================================================
@@ -214,26 +245,38 @@ class DataBackupService {
       fieldName: 'memoRecords',
     );
 
-    final counterRecords = _toMapList(
-      decoded['counterRecords'],
-      fieldName: 'counterRecords',
+    final counterRecords = _normalizeCounterRecords(
+      _toMapList(
+        decoded['counterRecords'],
+        fieldName: 'counterRecords',
+      ),
     );
 
     //================================================
     // ID重複チェック
     //================================================
 
-    _validateIds(incomeRecords, fieldName: 'incomeRecords');
+    _validateIds(
+      incomeRecords,
+      fieldName: 'incomeRecords',
+    );
 
-    _validateIds(memoRecords, fieldName: 'memoRecords');
+    _validateIds(
+      memoRecords,
+      fieldName: 'memoRecords',
+    );
 
-    _validateIds(counterRecords, fieldName: 'counterRecords');
+    _validateIds(
+      counterRecords,
+      fieldName: 'counterRecords',
+    );
 
     //================================================
     // SQLite取得
     //================================================
 
-    final db = await DatabaseService.instance.database;
+    final db =
+        await DatabaseService.instance.database;
 
     //================================================
     // トランザクション
@@ -317,17 +360,122 @@ class DataBackupService {
   }
 
   //==================================================
+  // Counter Record Compatibility
+  //==================================================
+
+  /// 小役カウンターの旧バックアップを
+  /// 現在のデータベース形式に合わせる。
+  ///
+  /// 旧バックアップでは次の項目が
+  /// 存在しない場合がある。
+  ///
+  /// ・machine_type
+  /// ・strong_cherry
+  /// ・weak_cherry
+  /// ・strong_bell
+  /// ・weak_bell
+  /// ・strong_suika
+  /// ・weak_suika
+  /// ・strong_grape
+  /// ・weak_grape
+  /// ・strong_chance
+  /// ・weak_chance
+  ///
+  /// これらが存在しない場合は、
+  /// Aタイプ・追加カウント0として補完する。
+  ///
+  /// 既存のレコード内容は削除・置換せず、
+  /// 足りない項目だけを追加する。
+  List<Map<String, dynamic>> _normalizeCounterRecords(
+    List<Map<String, dynamic>> records,
+  ) {
+    return records.map((record) {
+      final normalized =
+          Map<String, dynamic>.from(record);
+
+      //==============================================
+      // 機種タイプ
+      //==============================================
+
+      normalized.putIfAbsent(
+        'machine_type',
+        () => 'Aタイプ',
+      );
+
+      //==============================================
+      // ATタイプ用カウント
+      //==============================================
+
+      normalized.putIfAbsent(
+        'strong_cherry',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'weak_cherry',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'strong_bell',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'weak_bell',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'strong_suika',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'weak_suika',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'strong_grape',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'weak_grape',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'strong_chance',
+        () => 0,
+      );
+
+      normalized.putIfAbsent(
+        'weak_chance',
+        () => 0,
+      );
+
+      return normalized;
+    }).toList();
+  }
+
+  //==================================================
   // Validation
   //==================================================
 
   /// バックアップ全体を検証する。
-  void _validateBackup(Map<String, dynamic> backup) {
+  void _validateBackup(
+    Map<String, dynamic> backup,
+  ) {
     //================================================
     // format
     //================================================
 
     if (backup['format'] != _backupFormat) {
-      throw FormatException('「パチスロ収支」のバックアップファイルではありません。');
+      throw FormatException(
+        '「パチスロ収支」のバックアップファイルではありません。',
+      );
     }
 
     //================================================
@@ -337,7 +485,9 @@ class DataBackupService {
     final version = backup['version'];
 
     if (version is! int) {
-      throw FormatException('バックアップバージョンが不正です。');
+      throw FormatException(
+        'バックアップバージョンが不正です。',
+      );
     }
 
     if (version != _backupVersion) {
@@ -354,10 +504,13 @@ class DataBackupService {
     // databaseVersion
     //================================================
 
-    final databaseVersion = backup['databaseVersion'];
+    final databaseVersion =
+        backup['databaseVersion'];
 
     if (databaseVersion is! int) {
-      throw FormatException('データベースバージョンが不正です。');
+      throw FormatException(
+        'データベースバージョンが不正です。',
+      );
     }
 
     if (databaseVersion > _databaseVersion) {
@@ -371,26 +524,39 @@ class DataBackupService {
     // Arrays
     //================================================
 
-    _toMapList(backup['incomeRecords'], fieldName: 'incomeRecords');
+    _toMapList(
+      backup['incomeRecords'],
+      fieldName: 'incomeRecords',
+    );
 
-    _toMapList(backup['memoRecords'], fieldName: 'memoRecords');
+    _toMapList(
+      backup['memoRecords'],
+      fieldName: 'memoRecords',
+    );
 
-    _toMapList(backup['counterRecords'], fieldName: 'counterRecords');
+    _toMapList(
+      backup['counterRecords'],
+      fieldName: 'counterRecords',
+    );
   }
 
   /// JSONの配列を
-  /// `List<Map<String, dynamic>>`へ変換する。
+  /// `List<Map<String, dynamic>>` へ変換する。
   List<Map<String, dynamic>> _toMapList(
     dynamic value, {
     required String fieldName,
   }) {
     if (value is! List) {
-      throw FormatException('$fieldName が配列ではありません。');
+      throw FormatException(
+        '$fieldName が配列ではありません。',
+      );
     }
 
     return value.map<Map<String, dynamic>>((item) {
       if (item is! Map<String, dynamic>) {
-        throw FormatException('$fieldName に不正なデータが含まれています。');
+        throw FormatException(
+          '$fieldName に不正なデータが含まれています。',
+        );
       }
 
       return Map<String, dynamic>.from(item);
@@ -408,15 +574,21 @@ class DataBackupService {
       final id = record['id'];
 
       if (id == null) {
-        throw FormatException('$fieldName にIDなしのデータがあります。');
+        throw FormatException(
+          '$fieldName にIDなしのデータがあります。',
+        );
       }
 
       if (id is! int) {
-        throw FormatException('$fieldName のIDが不正です。');
+        throw FormatException(
+          '$fieldName のIDが不正です。',
+        );
       }
 
       if (!ids.add(id)) {
-        throw FormatException('$fieldName に同じIDのデータがあります。');
+        throw FormatException(
+          '$fieldName に同じIDのデータがあります。',
+        );
       }
     }
   }
@@ -431,15 +603,20 @@ class DataBackupService {
 
     final year = now.year.toString();
 
-    final month = now.month.toString().padLeft(2, '0');
+    final month =
+        now.month.toString().padLeft(2, '0');
 
-    final day = now.day.toString().padLeft(2, '0');
+    final day =
+        now.day.toString().padLeft(2, '0');
 
-    final hour = now.hour.toString().padLeft(2, '0');
+    final hour =
+        now.hour.toString().padLeft(2, '0');
 
-    final minute = now.minute.toString().padLeft(2, '0');
+    final minute =
+        now.minute.toString().padLeft(2, '0');
 
-    final second = now.second.toString().padLeft(2, '0');
+    final second =
+        now.second.toString().padLeft(2, '0');
 
     return 'pachislot_income_backup_'
         '$year$month$day'

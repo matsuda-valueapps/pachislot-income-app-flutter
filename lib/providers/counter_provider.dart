@@ -17,18 +17,23 @@ class CounterProvider extends ChangeNotifier {
   /// タイトル
   String _title = '';
 
+  /// 機種タイプ
+  String _machineType = 'Aタイプ';
+
   //==================================================
   // ゲーム数
   //==================================================
 
   int _startGame = 0;
+
   int _currentGame = 0;
 
   //==================================================
-  // 小役
+  // Aタイプ小役
   //==================================================
 
-  List<CounterItem> _items = [
+  /// Aタイプの小役一覧
+  List<CounterItem> _aItems = [
     const CounterItem(
       id: 'cherry',
       name: 'チェリー',
@@ -57,28 +62,88 @@ class CounterProvider extends ChangeNotifier {
   ];
 
   //==================================================
+  // ATタイプ小役
+  //==================================================
+
+  /// ATタイプの小役一覧
+  List<CounterItem> _atItems = [
+    const CounterItem(
+      id: 'strong_cherry',
+      name: '強チェリー',
+      color: Colors.red,
+    ),
+    const CounterItem(
+      id: 'weak_cherry',
+      name: '弱チェリー',
+      color: Colors.red,
+    ),
+    const CounterItem(
+      id: 'strong_bell',
+      name: '強ベル',
+      color: Colors.yellow,
+    ),
+    const CounterItem(
+      id: 'weak_bell',
+      name: '弱ベル',
+      color: Colors.yellow,
+    ),
+    const CounterItem(
+      id: 'strong_suika',
+      name: '強スイカ',
+      color: Colors.green,
+    ),
+    const CounterItem(
+      id: 'weak_suika',
+      name: '弱スイカ',
+      color: Colors.green,
+    ),
+    const CounterItem(
+      id: 'strong_grape',
+      name: '強ブドウ',
+      color: Colors.purple,
+    ),
+    const CounterItem(
+      id: 'weak_grape',
+      name: '弱ブドウ',
+      color: Colors.purple,
+    ),
+    const CounterItem(
+      id: 'strong_chance',
+      name: '強チャンス目',
+      color: Colors.blue,
+    ),
+    const CounterItem(
+      id: 'weak_chance',
+      name: '弱チャンス目',
+      color: Colors.blue,
+    ),
+  ];
+
+  //==================================================
   // Getter
   //==================================================
 
   /// 選択中の日付
-  DateTime get selectedDate =>
-      _selectedDate;
+  DateTime get selectedDate => _selectedDate;
 
   /// タイトル
   String get title => _title;
 
+  /// 機種タイプ
+  String get machineType => _machineType;
+
+  /// ATタイプかどうか
+  bool get isAtType => _machineType == 'ATタイプ';
+
   /// 開始ゲーム数
-  int get startGame =>
-      _startGame;
+  int get startGame => _startGame;
 
   /// 現在ゲーム数
-  int get currentGame =>
-      _currentGame;
+  int get currentGame => _currentGame;
 
   /// 遊技ゲーム数（現在 - 開始）
   int get playGame {
-    final value =
-        _currentGame - _startGame;
+    final value = _currentGame - _startGame;
 
     if (value < 0) {
       return 0;
@@ -87,9 +152,90 @@ class CounterProvider extends ChangeNotifier {
     return value;
   }
 
-  /// 小役一覧
+  /// 現在選択されている機種タイプの小役一覧
   List<CounterItem> get items =>
-      List.unmodifiable(_items);
+      List.unmodifiable(_activeItems);
+
+  /// 現在選択されている機種タイプの小役一覧
+  List<CounterItem> get _activeItems =>
+      isAtType ? _atItems : _aItems;
+
+  /// AタイプとATタイプの両方のカウント
+  ///
+  /// 保存処理などで使用する。
+  /// Aタイプの項目は既存のキーを維持し、
+  /// ATタイプの項目はCounterRecordの
+  /// Dartフィールド名に合わせたキーを使用する。
+  Map<String, int> get activeCounts {
+    return Map.unmodifiable({
+      // Aタイプ
+      'cherry': _getCount(_aItems, 'cherry'),
+      'bell': _getCount(_aItems, 'bell'),
+      'suika': _getCount(_aItems, 'suika'),
+      'grape': _getCount(_aItems, 'grape'),
+      'chance': _getCount(_aItems, 'chance'),
+
+      // ATタイプ
+      'strongCherry':
+          _getCount(_atItems, 'strong_cherry'),
+      'weakCherry':
+          _getCount(_atItems, 'weak_cherry'),
+      'strongBell':
+          _getCount(_atItems, 'strong_bell'),
+      'weakBell':
+          _getCount(_atItems, 'weak_bell'),
+      'strongSuika':
+          _getCount(_atItems, 'strong_suika'),
+      'weakSuika':
+          _getCount(_atItems, 'weak_suika'),
+      'strongGrape':
+          _getCount(_atItems, 'strong_grape'),
+      'weakGrape':
+          _getCount(_atItems, 'weak_grape'),
+      'strongChance':
+          _getCount(_atItems, 'strong_chance'),
+      'weakChance':
+          _getCount(_atItems, 'weak_chance'),
+    });
+  }
+
+  /// 指定された小役のカウントを取得する。
+  int _getCount(
+    List<CounterItem> source,
+    String id,
+  ) {
+    for (final item in source) {
+      if (item.id == id) {
+        return item.count;
+      }
+    }
+
+    return 0;
+  }
+
+  //==================================================
+  // 機種タイプ
+  //==================================================
+
+  /// 機種タイプを変更する。
+  ///
+  /// AタイプとATタイプのカウントは
+  /// それぞれ保持する。
+  void setMachineType(String value) {
+    if (value != 'Aタイプ' && value != 'ATタイプ') {
+      return;
+    }
+
+    if (_machineType == value) {
+      return;
+    }
+
+    _machineType = value;
+
+    _saveDraft();
+
+    notifyListeners();
+  }
 
   //==================================================
   // SharedPreferences
@@ -97,11 +243,10 @@ class CounterProvider extends ChangeNotifier {
 
   /// 起動時に下書きを復元する。
   ///
-  /// 日付・タイトル・ゲーム数・
-  /// 各小役カウントを復元する。
+  /// 日付・タイトル・機種タイプ・ゲーム数・
+  /// AタイプおよびATタイプのカウントを復元する。
   Future<void> loadDraft() async {
-    final draft =
-        await CounterDraftService.loadDraft();
+    final draft = await CounterDraftService.loadDraft();
 
     //================================================
     // 日付
@@ -112,84 +257,149 @@ class CounterProvider extends ChangeNotifier {
 
     if (dateString.isNotEmpty) {
       try {
-        _selectedDate =
-            DateTime.parse(dateString);
+        _selectedDate = DateTime.parse(dateString);
       } catch (_) {
-        _selectedDate =
-            DateTime.now();
+        _selectedDate = DateTime.now();
       }
     } else {
-      _selectedDate =
-          DateTime.now();
+      _selectedDate = DateTime.now();
     }
 
     //================================================
     // タイトル
     //================================================
 
-    _title =
-        draft['title']?.toString() ?? '';
+    _title = draft['title']?.toString() ?? '';
+
+    //================================================
+    // 機種タイプ
+    //================================================
+
+    final savedMachineType =
+        draft['machineType']?.toString() ?? 'Aタイプ';
+
+    _machineType =
+        savedMachineType == 'ATタイプ'
+            ? 'ATタイプ'
+            : 'Aタイプ';
 
     //================================================
     // ゲーム数
     //================================================
 
-    _startGame =
-        draft['startGame'] ?? 0;
+    _startGame = _readInt(draft['startGame']);
 
-    _currentGame =
-        draft['currentGame'] ?? 0;
+    _currentGame = _readInt(draft['currentGame']);
 
     //================================================
-    // 小役
+    // Aタイプ小役
     //================================================
 
-    _items = [
-      _items[0].copyWith(
-        count:
-            draft['cherry'] ?? 0,
+    _aItems = [
+      _aItems[0].copyWith(
+        count: _readInt(draft['cherry']),
       ),
-      _items[1].copyWith(
-        count:
-            draft['bell'] ?? 0,
+      _aItems[1].copyWith(
+        count: _readInt(draft['bell']),
       ),
-      _items[2].copyWith(
-        count:
-            draft['suika'] ?? 0,
+      _aItems[2].copyWith(
+        count: _readInt(draft['suika']),
       ),
-      _items[3].copyWith(
-        count:
-            draft['grape'] ?? 0,
+      _aItems[3].copyWith(
+        count: _readInt(draft['grape']),
       ),
-      _items[4].copyWith(
-        count:
-            draft['chance'] ?? 0,
+      _aItems[4].copyWith(
+        count: _readInt(draft['chance']),
+      ),
+    ];
+
+    //================================================
+    // ATタイプ小役
+    //================================================
+
+    _atItems = [
+      _atItems[0].copyWith(
+        count: _readInt(draft['strongCherry']),
+      ),
+      _atItems[1].copyWith(
+        count: _readInt(draft['weakCherry']),
+      ),
+      _atItems[2].copyWith(
+        count: _readInt(draft['strongBell']),
+      ),
+      _atItems[3].copyWith(
+        count: _readInt(draft['weakBell']),
+      ),
+      _atItems[4].copyWith(
+        count: _readInt(draft['strongSuika']),
+      ),
+      _atItems[5].copyWith(
+        count: _readInt(draft['weakSuika']),
+      ),
+      _atItems[6].copyWith(
+        count: _readInt(draft['strongGrape']),
+      ),
+      _atItems[7].copyWith(
+        count: _readInt(draft['weakGrape']),
+      ),
+      _atItems[8].copyWith(
+        count: _readInt(draft['strongChance']),
+      ),
+      _atItems[9].copyWith(
+        count: _readInt(draft['weakChance']),
       ),
     ];
 
     notifyListeners();
   }
 
+  /// 値を安全にintへ変換する。
+  int _readInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   /// 下書きを自動保存する。
   ///
-  /// 日付・タイトル・ゲーム数・
-  /// 各小役カウントを保存する。
+  /// 日付・タイトル・機種タイプ・ゲーム数・
+  /// 両タイプの小役カウントを保存する。
   Future<void> _saveDraft() async {
+    final counts = activeCounts;
+
     await CounterDraftService.saveDraft(
       date: _selectedDate,
       title: _title,
+      machineType: _machineType,
       startGame: _startGame,
       currentGame: _currentGame,
-      cherry:
-          _items[0].count,
-      bell:
-          _items[1].count,
-      suika:
-          _items[2].count,
-      grape:
-          _items[3].count,
-      chance:
-          _items[4].count,
+
+      // Aタイプ
+      cherry: counts['cherry'] ?? 0,
+      bell: counts['bell'] ?? 0,
+      suika: counts['suika'] ?? 0,
+      grape: counts['grape'] ?? 0,
+      chance: counts['chance'] ?? 0,
+
+      // ATタイプ
+      extraCounts: {
+        'strongCherry': counts['strongCherry'] ?? 0,
+        'weakCherry': counts['weakCherry'] ?? 0,
+        'strongBell': counts['strongBell'] ?? 0,
+        'weakBell': counts['weakBell'] ?? 0,
+        'strongSuika': counts['strongSuika'] ?? 0,
+        'weakSuika': counts['weakSuika'] ?? 0,
+        'strongGrape': counts['strongGrape'] ?? 0,
+        'weakGrape': counts['weakGrape'] ?? 0,
+        'strongChance': counts['strongChance'] ?? 0,
+        'weakChance': counts['weakChance'] ?? 0,
+      },
     );
   }
 
@@ -198,15 +408,10 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// 日付を変更する。
-  void setSelectedDate(
-    DateTime value,
-  ) {
-    if (_selectedDate.year ==
-            value.year &&
-        _selectedDate.month ==
-            value.month &&
-        _selectedDate.day ==
-            value.day) {
+  void setSelectedDate(DateTime value) {
+    if (_selectedDate.year == value.year &&
+        _selectedDate.month == value.month &&
+        _selectedDate.day == value.day) {
       return;
     }
 
@@ -222,9 +427,7 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// タイトルを変更する。
-  void setTitle(
-    String value,
-  ) {
+  void setTitle(String value) {
     if (_title == value) {
       return;
     }
@@ -241,9 +444,7 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// 開始ゲーム数を変更する。
-  void setStartGame(
-    int value,
-  ) {
+  void setStartGame(int value) {
     if (_startGame == value) {
       return;
     }
@@ -256,9 +457,7 @@ class CounterProvider extends ChangeNotifier {
   }
 
   /// 現在ゲーム数を変更する。
-  void setCurrentGame(
-    int value,
-  ) {
+  void setCurrentGame(int value) {
     if (_currentGame == value) {
       return;
     }
@@ -271,21 +470,15 @@ class CounterProvider extends ChangeNotifier {
   }
 
   /// 開始ゲーム数TextField用
-  void updateStartGame(
-    String value,
-  ) {
-    final number =
-        int.tryParse(value) ?? 0;
+  void updateStartGame(String value) {
+    final number = int.tryParse(value) ?? 0;
 
     setStartGame(number);
   }
 
   /// 現在ゲーム数TextField用
-  void updateCurrentGame(
-    String value,
-  ) {
-    final number =
-        int.tryParse(value) ?? 0;
+  void updateCurrentGame(String value) {
+    final number = int.tryParse(value) ?? 0;
 
     setCurrentGame(number);
   }
@@ -295,23 +488,26 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// 小役を1回増やす。
-  void increment(
-    String id,
-  ) {
-    final index =
-        _items.indexWhere(
-      (e) => e.id == id,
+  void increment(String id) {
+    final items = _activeItems;
+
+    final index = items.indexWhere(
+      (item) => item.id == id,
     );
 
     if (index == -1) {
       return;
     }
 
-    _items[index] =
-        _items[index].copyWith(
-      count:
-          _items[index].count + 1,
+    final updatedItem = items[index].copyWith(
+      count: items[index].count + 1,
     );
+
+    if (isAtType) {
+      _atItems[index] = updatedItem;
+    } else {
+      _aItems[index] = updatedItem;
+    }
 
     _saveDraft();
 
@@ -319,27 +515,30 @@ class CounterProvider extends ChangeNotifier {
   }
 
   /// 小役を1回減らす。
-  void decrement(
-    String id,
-  ) {
-    final index =
-        _items.indexWhere(
-      (e) => e.id == id,
+  void decrement(String id) {
+    final items = _activeItems;
+
+    final index = items.indexWhere(
+      (item) => item.id == id,
     );
 
     if (index == -1) {
       return;
     }
 
-    if (_items[index].count == 0) {
+    if (items[index].count == 0) {
       return;
     }
 
-    _items[index] =
-        _items[index].copyWith(
-      count:
-          _items[index].count - 1,
+    final updatedItem = items[index].copyWith(
+      count: items[index].count - 1,
     );
+
+    if (isAtType) {
+      _atItems[index] = updatedItem;
+    } else {
+      _aItems[index] = updatedItem;
+    }
 
     _saveDraft();
 
@@ -354,9 +553,10 @@ class CounterProvider extends ChangeNotifier {
   ///
   /// ・日付 → 今日
   /// ・タイトル → 空
+  /// ・機種タイプ → Aタイプ
   /// ・開始ゲーム数 → 0
   /// ・現在ゲーム数 → 0
-  /// ・各小役カウント → 0
+  /// ・AタイプおよびATタイプの全カウント → 0
   ///
   /// SharedPreferencesの下書きも削除する。
   Future<void> reset() async {
@@ -364,23 +564,37 @@ class CounterProvider extends ChangeNotifier {
     // 基本情報
     //================================================
 
-    _selectedDate =
-        DateTime.now();
+    _selectedDate = DateTime.now();
 
     _title = '';
+
+    _machineType = 'Aタイプ';
 
     //================================================
     // ゲーム数
     //================================================
 
     _startGame = 0;
+
     _currentGame = 0;
 
     //================================================
-    // 小役
+    // Aタイプ小役
     //================================================
 
-    _items = _items
+    _aItems = _aItems
+        .map(
+          (item) => item.copyWith(
+            count: 0,
+          ),
+        )
+        .toList();
+
+    //================================================
+    // ATタイプ小役
+    //================================================
+
+    _atItems = _atItems
         .map(
           (item) => item.copyWith(
             count: 0,
@@ -392,8 +606,7 @@ class CounterProvider extends ChangeNotifier {
     // 下書き削除
     //================================================
 
-    await CounterDraftService
-        .clearDraft();
+    await CounterDraftService.clearDraft();
 
     notifyListeners();
   }
@@ -403,20 +616,16 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// 小役の出現確率を計算する。
-  String probability(
-    String id,
-  ) {
-    final item =
-        _items.firstWhere(
-      (e) => e.id == id,
+  String probability(String id) {
+    final item = _activeItems.firstWhere(
+      (item) => item.id == id,
     );
 
     //================================================
     // カウントなし / 遊技ゲーム数なし
     //================================================
 
-    if (item.count == 0 ||
-        playGame == 0) {
+    if (item.count == 0 || playGame == 0) {
       return '1 / -----';
     }
 
@@ -424,15 +633,13 @@ class CounterProvider extends ChangeNotifier {
     // 確率計算
     //================================================
 
-    final probability =
-        playGame / item.count;
+    final probability = playGame / item.count;
 
     //================================================
     // 割り切れる場合は整数表示
     //================================================
 
-    if (probability ==
-        probability.roundToDouble()) {
+    if (probability == probability.roundToDouble()) {
       return '1 / ${probability.toInt()}';
     }
 

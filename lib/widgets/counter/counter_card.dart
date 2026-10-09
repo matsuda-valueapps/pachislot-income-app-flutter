@@ -38,6 +38,10 @@ class CounterCard extends StatelessWidget {
     String id,
   ) {
     switch (id) {
+      //================================================
+      // Aタイプ
+      //================================================
+
       case 'cherry':
         return KoyakuType.cherry;
 
@@ -53,9 +57,64 @@ class CounterCard extends StatelessWidget {
       case 'chance':
         return KoyakuType.chance;
 
+      //================================================
+      // ATタイプ
+      //================================================
+
+      case 'strong_cherry':
+      case 'weak_cherry':
+        return KoyakuType.cherry;
+
+      case 'strong_bell':
+      case 'weak_bell':
+        return KoyakuType.bell;
+
+      case 'strong_suika':
+      case 'weak_suika':
+        return KoyakuType.watermelon;
+
+      case 'strong_grape':
+      case 'weak_grape':
+        return KoyakuType.grape;
+
+      case 'strong_chance':
+      case 'weak_chance':
+        return KoyakuType.chance;
+
+      //================================================
+      // その他
+      //================================================
+
       default:
         return KoyakuType.cherry;
     }
+  }
+
+  //==================================================
+  // 小役アイコンサイズ
+  //==================================================
+
+  /// 小役IDに応じてアイコンサイズを変更する。
+  ///
+  /// ・Aタイプ：36px
+  /// ・ATタイプ「強」：36px
+  /// ・ATタイプ「弱」：28px
+  double _getIconSize(
+    String id,
+  ) {
+    //================================================
+    // ATタイプ「弱」
+    //================================================
+
+    if (id.startsWith('weak_')) {
+      return 28;
+    }
+
+    //================================================
+    // AタイプおよびATタイプ「強」
+    //================================================
+
+    return 36;
   }
 
   //==================================================
@@ -89,11 +148,19 @@ class CounterCard extends StatelessWidget {
               // 小役アイコン
               //================================================
 
-              KoyakuIcon(
-                type: _getKoyakuType(
-                  item.id,
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: Center(
+                  child: KoyakuIcon(
+                    type: _getKoyakuType(
+                      item.id,
+                    ),
+                    size: _getIconSize(
+                      item.id,
+                    ),
+                  ),
                 ),
-                size: 36,
               ),
 
               const SizedBox(

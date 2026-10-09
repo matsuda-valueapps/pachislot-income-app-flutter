@@ -20,8 +20,7 @@ class CounterListPage extends StatefulWidget {
       _CounterListPageState();
 }
 
-class _CounterListPageState
-    extends State<CounterListPage> {
+class _CounterListPageState extends State<CounterListPage> {
   //==================================================
   // データ
   //==================================================
@@ -35,8 +34,7 @@ class _CounterListPageState
   //==================================================
 
   /// タイトル検索
-  final TextEditingController
-      _searchController =
+  final TextEditingController _searchController =
       TextEditingController();
 
   //==================================================
@@ -63,14 +61,12 @@ class _CounterListPageState
   @override
   void initState() {
     super.initState();
-
     _loadRecords();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-
     super.dispose();
   }
 
@@ -88,8 +84,7 @@ class _CounterListPageState
 
     try {
       final records =
-          await DatabaseService.instance
-              .getCounterRecords();
+          await DatabaseService.instance.getCounterRecords();
 
       if (!mounted) {
         return;
@@ -109,8 +104,7 @@ class _CounterListPageState
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'データの取得に失敗しました。',
@@ -131,8 +125,7 @@ class _CounterListPageState
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            CounterDetailPage(
+        builder: (_) => CounterDetailPage(
           record: record,
         ),
       ),
@@ -158,12 +151,9 @@ class _CounterListPageState
   //==================================================
 
   /// 「2026年8月18日(火)」形式
-  String _formatDate(
-    String date,
-  ) {
+  String _formatDate(String date) {
     try {
-      final parsedDate =
-          DateTime.parse(date);
+      final parsedDate = DateTime.parse(date);
 
       return DateFormat(
         'yyyy年M月d日(E)',
@@ -180,9 +170,7 @@ class _CounterListPageState
 
   /// 絞り込み条件用の日付を
   /// YYYY/MM/DD形式で表示する。
-  String _formatFilterDate(
-    DateTime date,
-  ) {
+  String _formatFilterDate(DateTime date) {
     return '${date.year}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.day.toString().padLeft(2, '0')}';
@@ -193,9 +181,7 @@ class _CounterListPageState
   //==================================================
 
   /// 3桁区切り
-  String _formatNumber(
-    int value,
-  ) {
+  String _formatNumber(int value) {
     return NumberFormat(
       '#,###',
       'ja_JP',
@@ -206,14 +192,10 @@ class _CounterListPageState
   // 小役合計
   //==================================================
 
-  int _totalCount(
-    CounterRecord record,
-  ) {
-    return record.cherry +
-        record.bell +
-        record.suika +
-        record.grape +
-        record.chance;
+  int _totalCount(CounterRecord record) {
+    // CounterRecord側で機種タイプに応じて
+    // Aタイプ5種類・ATタイプ10種類を合計する。
+    return record.totalCount;
   }
 
   //==================================================
@@ -221,12 +203,9 @@ class _CounterListPageState
   //==================================================
 
   /// 検索キーワードを変更する。
-  void _onSearchChanged(
-    String value,
-  ) {
+  void _onSearchChanged(String value) {
     setState(() {
-      _searchQuery =
-          value.trim().toLowerCase();
+      _searchQuery = value.trim().toLowerCase();
     });
   }
 
@@ -250,9 +229,7 @@ class _CounterListPageState
   }
 
   /// 日付を日単位に正規化する。
-  DateTime _dateOnly(
-    DateTime date,
-  ) {
+  DateTime _dateOnly(DateTime date) {
     return DateTime(
       date.year,
       date.month,
@@ -261,9 +238,7 @@ class _CounterListPageState
   }
 
   /// 小役データの日付をDateTimeへ変換する。
-  DateTime? _parseRecordDate(
-    String date,
-  ) {
+  DateTime? _parseRecordDate(String date) {
     try {
       return _dateOnly(
         DateTime.parse(date),
@@ -275,15 +250,10 @@ class _CounterListPageState
 
   /// 日付絞り込みダイアログを表示する。
   Future<void> _showDateFilterDialog() async {
-    DateTime? tempStartDate =
-        _filterStartDate;
+    DateTime? tempStartDate = _filterStartDate;
+    DateTime? tempEndDate = _filterEndDate;
 
-    DateTime? tempEndDate =
-        _filterEndDate;
-
-    final result =
-        await showDialog<
-            Map<String, DateTime?>>(
+    final result = await showDialog<Map<String, DateTime?>>(
       context: context,
       builder: (dialogContext) {
         return StatefulBuilder(
@@ -319,18 +289,15 @@ class _CounterListPageState
                 ],
               ),
               content: Column(
-                mainAxisSize:
-                    MainAxisSize.min,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   //========================================
                   // 開始日
                   //========================================
 
                   ListTile(
-                    contentPadding:
-                        EdgeInsets.zero,
-                    leading:
-                        const ServiceIcon(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const ServiceIcon(
                       icon: 'google_calendar',
                       size: 36,
                     ),
@@ -348,12 +315,10 @@ class _CounterListPageState
                         ? IconButton(
                             onPressed: () {
                               setDialogState(() {
-                                tempStartDate =
-                                    null;
+                                tempStartDate = null;
                               });
                             },
-                            icon:
-                                const Icon(
+                            icon: const Icon(
                               Icons.clear,
                             ),
                           )
@@ -366,29 +331,22 @@ class _CounterListPageState
 
                       final pickedDate =
                           await showDatePicker(
-                        context:
-                            dialogContext,
-                        initialDate:
-                            initialDate,
-                        firstDate:
-                            DateTime(2020),
-                        lastDate:
-                            DateTime(2100),
-                        locale:
-                            const Locale(
+                        context: dialogContext,
+                        initialDate: initialDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                        locale: const Locale(
                           'ja',
                           'JP',
                         ),
                       );
 
-                      if (pickedDate ==
-                          null) {
+                      if (pickedDate == null) {
                         return;
                       }
 
                       setDialogState(() {
-                        tempStartDate =
-                            _dateOnly(
+                        tempStartDate = _dateOnly(
                           pickedDate,
                         );
                       });
@@ -402,10 +360,8 @@ class _CounterListPageState
                   //========================================
 
                   ListTile(
-                    contentPadding:
-                        EdgeInsets.zero,
-                    leading:
-                        const ServiceIcon(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const ServiceIcon(
                       icon: 'google_calendar',
                       size: 36,
                     ),
@@ -423,12 +379,10 @@ class _CounterListPageState
                         ? IconButton(
                             onPressed: () {
                               setDialogState(() {
-                                tempEndDate =
-                                    null;
+                                tempEndDate = null;
                               });
                             },
-                            icon:
-                                const Icon(
+                            icon: const Icon(
                               Icons.clear,
                             ),
                           )
@@ -441,29 +395,22 @@ class _CounterListPageState
 
                       final pickedDate =
                           await showDatePicker(
-                        context:
-                            dialogContext,
-                        initialDate:
-                            initialDate,
-                        firstDate:
-                            DateTime(2020),
-                        lastDate:
-                            DateTime(2100),
-                        locale:
-                            const Locale(
+                        context: dialogContext,
+                        initialDate: initialDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                        locale: const Locale(
                           'ja',
                           'JP',
                         ),
                       );
 
-                      if (pickedDate ==
-                          null) {
+                      if (pickedDate == null) {
                         return;
                       }
 
                       setDialogState(() {
-                        tempEndDate =
-                            _dateOnly(
+                        tempEndDate = _dateOnly(
                           pickedDate,
                         );
                       });
@@ -471,7 +418,6 @@ class _CounterListPageState
                   ),
                 ],
               ),
-
               actions: [
                 //========================================
                 // ボタン
@@ -490,16 +436,12 @@ class _CounterListPageState
                             dialogContext,
                           );
                         },
-                        style:
-                            OutlinedButton.styleFrom(
-                          minimumSize:
-                              const Size(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(
                             0,
                             48,
                           ),
-                          padding:
-                              const EdgeInsets
-                                  .symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 12,
                           ),
@@ -508,10 +450,8 @@ class _CounterListPageState
                           'キャンセル',
                           maxLines: 1,
                           softWrap: false,
-                          overflow:
-                              TextOverflow.ellipsis,
-                          textAlign:
-                              TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
                           ),
@@ -532,16 +472,12 @@ class _CounterListPageState
                         onPressed: () {
                           // 開始日と終了日が逆の場合は
                           // 適用しない。
-                          if (tempStartDate !=
-                                  null &&
-                              tempEndDate !=
-                                  null &&
-                              tempStartDate!
-                                  .isAfter(
+                          if (tempStartDate != null &&
+                              tempEndDate != null &&
+                              tempStartDate!.isAfter(
                                 tempEndDate!,
                               )) {
-                            ScaffoldMessenger
-                                .of(
+                            ScaffoldMessenger.of(
                               context,
                             ).showSnackBar(
                               const SnackBar(
@@ -557,23 +493,17 @@ class _CounterListPageState
                           Navigator.pop(
                             dialogContext,
                             {
-                              'start':
-                                  tempStartDate,
-                              'end':
-                                  tempEndDate,
+                              'start': tempStartDate,
+                              'end': tempEndDate,
                             },
                           );
                         },
-                        style:
-                            FilledButton.styleFrom(
-                          minimumSize:
-                              const Size(
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(
                             0,
                             48,
                           ),
-                          padding:
-                              const EdgeInsets
-                                  .symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 12,
                           ),
@@ -582,10 +512,8 @@ class _CounterListPageState
                           '適用',
                           maxLines: 1,
                           softWrap: false,
-                          overflow:
-                              TextOverflow.ellipsis,
-                          textAlign:
-                              TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,
                           ),
@@ -606,10 +534,8 @@ class _CounterListPageState
     }
 
     setState(() {
-      _filterStartDate =
-          result['start'];
-      _filterEndDate =
-          result['end'];
+      _filterStartDate = result['start'];
+      _filterEndDate = result['end'];
     });
   }
 
@@ -643,13 +569,9 @@ class _CounterListPageState
       //==============================================
 
       if (_searchQuery.isNotEmpty) {
-        final title =
-            record.title
-                .toLowerCase();
+        final title = record.title.toLowerCase();
 
-        if (!title.contains(
-          _searchQuery,
-        )) {
+        if (!title.contains(_searchQuery)) {
           return false;
         }
       }
@@ -658,25 +580,20 @@ class _CounterListPageState
       // 日付条件
       //==============================================
 
-      final recordDate =
-          _parseRecordDate(
+      final recordDate = _parseRecordDate(
         record.date,
       );
 
       if (_filterStartDate != null) {
         if (recordDate == null ||
-            recordDate.isBefore(
-              _filterStartDate!,
-            )) {
+            recordDate.isBefore(_filterStartDate!)) {
           return false;
         }
       }
 
       if (_filterEndDate != null) {
         if (recordDate == null ||
-            recordDate.isAfter(
-              _filterEndDate!,
-            )) {
+            recordDate.isAfter(_filterEndDate!)) {
           return false;
         }
       }
@@ -694,82 +611,46 @@ class _CounterListPageState
     BuildContext context,
   ) {
     return TextField(
-      controller:
-          _searchController,
-      onChanged:
-          _onSearchChanged,
-      textInputAction:
-          TextInputAction.search,
-      decoration:
-          InputDecoration(
-        hintText:
-            'タイトルを検索',
-        prefixIcon:
-            const Icon(
+      controller: _searchController,
+      onChanged: _onSearchChanged,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: 'タイトルを検索',
+        prefixIcon: const Icon(
           Icons.search,
         ),
-        suffixIcon:
-            _searchQuery.isNotEmpty
-                ? IconButton(
-                    onPressed:
-                        _clearSearch,
-                    icon:
-                        const Icon(
-                      Icons.clear,
-                    ),
-                  )
-                : null,
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                onPressed: _clearSearch,
+                icon: const Icon(
+                  Icons.clear,
+                ),
+              )
+            : null,
         filled: true,
-        fillColor:
-            Theme.of(context)
-                .colorScheme
-                .surface,
-        border:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            16,
-          ),
-          borderSide:
-              BorderSide(
-            color: Theme.of(context)
-                .colorScheme
-                .outline,
+        fillColor: Theme.of(context).colorScheme.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline,
           ),
         ),
-        enabledBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            16,
-          ),
-          borderSide:
-              BorderSide(
-            color: Theme.of(context)
-                .colorScheme
-                .outline,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline,
           ),
         ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            16,
-          ),
-          borderSide:
-              BorderSide(
-            color: Theme.of(context)
-                .colorScheme
-                .primary,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
             width: 2,
           ),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(
-          horizontal:
-              AppSpacing.md,
-          vertical:
-              AppSpacing.md,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
         ),
       ),
     );
@@ -785,10 +666,8 @@ class _CounterListPageState
     int count,
   ) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal:
-            AppSpacing.xs,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
       ),
       child: Text(
         '検索結果：$count件',
@@ -799,8 +678,7 @@ class _CounterListPageState
               color: Theme.of(context)
                   .colorScheme
                   .onSurfaceVariant,
-              fontWeight:
-                  FontWeight.w600,
+              fontWeight: FontWeight.w600,
             ),
       ),
     );
@@ -816,8 +694,7 @@ class _CounterListPageState
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed:
-            _showDateFilterDialog,
+        onPressed: _showDateFilterDialog,
         icon: const ActionButtonIcon.filter(
           size: 38.0,
         ),
@@ -860,8 +737,7 @@ class _CounterListPageState
     }
 
     return Padding(
-      padding:
-          const EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: AppSpacing.xs,
         left: AppSpacing.lg,
       ),
@@ -870,23 +746,18 @@ class _CounterListPageState
           Expanded(
             child: Text(
               '日付：$dateText',
-              style:
-                  Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                        color: Theme.of(
-                          context,
-                        )
-                            .colorScheme
-                            .onSurfaceVariant,
-                      ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant,
+                  ),
             ),
           ),
-
           TextButton(
-            onPressed:
-                _clearDateFilter,
+            onPressed: _clearDateFilter,
             child: const Text(
               'クリア',
             ),
@@ -959,11 +830,10 @@ class _CounterListPageState
         // 外枠
         //================================================
 
-        borderRadius:
-            AppRadius.card,
+        borderRadius: AppRadius.card,
 
         border: Border.all(
-          color: Color.fromRGBO(
+          color: const Color.fromRGBO(
             157,
             201,
             246,
@@ -1011,11 +881,9 @@ class _CounterListPageState
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius:
-              AppRadius.card,
+          borderRadius: AppRadius.card,
           child: Padding(
-            padding:
-                const EdgeInsets.all(
+            padding: const EdgeInsets.all(
               AppSpacing.md,
             ),
             child: child,
@@ -1035,37 +903,30 @@ class _CounterListPageState
     BuildContext context,
     CounterRecord record,
   ) {
-    final title =
-        record.title.trim().isEmpty
-            ? 'タイトルなし'
-            : record.title.trim();
+    final title = record.title.trim().isEmpty
+        ? 'タイトルなし'
+        : record.title.trim();
 
     final playGame =
-        record.currentGame -
-            record.startGame;
+        record.currentGame - record.startGame;
 
     return _buildPremiumGlassCard(
       context: context,
-      onTap: () =>
-          _openDetail(record),
+      onTap: () => _openDetail(record),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //========================================
           // 日付
           //========================================
 
           Text(
-            _formatDate(
-              record.date,
-            ),
+            _formatDate(record.date),
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
                 ?.copyWith(
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
           ),
 
@@ -1080,15 +941,50 @@ class _CounterListPageState
           Text(
             title,
             maxLines: 2,
-            overflow:
-                TextOverflow.ellipsis,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context)
                 .textTheme
                 .bodyLarge
                 ?.copyWith(
-                  fontWeight:
-                      FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
+          ),
+
+          const SizedBox(
+            height: AppSpacing.sm,
+          ),
+
+          //========================================
+          // 機種タイプ
+          //========================================
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                record.machineType,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium
+                    ?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
           ),
 
           const SizedBox(
@@ -1143,17 +1039,14 @@ class _CounterListPageState
           //========================================
 
           Align(
-            alignment:
-                Alignment.centerRight,
+            alignment: Alignment.centerRight,
             child: Text(
               '小役合計 ${_formatNumber(_totalCount(record))}回',
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
                   ?.copyWith(
-                    color: Theme.of(
-                      context,
-                    )
+                    color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant,
                   ),
@@ -1174,8 +1067,7 @@ class _CounterListPageState
     required String value,
   }) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
@@ -1197,8 +1089,7 @@ class _CounterListPageState
               .textTheme
               .bodyLarge
               ?.copyWith(
-                fontWeight:
-                    FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
         ),
       ],
@@ -1213,13 +1104,10 @@ class _CounterListPageState
     BuildContext context,
   ) {
     return RefreshIndicator(
-      onRefresh:
-          _loadRecords,
+      onRefresh: _loadRecords,
       child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
-        padding:
-            AppSpacing.page,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: AppSpacing.page,
         children: [
           const SizedBox(
             height: 160,
@@ -1234,8 +1122,7 @@ class _CounterListPageState
           ),
 
           const SizedBox(
-            height:
-                AppSpacing.md,
+            height: AppSpacing.md,
           ),
 
           const Center(
@@ -1258,16 +1145,13 @@ class _CounterListPageState
 
   Widget _buildNoSearchResultView() {
     return ListView(
-      physics:
-          const AlwaysScrollableScrollPhysics(),
-      padding:
-          const EdgeInsets.all(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(
         AppSpacing.xl,
       ),
       children: [
         const SizedBox(
-          height:
-              AppSpacing.xl,
+          height: AppSpacing.xl,
         ),
 
         Icon(
@@ -1279,34 +1163,29 @@ class _CounterListPageState
         ),
 
         const SizedBox(
-          height:
-              AppSpacing.md,
+          height: AppSpacing.md,
         ),
 
         Text(
           '検索結果がありません',
-          textAlign:
-              TextAlign.center,
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .titleMedium
               ?.copyWith(
-                fontWeight:
-                    FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
         ),
 
         const SizedBox(
-          height:
-              AppSpacing.sm,
+          height: AppSpacing.sm,
         ),
 
         Text(
           _hasDateFilter
               ? '検索条件を変更してください。'
               : '別のキーワードで検索してください。',
-          textAlign:
-              TextAlign.center,
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .bodyMedium
@@ -1337,8 +1216,7 @@ class _CounterListPageState
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             //================================================
             // AdMobバナー
@@ -1383,8 +1261,7 @@ class _CounterListPageState
 
     if (_isLoading) {
       return const Center(
-        child:
-            CircularProgressIndicator(),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -1402,8 +1279,7 @@ class _CounterListPageState
     // 検索・絞り込み
     //================================================
 
-    final filteredRecords =
-        _filterRecords(
+    final filteredRecords = _filterRecords(
       _records,
     );
 
@@ -1418,22 +1294,19 @@ class _CounterListPageState
         //============================================
 
         Padding(
-          padding:
-              EdgeInsets.fromLTRB(
+          padding: EdgeInsets.fromLTRB(
             AppSpacing.page.left,
             AppSpacing.page.top,
             AppSpacing.page.right,
             0,
           ),
-          child:
-              _buildSearchField(
+          child: _buildSearchField(
             context,
           ),
         ),
 
         const SizedBox(
-          height:
-              AppSpacing.sm,
+          height: AppSpacing.sm,
         ),
 
         //============================================
@@ -1441,16 +1314,12 @@ class _CounterListPageState
         //============================================
 
         Align(
-          alignment:
-              Alignment.centerLeft,
+          alignment: Alignment.centerLeft,
           child: Padding(
-            padding:
-                EdgeInsets.symmetric(
-              horizontal:
-                  AppSpacing.page.left,
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.page.left,
             ),
-            child:
-                _buildResultCount(
+            child: _buildResultCount(
               context,
               filteredRecords.length,
             ),
@@ -1458,8 +1327,7 @@ class _CounterListPageState
         ),
 
         const SizedBox(
-          height:
-              AppSpacing.sm,
+          height: AppSpacing.sm,
         ),
 
         //============================================
@@ -1467,13 +1335,10 @@ class _CounterListPageState
         //============================================
 
         Padding(
-          padding:
-              EdgeInsets.symmetric(
-            horizontal:
-                AppSpacing.page.left,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.page.left,
           ),
-          child:
-              _buildDateFilterButton(
+          child: _buildDateFilterButton(
             context,
           ),
         ),
@@ -1483,13 +1348,10 @@ class _CounterListPageState
         //============================================
 
         Padding(
-          padding:
-              EdgeInsets.symmetric(
-            horizontal:
-                AppSpacing.page.left,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.page.left,
           ),
-          child:
-              _buildDateFilterSummary(
+          child: _buildDateFilterSummary(
             context,
           ),
         ),
@@ -1499,47 +1361,39 @@ class _CounterListPageState
         //============================================
 
         Expanded(
-          child:
-              filteredRecords.isEmpty
-                  ? _buildNoSearchResultView()
-                  : RefreshIndicator(
-                      onRefresh:
-                          _loadRecords,
-                      child:
-                          ListView.separated(
-                        physics:
-                            const AlwaysScrollableScrollPhysics(),
-                        padding:
-                            EdgeInsets.fromLTRB(
-                          AppSpacing.page.left,
-                          AppSpacing.page.top,
-                          AppSpacing.page.right,
-                          AppSpacing.page.bottom,
-                        ),
-                        itemCount:
-                            filteredRecords.length,
-                        separatorBuilder:
-                            (
-                          context,
-                          index,
-                        ) =>
-                                AppSpacing.gapMd,
-                        itemBuilder:
-                            (
-                          context,
-                          index,
-                        ) {
-                          final record =
-                              filteredRecords[
-                                  index];
-
-                          return _buildCounterCard(
-                            context,
-                            record,
-                          );
-                        },
-                      ),
+          child: filteredRecords.isEmpty
+              ? _buildNoSearchResultView()
+              : RefreshIndicator(
+                  onRefresh: _loadRecords,
+                  child: ListView.separated(
+                    physics:
+                        const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.page.left,
+                      AppSpacing.page.top,
+                      AppSpacing.page.right,
+                      AppSpacing.page.bottom,
                     ),
+                    itemCount: filteredRecords.length,
+                    separatorBuilder: (
+                      context,
+                      index,
+                    ) =>
+                        AppSpacing.gapMd,
+                    itemBuilder: (
+                      context,
+                      index,
+                    ) {
+                      final record =
+                          filteredRecords[index];
+
+                      return _buildCounterCard(
+                        context,
+                        record,
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );

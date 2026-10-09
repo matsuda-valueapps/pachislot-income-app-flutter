@@ -23,29 +23,24 @@ class CounterPage extends StatefulWidget {
   const CounterPage({super.key});
 
   @override
-  State<CounterPage> createState() =>
-      _CounterPageState();
+  State<CounterPage> createState() => _CounterPageState();
 }
 
-class _CounterPageState
-    extends State<CounterPage> {
+class _CounterPageState extends State<CounterPage> {
   //==================================================
   // Controller
   //==================================================
 
   /// 開始ゲーム数
-  final TextEditingController
-      _startGameController =
+  final TextEditingController _startGameController =
       TextEditingController();
 
   /// 現在ゲーム数
-  final TextEditingController
-      _currentGameController =
+  final TextEditingController _currentGameController =
       TextEditingController();
 
   /// タイトル
-  final TextEditingController
-      _titleController =
+  final TextEditingController _titleController =
       TextEditingController();
 
   //==================================================
@@ -66,24 +61,9 @@ class _CounterPageState
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color.fromRGBO(
-            250,
-            253,
-            255,
-            0.98,
-          ),
-          Color.fromRGBO(
-            247,
-            251,
-            255,
-            0.98,
-          ),
-          Color.fromRGBO(
-            239,
-            247,
-            255,
-            0.98,
-          ),
+          Color.fromRGBO(250, 253, 255, 0.98),
+          Color.fromRGBO(247, 251, 255, 0.98),
+          Color.fromRGBO(239, 247, 255, 0.98),
         ],
         stops: [
           0.0,
@@ -95,14 +75,11 @@ class _CounterPageState
       //================================================
       // 既存カードと同じ角丸
       //================================================
-
-      borderRadius:
-          AppRadius.card,
+      borderRadius: AppRadius.card,
 
       //================================================
       // 薄いブルーBorder
       //================================================
-
       border: Border.all(
         color: const Color.fromRGBO(
           157,
@@ -116,12 +93,10 @@ class _CounterPageState
       //================================================
       // 柔らかい立体影
       //================================================
-
       boxShadow: const [
         //================================================
         // 下方向の柔らかい影
         //================================================
-
         BoxShadow(
           color: Color.fromRGBO(
             92,
@@ -140,7 +115,6 @@ class _CounterPageState
         //================================================
         // 近距離の立体影
         //================================================
-
         BoxShadow(
           color: Color.fromRGBO(
             125,
@@ -169,8 +143,7 @@ class _CounterPageState
 
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
-        final provider =
-            context.read<CounterProvider>();
+        final provider = context.read<CounterProvider>();
 
         await provider.loadDraft();
 
@@ -182,22 +155,19 @@ class _CounterPageState
         // ゲーム数
         //================================================
 
-        _startGameController.text =
-            provider.startGame == 0
-                ? ''
-                : provider.startGame.toString();
+        _startGameController.text = provider.startGame == 0
+            ? ''
+            : provider.startGame.toString();
 
-        _currentGameController.text =
-            provider.currentGame == 0
-                ? ''
-                : provider.currentGame.toString();
+        _currentGameController.text = provider.currentGame == 0
+            ? ''
+            : provider.currentGame.toString();
 
         //================================================
         // タイトル
         //================================================
 
-        _titleController.text =
-            provider.title;
+        _titleController.text = provider.title;
       },
     );
   }
@@ -235,17 +205,12 @@ class _CounterPageState
   Future<void> _selectDate(
     CounterProvider provider,
   ) async {
-    final pickedDate =
-        await showDatePicker(
+    final pickedDate = await showDatePicker(
       context: context,
-      initialDate:
-          provider.selectedDate,
-      firstDate:
-          DateTime(2020),
-      lastDate:
-          DateTime(2100),
-      locale:
-          const Locale(
+      initialDate: provider.selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      locale: const Locale(
         'ja',
         'JP',
       ),
@@ -282,20 +247,14 @@ class _CounterPageState
 
   /// SQLite保存用のCounterRecordを作成する。
   ///
-  /// 保存時点の
-  /// ・日付
-  /// ・タイトル
-  /// ・開始ゲーム数
-  /// ・現在ゲーム数
-  /// ・各小役カウント
-  /// ・作成日時
-  /// ・更新日時
-  /// を正式保存用データへまとめる。
+  /// 保存時点の日付・タイトル・機種タイプ・ゲーム数・
+  /// AタイプおよびATタイプの小役カウント・作成日時・更新日時を
+  /// 正式保存用データへまとめる。
   CounterRecord _createCounterRecord(
     CounterProvider provider,
   ) {
-    final now =
-        DateTime.now();
+    final now = DateTime.now();
+    final counts = provider.activeCounts;
 
     return CounterRecord(
       //================================================
@@ -307,67 +266,49 @@ class _CounterPageState
           .split('T')
           .first,
 
-      title:
-          provider.title.trim(),
+      title: provider.title.trim(),
+
+      machineType: provider.machineType,
 
       //================================================
       // ゲーム数
       //================================================
 
-      startGame:
-          provider.startGame,
+      startGame: provider.startGame,
 
-      currentGame:
-          provider.currentGame,
+      currentGame: provider.currentGame,
 
       //================================================
-      // 小役
+      // Aタイプ小役
       //================================================
 
-      cherry: provider.items
-          .firstWhere(
-            (item) =>
-                item.id == 'cherry',
-          )
-          .count,
+      cherry: counts['cherry'] ?? 0,
+      bell: counts['bell'] ?? 0,
+      suika: counts['suika'] ?? 0,
+      grape: counts['grape'] ?? 0,
+      chance: counts['chance'] ?? 0,
 
-      bell: provider.items
-          .firstWhere(
-            (item) =>
-                item.id == 'bell',
-          )
-          .count,
+      //================================================
+      // ATタイプ小役
+      //================================================
 
-      suika: provider.items
-          .firstWhere(
-            (item) =>
-                item.id == 'suika',
-          )
-          .count,
-
-      grape: provider.items
-          .firstWhere(
-            (item) =>
-                item.id == 'grape',
-          )
-          .count,
-
-      chance: provider.items
-          .firstWhere(
-            (item) =>
-                item.id == 'chance',
-          )
-          .count,
+      strongCherry: counts['strongCherry'] ?? 0,
+      weakCherry: counts['weakCherry'] ?? 0,
+      strongBell: counts['strongBell'] ?? 0,
+      weakBell: counts['weakBell'] ?? 0,
+      strongSuika: counts['strongSuika'] ?? 0,
+      weakSuika: counts['weakSuika'] ?? 0,
+      strongGrape: counts['strongGrape'] ?? 0,
+      weakGrape: counts['weakGrape'] ?? 0,
+      strongChance: counts['strongChance'] ?? 0,
+      weakChance: counts['weakChance'] ?? 0,
 
       //================================================
       // 日時
       //================================================
 
-      createdAt:
-          now.toIso8601String(),
-
-      updatedAt:
-          now.toIso8601String(),
+      createdAt: now.toIso8601String(),
+      updatedAt: now.toIso8601String(),
     );
   }
 
@@ -390,14 +331,11 @@ class _CounterPageState
     // フォーカス解除
     //================================================
     //
-    // 最後に入力していた
-    // タイトル・ゲーム数欄などに
+    // 最後に入力していたタイトル・ゲーム数欄などに
     // フォーカスが残るのを防ぐ。
     //================================================
 
-    FocusManager.instance
-        .primaryFocus
-        ?.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
 
     //================================================
     // ソフトウェアキーボードを閉じる
@@ -412,8 +350,7 @@ class _CounterPageState
     //================================================
 
     try {
-      await SystemChannels.textInput
-          .invokeMethod<void>(
+      await SystemChannels.textInput.invokeMethod<void>(
         'TextInput.hide',
       );
     } catch (_) {
@@ -456,16 +393,14 @@ class _CounterPageState
     // スクロール位置をトップへ戻す。
     //================================================
 
-    WidgetsBinding.instance
-        .addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         if (!mounted) {
           return;
         }
 
         final controller =
-            PrimaryScrollController
-                .maybeOf(context);
+            PrimaryScrollController.maybeOf(context);
 
         if (controller == null) {
           return;
@@ -476,8 +411,7 @@ class _CounterPageState
         }
 
         controller.jumpTo(
-          controller.position
-              .minScrollExtent,
+          controller.position.minScrollExtent,
         );
       },
     );
@@ -499,12 +433,10 @@ class _CounterPageState
   Future<void> _onSave(
     CounterProvider provider,
   ) async {
-    final result =
-        await DialogService.showConfirm(
+    final result = await DialogService.showConfirm(
       context: context,
       title: '保存しますか？',
-      message:
-          'カウント内容を保存します。',
+      message: 'カウント内容を保存します。',
       confirmText: '保存',
     );
 
@@ -521,8 +453,7 @@ class _CounterPageState
       // SQLite保存用データ作成
       //================================================
 
-      final record =
-          _createCounterRecord(
+      final record = _createCounterRecord(
         provider,
       );
 
@@ -530,9 +461,7 @@ class _CounterPageState
       // SQLiteへ正式保存
       //================================================
 
-      await DatabaseService
-          .instance
-          .insertCounterRecord(
+      await DatabaseService.instance.insertCounterRecord(
         record,
       );
 
@@ -541,8 +470,7 @@ class _CounterPageState
       }
 
       //================================================
-      // SQLite保存成功後に
-      // 画面を完全初期化
+      // SQLite保存成功後に画面を完全初期化
       //================================================
 
       await _resetAfterSave(
@@ -557,9 +485,7 @@ class _CounterPageState
       // 保存完了
       //================================================
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             '保存しました',
@@ -574,14 +500,11 @@ class _CounterPageState
       //================================================
       // SQLite保存失敗
       //
-      // この場合はprovider.reset()を
-      // 実行しないため、
+      // この場合はprovider.reset()を実行しないため、
       // 下書きは残る。
       //================================================
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             '保存に失敗しました。もう一度お試しください。',
@@ -599,12 +522,10 @@ class _CounterPageState
   Future<void> _onReset(
     CounterProvider provider,
   ) async {
-    final result =
-        await DialogService.showConfirm(
+    final result = await DialogService.showConfirm(
       context: context,
       title: 'リセットしますか？',
-      message:
-          '入力内容をすべてリセットします。',
+      message: '入力内容をすべてリセットします。',
       confirmText: 'リセット',
     );
 
@@ -634,9 +555,7 @@ class _CounterPageState
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
           'リセットしました',
@@ -654,8 +573,7 @@ class _CounterPageState
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            const CounterListPage(),
+        builder: (_) => const CounterListPage(),
       ),
     );
   }
@@ -668,14 +586,12 @@ class _CounterPageState
     BuildContext context,
     CounterProvider provider,
   ) {
-    final formattedDate =
-        _formatDate(
+    final formattedDate = _formatDate(
       provider.selectedDate,
     );
 
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //================================================
         // ラベル
@@ -684,8 +600,7 @@ class _CounterPageState
         Text(
           '日付',
           style: AppTextStyles.body.copyWith(
-            fontWeight:
-                FontWeight.w600,
+            fontWeight: FontWeight.w600,
           ),
         ),
 
@@ -700,31 +615,22 @@ class _CounterPageState
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () =>
-                _selectDate(provider),
-            borderRadius:
-                BorderRadius.circular(
+            onTap: () => _selectDate(provider),
+            borderRadius: BorderRadius.circular(
               AppRadius.md,
             ),
             child: Ink(
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal:
-                    AppSpacing.md,
-                vertical:
-                    AppSpacing.md,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
               ),
-              decoration:
-                  BoxDecoration(
-                color:
-                    AppColors.surface,
-                borderRadius:
-                    BorderRadius.circular(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(
                   AppRadius.md,
                 ),
                 border: Border.all(
-                  color:
-                      AppColors.border,
+                  color: AppColors.border,
                 ),
               ),
               child: Row(
@@ -735,28 +641,99 @@ class _CounterPageState
                   ),
 
                   const SizedBox(
-                    width:
-                        AppSpacing.md,
+                    width: AppSpacing.md,
                   ),
 
                   Expanded(
                     child: Text(
                       formattedDate,
-                      style:
-                          AppTextStyles.body,
+                      style: AppTextStyles.body,
                     ),
                   ),
 
                   const Icon(
-                    Icons
-                        .arrow_drop_down_rounded,
-                    color:
-                        AppColors.iconDisabled,
+                    Icons.arrow_drop_down_rounded,
+                    color: AppColors.iconDisabled,
                   ),
                 ],
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  //==================================================
+  // 機種タイプフィールド
+  //==================================================
+
+  Widget _buildMachineTypeField(
+    CounterProvider provider,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '機種タイプ',
+          style: AppTextStyles.body.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        const SizedBox(
+          height: AppSpacing.sm,
+        ),
+
+        DropdownButtonFormField<String>(
+          initialValue: provider.machineType,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                AppRadius.md,
+              ),
+              borderSide: const BorderSide(
+                color: AppColors.border,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                AppRadius.md,
+              ),
+              borderSide: const BorderSide(
+                color: AppColors.border,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                AppRadius.md,
+              ),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
+          ),
+          items: const [
+            DropdownMenuItem<String>(
+              value: 'Aタイプ',
+              child: Text('Aタイプ'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'ATタイプ',
+              child: Text('ATタイプ'),
+            ),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              provider.setMachineType(value);
+            }
+          },
         ),
       ],
     );
@@ -771,8 +748,7 @@ class _CounterPageState
     CounterProvider provider,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //================================================
         // ラベル
@@ -781,8 +757,7 @@ class _CounterPageState
         Text(
           'タイトル',
           style: AppTextStyles.body.copyWith(
-            fontWeight:
-                FontWeight.w600,
+            fontWeight: FontWeight.w600,
           ),
         ),
 
@@ -795,66 +770,45 @@ class _CounterPageState
         //================================================
 
         TextField(
-          controller:
-              _titleController,
+          controller: _titleController,
           onChanged: (value) {
             _onTitleChanged(
               provider,
               value,
             );
           },
-          textInputAction:
-              TextInputAction.done,
-          decoration:
-              InputDecoration(
-            hintText:
-                '例：マルハン○○店北斗7番台',
+          textInputAction: TextInputAction.done,
+          decoration: InputDecoration(
+            hintText: '例：マルハン○○店○○7番台',
             filled: true,
-            fillColor:
-                AppColors.surface,
-            border:
-                OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(
+            fillColor: AppColors.surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
                 AppRadius.md,
               ),
-              borderSide:
-                  const BorderSide(
-                color:
-                    AppColors.border,
+              borderSide: const BorderSide(
+                color: AppColors.border,
               ),
             ),
-            enabledBorder:
-                OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
                 AppRadius.md,
               ),
-              borderSide:
-                  const BorderSide(
-                color:
-                    AppColors.border,
+              borderSide: const BorderSide(
+                color: AppColors.border,
               ),
             ),
-            focusedBorder:
-                OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
                 AppRadius.md,
               ),
-              borderSide:
-                  BorderSide(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(
-              horizontal:
-                  AppSpacing.md,
-              vertical:
-                  AppSpacing.md,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
             ),
           ),
         ),
@@ -870,8 +824,7 @@ class _CounterPageState
   Widget build(
     BuildContext context,
   ) {
-    final provider =
-        context.watch<CounterProvider>();
+    final provider = context.watch<CounterProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -882,8 +835,7 @@ class _CounterPageState
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             //================================================
             // AdMobバナー
@@ -914,8 +866,7 @@ class _CounterPageState
 
             Expanded(
               child: SingleChildScrollView(
-                padding:
-                    AppSpacing.page,
+                padding: AppSpacing.page,
                 child: Container(
                   //================================================
                   // MemoPageと同じカード外側余白
@@ -923,18 +874,15 @@ class _CounterPageState
                   // AppBarとカードの距離をMemoPageと揃える。
                   //================================================
 
-                  margin:
-                      const EdgeInsets.symmetric(
-                    vertical:
-                        AppSpacing.xs,
+                  margin: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.xs,
                   ),
 
                   //================================================
                   // MemoPageと同じカード内側余白
                   //================================================
 
-                  padding:
-                      AppSpacing.card,
+                  padding: AppSpacing.card,
 
                   //================================================
                   // プレミアムガラス装飾
@@ -947,13 +895,10 @@ class _CounterPageState
                   // ※上部ガラスハイライトなし
                   //================================================
 
-                  decoration:
-                      _buildGlassDecoration(),
+                  decoration: _buildGlassDecoration(),
 
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment
-                            .stretch,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       //================================================
                       // 日付
@@ -965,8 +910,19 @@ class _CounterPageState
                       ),
 
                       const SizedBox(
-                        height:
-                            AppSpacing.lg,
+                        height: AppSpacing.lg,
+                      ),
+
+                      //================================================
+                      // 機種タイプ
+                      //================================================
+
+                      _buildMachineTypeField(
+                        provider,
+                      ),
+
+                      const SizedBox(
+                        height: AppSpacing.lg,
                       ),
 
                       //================================================
@@ -979,8 +935,7 @@ class _CounterPageState
                       ),
 
                       const SizedBox(
-                        height:
-                            AppSpacing.lg,
+                        height: AppSpacing.lg,
                       ),
 
                       //================================================
@@ -988,11 +943,8 @@ class _CounterPageState
                       //================================================
 
                       StartGameCounter(
-                        controller:
-                            _startGameController,
-                        onChanged:
-                            provider
-                                .updateStartGame,
+                        controller: _startGameController,
+                        onChanged: provider.updateStartGame,
                       ),
 
                       //================================================
@@ -1000,11 +952,8 @@ class _CounterPageState
                       //================================================
 
                       GameCounter(
-                        controller:
-                            _currentGameController,
-                        onChanged:
-                            provider
-                                .updateCurrentGame,
+                        controller: _currentGameController,
+                        onChanged: provider.updateCurrentGame,
                       ),
 
                       //================================================
@@ -1012,23 +961,18 @@ class _CounterPageState
                       //================================================
 
                       ...provider.items.map(
-                        (item) =>
-                            CounterCard(
+                        (item) => CounterCard(
                           item: item,
-                          probability:
-                              provider
-                                  .probability(
+                          probability: provider.probability(
                             item.id,
                           ),
                           onIncrement: () {
-                            provider
-                                .increment(
+                            provider.increment(
                               item.id,
                             );
                           },
                           onDecrement: () {
-                            provider
-                                .decrement(
+                            provider.decrement(
                               item.id,
                             );
                           },
@@ -1036,8 +980,7 @@ class _CounterPageState
                       ),
 
                       const SizedBox(
-                        height:
-                            AppSpacing.lg,
+                        height: AppSpacing.lg,
                       ),
 
                       //================================================
@@ -1047,33 +990,26 @@ class _CounterPageState
                       Row(
                         children: [
                           Expanded(
-                            child:
-                                OutlinedButton(
-                              onPressed: () =>
-                                  _onReset(
+                            child: OutlinedButton(
+                              onPressed: () => _onReset(
                                 provider,
                               ),
-                              child:
-                                  const Text(
+                              child: const Text(
                                 'リセット',
                               ),
                             ),
                           ),
 
                           const SizedBox(
-                            width:
-                                AppSpacing.md,
+                            width: AppSpacing.md,
                           ),
 
                           Expanded(
-                            child:
-                                FilledButton(
-                              onPressed: () =>
-                                  _onSave(
+                            child: FilledButton(
+                              onPressed: () => _onSave(
                                 provider,
                               ),
-                              child:
-                                  const Text(
+                              child: const Text(
                                 '保存',
                               ),
                             ),
@@ -1086,23 +1022,17 @@ class _CounterPageState
                       //================================================
 
                       const SizedBox(
-                        height:
-                            AppSpacing.md,
+                        height: AppSpacing.md,
                       ),
 
                       SizedBox(
-                        width:
-                            double.infinity,
-                        child:
-                            OutlinedButton.icon(
-                          onPressed:
-                              _openCounterListPage,
-                          icon:
-                              const ActionButtonIcon.list(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _openCounterListPage,
+                          icon: const ActionButtonIcon.list(
                             size: 38,
                           ),
-                          label:
-                              const Text(
+                          label: const Text(
                             '小役DATA一覧',
                           ),
                         ),

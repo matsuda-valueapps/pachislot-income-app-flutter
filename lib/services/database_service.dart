@@ -1,4 +1,5 @@
 import 'package:path/path.dart';
+
 import 'package:sqflite/sqflite.dart';
 
 import '../models/counter_record.dart';
@@ -30,9 +31,12 @@ class DatabaseService {
   /// counter_recordsテーブル追加
   ///
   /// Version 4：
-  /// counter_recordsへ
-  /// date・titleカラム追加
-  static const int _databaseVersion = 4;
+  /// counter_recordsへdate・titleカラム追加
+  ///
+  /// Version 5：
+  /// counter_recordsへ機種タイプと
+  /// ATタイプ用の小役カウントカラムを追加
+  static const int _databaseVersion = 5;
 
   //==================================================
   // Table
@@ -62,8 +66,7 @@ class DatabaseService {
       return _database!;
     }
 
-    _database =
-        await _initDatabase();
+    _database = await _initDatabase();
 
     return _database!;
   }
@@ -140,7 +143,8 @@ class DatabaseService {
     //================================================
     //
     // 新規インストールの場合は、
-    // 最初からdate・titleを含めて作成する。
+    // 機種タイプとATタイプ用のカウント項目も
+    // 最初から作成する。
     //================================================
 
     await db.execute('''
@@ -148,6 +152,7 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         date TEXT NOT NULL DEFAULT '',
         title TEXT NOT NULL DEFAULT '',
+        machine_type TEXT NOT NULL DEFAULT 'Aタイプ',
         start_game INTEGER NOT NULL DEFAULT 0,
         current_game INTEGER NOT NULL DEFAULT 0,
         cherry INTEGER NOT NULL DEFAULT 0,
@@ -155,6 +160,16 @@ class DatabaseService {
         suika INTEGER NOT NULL DEFAULT 0,
         grape INTEGER NOT NULL DEFAULT 0,
         chance INTEGER NOT NULL DEFAULT 0,
+        strong_cherry INTEGER NOT NULL DEFAULT 0,
+        weak_cherry INTEGER NOT NULL DEFAULT 0,
+        strong_bell INTEGER NOT NULL DEFAULT 0,
+        weak_bell INTEGER NOT NULL DEFAULT 0,
+        strong_suika INTEGER NOT NULL DEFAULT 0,
+        weak_suika INTEGER NOT NULL DEFAULT 0,
+        strong_grape INTEGER NOT NULL DEFAULT 0,
+        weak_grape INTEGER NOT NULL DEFAULT 0,
+        strong_chance INTEGER NOT NULL DEFAULT 0,
+        weak_chance INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )
@@ -224,17 +239,12 @@ class DatabaseService {
     // Version 4
     //================================================
     //
-    // counter_recordsへ
-    // date・titleを追加する。
+    // counter_recordsへdate・titleを追加する。
     //
     // 既存のカウンターデータは削除しない。
     //
-    // 既存データには、
-    //
-    // date  → ''
-    // title → ''
-    //
-    // が設定される。
+    // 既存データにはdate・titleの初期値として
+    // 空文字が設定される。
     //================================================
 
     if (oldVersion < 4) {
@@ -246,6 +256,76 @@ class DatabaseService {
       await db.execute('''
         ALTER TABLE $_counterTable
         ADD COLUMN title TEXT NOT NULL DEFAULT ''
+      ''');
+    }
+
+    //================================================
+    // Version 5
+    //================================================
+    //
+    // counter_recordsへ機種タイプと
+    // ATタイプ用の小役カウントカラムを追加する。
+    //
+    // 既存のAタイプのカウントデータは維持する。
+    //
+    // 既存データにはmachine_typeとして
+    // 'Aタイプ'、AT用カウントには0が設定される。
+    //================================================
+
+    if (oldVersion < 5) {
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN machine_type TEXT NOT NULL DEFAULT 'Aタイプ'
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN strong_cherry INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN weak_cherry INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN strong_bell INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN weak_bell INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN strong_suika INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN weak_suika INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN strong_grape INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN weak_grape INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN strong_chance INTEGER NOT NULL DEFAULT 0
+      ''');
+
+      await db.execute('''
+        ALTER TABLE $_counterTable
+        ADD COLUMN weak_chance INTEGER NOT NULL DEFAULT 0
       ''');
     }
   }
@@ -261,14 +341,12 @@ class DatabaseService {
   Future<int> insertIncomeRecord(
     IncomeRecord record,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.insert(
       _incomeTable,
       record.toMap(),
-      conflictAlgorithm:
-          ConflictAlgorithm.abort,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
   }
 
@@ -276,16 +354,12 @@ class DatabaseService {
   ///
   /// 日付の新しい順、
   /// 同日の場合はIDの新しい順。
-  Future<List<IncomeRecord>>
-      getIncomeRecords() async {
-    final db =
-        await database;
+  Future<List<IncomeRecord>> getIncomeRecords() async {
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _incomeTable,
-      orderBy:
-          'date DESC, id DESC',
+      orderBy: 'date DESC, id DESC',
     );
 
     return maps
@@ -296,15 +370,12 @@ class DatabaseService {
   }
 
   /// IDを指定して収支データを1件取得
-  Future<IncomeRecord?>
-      getIncomeRecord(
+  Future<IncomeRecord?> getIncomeRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _incomeTable,
       where: 'id = ?',
       whereArgs: [id],
@@ -330,8 +401,7 @@ class DatabaseService {
       );
     }
 
-    final db =
-        await database;
+    final db = await database;
 
     return db.update(
       _incomeTable,
@@ -345,8 +415,7 @@ class DatabaseService {
   Future<int> deleteIncomeRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.delete(
       _incomeTable,
@@ -359,10 +428,8 @@ class DatabaseService {
   ///
   /// 将来的な
   /// 「データ初期化」機能などで使用する。
-  Future<int> deleteAllIncomeRecords()
-      async {
-    final db =
-        await database;
+  Future<int> deleteAllIncomeRecords() async {
+    final db = await database;
 
     return db.delete(
       _incomeTable,
@@ -380,14 +447,12 @@ class DatabaseService {
   Future<int> insertMemoRecord(
     MemoRecord record,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.insert(
       _memoTable,
       record.toMap(),
-      conflictAlgorithm:
-          ConflictAlgorithm.abort,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
   }
 
@@ -395,16 +460,12 @@ class DatabaseService {
   ///
   /// 日付の新しい順、
   /// 同日の場合はIDの新しい順。
-  Future<List<MemoRecord>>
-      getMemoRecords() async {
-    final db =
-        await database;
+  Future<List<MemoRecord>> getMemoRecords() async {
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _memoTable,
-      orderBy:
-          'date DESC, id DESC',
+      orderBy: 'date DESC, id DESC',
     );
 
     return maps
@@ -415,15 +476,12 @@ class DatabaseService {
   }
 
   /// IDを指定してメモを1件取得
-  Future<MemoRecord?>
-      getMemoRecord(
+  Future<MemoRecord?> getMemoRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _memoTable,
       where: 'id = ?',
       whereArgs: [id],
@@ -449,8 +507,7 @@ class DatabaseService {
       );
     }
 
-    final db =
-        await database;
+    final db = await database;
 
     return db.update(
       _memoTable,
@@ -464,8 +521,7 @@ class DatabaseService {
   Future<int> deleteMemoRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.delete(
       _memoTable,
@@ -478,10 +534,8 @@ class DatabaseService {
   ///
   /// 将来的な
   /// 「メモデータ初期化」機能などで使用する。
-  Future<int> deleteAllMemoRecords()
-      async {
-    final db =
-        await database;
+  Future<int> deleteAllMemoRecords() async {
+    final db = await database;
 
     return db.delete(
       _memoTable,
@@ -494,21 +548,19 @@ class DatabaseService {
 
   /// 小役カウンターをSQLiteへ正式保存
   ///
-  /// date・titleを含めて保存する。
+  /// date・title・machineType・各カウントを保存する。
   ///
   /// 戻り値：
   /// 保存されたレコードのID
   Future<int> insertCounterRecord(
     CounterRecord record,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.insert(
       _counterTable,
       record.toMap(),
-      conflictAlgorithm:
-          ConflictAlgorithm.abort,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
   }
 
@@ -517,17 +569,13 @@ class DatabaseService {
   /// 日付の新しい順、
   /// 同日の場合はIDの新しい順。
   ///
-  /// date・titleも取得される。
-  Future<List<CounterRecord>>
-      getCounterRecords() async {
-    final db =
-        await database;
+  /// date・title・machineType・各カウントも取得される。
+  Future<List<CounterRecord>> getCounterRecords() async {
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _counterTable,
-      orderBy:
-          'date DESC, id DESC',
+      orderBy: 'date DESC, id DESC',
     );
 
     return maps
@@ -538,15 +586,12 @@ class DatabaseService {
   }
 
   /// IDを指定して小役カウンターを1件取得
-  Future<CounterRecord?>
-      getCounterRecord(
+  Future<CounterRecord?> getCounterRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
-    final maps =
-        await db.query(
+    final maps = await db.query(
       _counterTable,
       where: 'id = ?',
       whereArgs: [id],
@@ -564,7 +609,7 @@ class DatabaseService {
 
   /// 小役カウンターを更新
   ///
-  /// date・titleを含めて更新する。
+  /// date・title・machineType・各カウントを更新する。
   Future<int> updateCounterRecord(
     CounterRecord record,
   ) async {
@@ -574,8 +619,7 @@ class DatabaseService {
       );
     }
 
-    final db =
-        await database;
+    final db = await database;
 
     return db.update(
       _counterTable,
@@ -589,8 +633,7 @@ class DatabaseService {
   Future<int> deleteCounterRecord(
     int id,
   ) async {
-    final db =
-        await database;
+    final db = await database;
 
     return db.delete(
       _counterTable,
@@ -603,10 +646,8 @@ class DatabaseService {
   ///
   /// 将来的な
   /// 「カウンターデータ初期化」機能などで使用する。
-  Future<int> deleteAllCounterRecords()
-      async {
-    final db =
-        await database;
+  Future<int> deleteAllCounterRecords() async {
+    final db = await database;
 
     return db.delete(
       _counterTable,
