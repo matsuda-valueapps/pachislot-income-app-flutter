@@ -230,6 +230,7 @@ class CounterDetailPage extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
                   ),
             ),
           ),
@@ -286,6 +287,7 @@ class CounterDetailPage extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
                   ),
             ),
           ),

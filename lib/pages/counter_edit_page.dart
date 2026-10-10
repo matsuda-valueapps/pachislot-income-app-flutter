@@ -700,7 +700,12 @@ class _CounterEditPageState extends State<CounterEditPage> {
                                 Expanded(
                                   child: Text(
                                     _formatDate(_selectedDate),
-                                    style: AppTextStyles.body,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
                                 ),
                                 const Icon(

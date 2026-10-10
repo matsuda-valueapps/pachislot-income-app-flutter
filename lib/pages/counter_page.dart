@@ -647,7 +647,12 @@ class _CounterPageState extends State<CounterPage> {
                   Expanded(
                     child: Text(
                       formattedDate,
-                      style: AppTextStyles.body,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
 

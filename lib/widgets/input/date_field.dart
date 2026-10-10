@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
-import '../../theme/app_text_styles.dart';
 
 import '../search/service_icon.dart';
 
@@ -109,8 +108,12 @@ class DateField extends StatelessWidget {
                   Expanded(
                     child: Text(
                       formattedDate,
-                      style:
-                          AppTextStyles.body,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
 
