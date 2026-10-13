@@ -483,8 +483,10 @@ class _CalendarCardState
               calendarFormat:
                   CalendarFormat.month,
 
-              daysOfWeekHeight:
-                  32,
+              daysOfWeekHeight: 32,
+
+              // 日付と収支金額を表示する週の高さ
+              rowHeight: 60,
 
               selectedDayPredicate:
                   (day) =>
@@ -1000,8 +1002,8 @@ class _CalendarCardState
   ) {
     return Center(
       child: Container(
-        width: 32,
-        height: 32,
+        width: 22,
+        height: 22,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
 
@@ -1078,6 +1080,7 @@ class _CalendarCardState
     );
   }
 
+  
   //==================================================
   // 収支結果ラベル
   //==================================================
@@ -1093,32 +1096,34 @@ class _CalendarCardState
     String text,
     Color color,
   ) {
-    return Align(
-      alignment:
-          Alignment.bottomCenter,
-      child: Transform.translate(
-        offset: const Offset(
-          0,
-          8,
-        ),
+    return SizedBox(
+      width: double.infinity,
+      child: Align(
+        alignment: Alignment.bottomCenter,
         child: Padding(
-          padding:
-              const EdgeInsets.only(
-            bottom: 2,
+          // 最終週の金額がカード下端で
+          // 切れないように、下側の余白を確保する。
+          padding: const EdgeInsets.only(
+            bottom: 10,
+            left: 2,
+            right: 2,
           ),
-          child: FittedBox(
-            fit:
-                BoxFit.scaleDown,
-            child: Text(
-              text,
-              maxLines: 1,
-              softWrap: false,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight:
-                    FontWeight.w600,
-                height: 1.0,
+          child: SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                text,
+                maxLines: 1,
+                softWrap: false,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
+                ),
               ),
             ),
           ),
