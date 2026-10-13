@@ -189,32 +189,7 @@ class _CalendarCardState
   }
 
   //==================================================
-  // 表示月判定
-  //==================================================
-
-  /// 指定された日付が、
-  /// 現在カレンダーで表示している月に
-  /// 属しているかを判定する。
-  ///
-  /// 今回のカレンダーでは、
-  /// 表示月以外の日付について
-  ///
-  /// ・日付
-  /// ・本日マーク
-  /// ・収支マーカー
-  ///
-  /// を表示しない。
-  bool _isInFocusedMonth(
-    DateTime day,
-  ) {
-    return day.year ==
-            _focusedDay.year &&
-        day.month ==
-            _focusedDay.month;
-  }
-
-  //==================================================
-  // 収支マーカー
+  // 収支データ取得
   //==================================================
 
   /// 現在保存されている収支データから
@@ -333,9 +308,6 @@ class _CalendarCardState
   //==================================================
 
   /// プレミアムガラス調の月移動ボタン。
-  ///
-  /// TableCalendarの標準操作自体は変更せず、
-  /// 見た目だけを変更する。
   Widget _buildChevronButton(
     IconData icon,
   ) {
@@ -397,58 +369,273 @@ class _CalendarCardState
   }
 
   //==================================================
+  // 月移動
+  //==================================================
+
+  /// 月を移動する。
+  ///
+  /// amount:
+  /// -1 → 前月
+  ///  1 → 翌月
+  void _changeMonth(int amount) {
+    final nextMonth = DateTime(
+      _focusedDay.year,
+      _focusedDay.month + amount,
+      1,
+    );
+
+    final now = DateTime.now();
+
+    setState(() {
+      _focusedDay = nextMonth;
+
+      // 現在年月に戻った場合は今日を選択する。
+      // 過去月・未来月へ移動した場合は無選択にする。
+      if (nextMonth.year == now.year &&
+          nextMonth.month == now.month) {
+        _selectedDay = now;
+      } else {
+        _selectedDay = null;
+      }
+    });
+
+    context
+        .read<HomeProvider>()
+        .setFocusedMonth(nextMonth);
+  }
+
+  //==================================================
+  // カスタムカレンダーの日付セル
+  //==================================================
+
+  /// 日付と収支金額を同じセル内に配置する。
+  ///
+  /// セルの高さを引数で受け取ることで、
+  /// 最終週だけ表示スペースを広げられる。
+  Widget _buildCalendarDayCell(
+    DateTime day,
+    HomeProvider provider, {
+    required double height,
+  }) {
+    final isSelected =
+        isSameDay(_selectedDay, day);
+
+    final isToday =
+        isSameDay(DateTime.now(), day);
+
+    final profit =
+        _getProfitForDay(day, provider);
+
+    Widget dateWidget;
+
+    if (isSelected || isToday) {
+      dateWidget = _buildCircleDay(
+        day,
+        isSelected
+            ? Colors.indigo
+            : AppColors.primary,
+      );
+    } else {
+      dateWidget = _buildDay(
+        day,
+        textColor: _defaultTextColor(day),
+      );
+    }
+
+    return SizedBox(
+      height: height,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedDay = day;
+              _focusedDay = day;
+            });
+
+            provider.setFocusedMonth(day);
+
+            _handleDateSelected(day);
+          },
+          borderRadius:
+              BorderRadius.circular(8),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // 日付をセルの上側に配置
+              Positioned(
+                top: 2,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: dateWidget,
+                ),
+              ),
+
+              //================================================
+              // 収支金額の表示位置
+              //================================================
+              //
+              // セルの下端ではなく、セル上端からの位置を固定する。
+              // これにより、最終週の高さを広げても
+              // 日付と収支金額の間隔が広がらない。
+              //
+              // 通常週・最終週ともにtop: 42で統一する。
+              //================================================
+
+              if (profit != null && profit != 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 36,
+                  child: _buildResultLabel(
+                    _formatProfit(profit),
+                    profit > 0
+                        ? AppColors.profit
+                        : AppColors.loss,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  //==================================================
   // Build
   //==================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     final provider =
         context.watch<HomeProvider>();
 
+    // 表示月の初日
+    final firstDay = DateTime(
+      _focusedDay.year,
+      _focusedDay.month,
+      1,
+    );
+
+    // 表示月の日数
+    final daysInMonth = DateTime(
+      _focusedDay.year,
+      _focusedDay.month + 1,
+      0,
+    ).day;
+
+    // DateTime.weekday は月曜=1～日曜=7。
+    // カレンダーは日曜始まりのため、日曜=0に変換する。
+    final leadingEmptyCells =
+        firstDay.weekday % 7;
+
+    final totalCells =
+        leadingEmptyCells + daysInMonth;
+
+    final weekCount =
+        (totalCells / 7).ceil();
+
+    //==================================================
+    // 週ごとの高さ
+    //==================================================
+    //
+    // 通常週：60px
+    // 最終週：82px
+    //
+    // 最終週だけ独立して高さを指定するため、
+    // 31日など月末の日付に収支がある場合も
+    // 金額の表示スペースを確保できる。
+    //==================================================
+
+    const normalWeekHeight = 60.0;
+    const finalWeekHeight = 82.0;
+
+    final weekRows = <Widget>[];
+
+    for (var week = 0;
+        week < weekCount;
+        week++) {
+      final isFinalWeek =
+          week == weekCount - 1;
+
+      final rowHeight = isFinalWeek
+          ? finalWeekHeight
+          : normalWeekHeight;
+
+      final dayCells = <Widget>[];
+
+      for (var weekday = 0;
+          weekday < 7;
+          weekday++) {
+        final cellIndex =
+            week * 7 + weekday;
+
+        final dayNumber =
+            cellIndex - leadingEmptyCells + 1;
+
+        Widget cell;
+
+        // 表示月に含まれないセルは空欄にする。
+        if (dayNumber < 1 ||
+            dayNumber > daysInMonth) {
+          cell = SizedBox(
+            height: rowHeight,
+          );
+        } else {
+          final day = DateTime(
+            _focusedDay.year,
+            _focusedDay.month,
+            dayNumber,
+          );
+
+          cell = _buildCalendarDayCell(
+            day,
+            provider,
+            height: rowHeight,
+          );
+        }
+
+        dayCells.add(
+          Expanded(
+            child: cell,
+          ),
+        );
+      }
+
+      weekRows.add(
+        Row(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: dayCells,
+        ),
+      );
+    }
+
     return Container(
-      decoration:
-          _buildGlassDecoration(),
-      padding:
-          const EdgeInsets.all(
+      decoration: _buildGlassDecoration(),
+      padding: const EdgeInsets.all(
         AppSpacing.md,
       ),
       child: ClipRRect(
         borderRadius:
-            BorderRadius.circular(
-          22,
-        ),
+            BorderRadius.circular(22),
         child: Stack(
           children: [
             //==================================================
             // ガラス内側ハイライト
             //==================================================
             //
-            // 外側の青い枠とは別に、
-            // 内側へごく薄い白～ブルーのラインを入れる。
-            //
-            // 重要：
-            // このハイライトはTableCalendarより
-            // 背面に配置する。
-            //
-            // これにより、収支金額（+10,000など）と
-            // ハイライトラインが重なっても、
-            // 収支文字が常に前面に表示される。
-            //
-            // IgnorePointerにより、
-            // この装飾が日付タップ操作を邪魔することもない。
+            // カレンダー本体の背面に配置する。
+            // IgnorePointerにより日付タップを妨げない。
             //==================================================
 
             Positioned.fill(
               child: IgnorePointer(
                 child: Container(
-                  decoration:
-                      BoxDecoration(
+                  decoration: BoxDecoration(
                     borderRadius:
-                        BorderRadius.circular(
-                      21,
-                    ),
+                        BorderRadius.circular(21),
                     border: Border.all(
                       color:
                           const Color.fromRGBO(
@@ -464,464 +651,128 @@ class _CalendarCardState
               ),
             ),
 
-            //================================================
-            // カレンダー本体
-            //================================================
+            //==================================================
+            // 独自配置カレンダー
+            //==================================================
 
-            TableCalendar(
-              locale: 'ja_JP',
+            GestureDetector(
+              // 左右スワイプで月を移動する。
+              onHorizontalDragEnd: (details) {
+                final velocity =
+                    details.primaryVelocity ?? 0;
 
-              firstDay:
-                  DateTime(2020),
+                if (velocity < -100) {
+                  // 左スワイプ：翌月
+                  _changeMonth(1);
+                } else if (velocity > 100) {
+                  // 右スワイプ：前月
+                  _changeMonth(-1);
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  //================================================
+                  // 月タイトルと月移動ボタン
+                  //================================================
 
-              lastDay:
-                  DateTime(2100),
+                  SizedBox(
+                    height: 76,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () =>
+                              _changeMonth(-1),
+                          child: _buildChevronButton(
+                            Icons.chevron_left,
+                          ),
+                        ),
 
-              focusedDay:
-                  _focusedDay,
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              '${_focusedDay.year}年${_focusedDay.month}月',
+                              style:
+                                  const TextStyle(
+                                fontSize: 22,
+                                fontWeight:
+                                    FontWeight.bold,
+                                color:
+                                    Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
 
-              calendarFormat:
-                  CalendarFormat.month,
-
-              daysOfWeekHeight: 32,
-
-              // 日付と収支金額を表示する週の高さ
-              rowHeight: 60,
-
-              selectedDayPredicate:
-                  (day) =>
-                      isSameDay(
-                    _selectedDay,
-                    day,
+                        GestureDetector(
+                          onTap: () =>
+                              _changeMonth(1),
+                          child: _buildChevronButton(
+                            Icons.chevron_right,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
-              //================================================
-              // 日付選択
-              //================================================
-
-              onDaySelected: (
-                selectedDay,
-                focusedDay,
-              ) {
-                setState(() {
-                  _selectedDay =
-                      selectedDay;
-
-                  _focusedDay =
-                      focusedDay;
-                });
-
-                // 表示年月が変更された場合、
-                // HomeProviderへ通知する。
-                provider
-                    .setFocusedMonth(
-                  focusedDay,
-                );
-
-                // タップされた日付を
-                // 親Widgetへ通知する。
-                //
-                // SQLite検索・確認ダイアログ・
-                // 画面遷移はCalendarCardでは行わない。
-                _handleDateSelected(
-                  selectedDay,
-                );
-              },
-
-              //================================================
-              // 月変更
-              //================================================
-
-              onPageChanged: (
-                focusedDay,
-              ) {
-                final now =
-                    DateTime.now();
-
-                setState(() {
-                  _focusedDay =
-                      focusedDay;
-
                   //================================================
-                  // 現在年月の場合
-                  //================================================
-                  //
-                  // 今日を選択状態にする。
-                  //
-                  // 例：
-                  // 2026年9月
-                  // → 2026年9月1日を選択
+                  // 曜日
                   //================================================
 
-                  if (focusedDay.year ==
-                          now.year &&
-                      focusedDay.month ==
-                          now.month) {
-                    _selectedDay = now;
-                  }
-
-                  //================================================
-                  // 過去月・未来月の場合
-                  //================================================
-                  //
-                  // 月を移動した直後は無選択にする。
-                  //
-                  // 例：
-                  // 8月 → 7月
-                  // → 無選択
-                  //
-                  // 例：
-                  // 8月 → 9月
-                  // → 無選択
-                  //================================================
-
-                  else {
-                    _selectedDay =
-                        null;
-                  }
-                });
-
-                // カレンダーの表示月が変更されたら
-                // HomeProviderへ通知する。
-                provider
-                    .setFocusedMonth(
-                  focusedDay,
-                );
-              },
-
-              //==================================================
-              // ヘッダー
-              //==================================================
-
-              headerStyle:
-                  HeaderStyle(
-                titleCentered: true,
-
-                formatButtonVisible:
-                    false,
-
-                //================================================
-                // 月タイトル
-                //================================================
-
-                titleTextStyle:
-                    const TextStyle(
-                  fontSize: 22,
-                  fontWeight:
-                      FontWeight.bold,
-                  color: Colors.black87,
-                ),
-
-                //================================================
-                // 左右の月移動ボタン
-                //================================================
-
-                leftChevronIcon:
-                    _buildChevronButton(
-                  Icons.chevron_left,
-                ),
-
-                rightChevronIcon:
-                    _buildChevronButton(
-                  Icons.chevron_right,
-                ),
-              ),
-
-              //==================================================
-              // カレンダースタイル
-              //==================================================
-
-              calendarStyle:
-                  const CalendarStyle(
-                //================================================
-                // 表示月以外の日付を非表示
-                //================================================
-                //
-                // これにより、
-                //
-                // 2026年8月表示時の
-                // 2026年9月1日～5日
-                //
-                // などが表示されなくなる。
-                //
-                // カレンダーのサイズ自体は変更しない。
-                //================================================
-
-                outsideDaysVisible:
-                    false,
-
-                //================================================
-                // ガラスカードの背景を
-                // そのまま見せる。
-                //================================================
-
-                defaultDecoration:
-                    BoxDecoration(
-                  color:
-                      Colors.transparent,
-                ),
-
-                weekendDecoration:
-                    BoxDecoration(
-                  color:
-                      Colors.transparent,
-                ),
-
-                outsideDecoration:
-                    BoxDecoration(
-                  color:
-                      Colors.transparent,
-                ),
-
-                todayDecoration:
-                    BoxDecoration(
-                  color:
-                      Colors.transparent,
-                ),
-
-                selectedDecoration:
-                    BoxDecoration(
-                  color:
-                      Colors.transparent,
-                ),
-              ),
-
-              //==================================================
-              // カレンダーBuilder
-              //==================================================
-
-              calendarBuilders:
-                  CalendarBuilders(
-                //==================================================
-                // 曜日
-                //==================================================
-
-                dowBuilder: (
-                  context,
-                  day,
-                ) {
-                  final text = [
-                    '日',
-                    '月',
-                    '火',
-                    '水',
-                    '木',
-                    '金',
-                    '土',
-                  ][day.weekday % 7];
-
-                  Color color =
-                      Colors.black87;
-
-                  if (day.weekday ==
-                      DateTime.sunday) {
-                    color =
-                        Colors.red;
-                  } else if (day.weekday ==
-                      DateTime.saturday) {
-                    color =
-                        Colors.blue;
-                  }
-
-                  return Center(
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight:
-                            FontWeight.w600,
-                      ),
+                  SizedBox(
+                    height: 32,
+                    child: Row(
+                      children: [
+                        for (var weekday = 0;
+                            weekday < 7;
+                            weekday++)
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                const [
+                                  '日',
+                                  '月',
+                                  '火',
+                                  '水',
+                                  '木',
+                                  '金',
+                                  '土',
+                                ][weekday],
+                                style: TextStyle(
+                                  color: weekday == 0
+                                      ? Colors.red
+                                      : weekday == 6
+                                          ? Colors.blue
+                                          : Colors.black87,
+                                  fontWeight:
+                                      FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                  );
-                },
+                  ),
 
-                //==================================================
-                // 通常日
-                //==================================================
-
-                defaultBuilder: (
-                  context,
-                  day,
-                  focusedDay,
-                ) {
                   //================================================
-                  // 念のため表示月以外の日付は
-                  // 明示的に非表示にする。
+                  // 日付セル
+                  //================================================
                   //
-                  // outsideDaysVisible: false と
-                  // 組み合わせることで、
-                  // 表示月以外の情報が誤って
-                  // 描画されることを防ぐ。
-                  //================================================
-
-                  if (!_isInFocusedMonth(day)) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return _buildDay(
-                    day,
-                    textColor:
-                        _defaultTextColor(
-                      day,
-                    ),
-                  );
-                },
-
-                //==================================================
-                // 範囲外の日付
-                //==================================================
-
-                outsideBuilder: (
-                  context,
-                  day,
-                  focusedDay,
-                ) {
-                  //================================================
-                  // 今回の仕様では、
-                  // 表示月以外の日付を表示しない。
+                  // 各週の高さは weekRows を生成する段階で
+                  // 設定済み。
                   //
-                  // 例：
-                  // 8月表示時の9月1日
-                  // → 完全に非表示
+                  // 最終週だけ高さを広げることで、
+                  // 月末の収支金額の表示スペースを確保する。
                   //================================================
 
-                  return const SizedBox.shrink();
-                },
-
-                //==================================================
-                // 今日
-                //==================================================
-
-                todayBuilder: (
-                  context,
-                  day,
-                  focusedDay,
-                ) {
-                  //================================================
-                  // 本日が表示月以外の場合は
-                  // 本日マークを表示しない。
-                  //
-                  // 例：
-                  // 本日＝2026年9月1日
-                  //
-                  // 8月表示
-                  // → 9月1日の本日マークは非表示
-                  //
-                  // 9月表示
-                  // → 9月1日の本日マークを表示
-                  //================================================
-
-                  if (!_isInFocusedMonth(day)) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return _buildCircleDay(
-                    day,
-                    AppColors.primary,
-                  );
-                },
-
-                //==================================================
-                // 選択中の日付
-                //==================================================
-
-                selectedBuilder: (
-                  context,
-                  day,
-                  focusedDay,
-                ) {
-                  //================================================
-                  // 表示月以外の選択日を表示しない。
-                  //================================================
-
-                  if (!_isInFocusedMonth(day)) {
-                    return const SizedBox.shrink();
-                  }
-
-                  return _buildCircleDay(
-                    day,
-                    Colors.indigo,
-                  );
-                },
-
-                //==================================================
-                // 収支マーカー
-                //==================================================
-
-                markerBuilder: (
-                  context,
-                  day,
-                  events,
-                ) {
-                  //================================================
-                  // 表示月以外の収支は表示しない。
-                  //
-                  // 例：
-                  // 2026年8月表示時
-                  // 2026年9月1日
-                  // +50,000円
-                  //     ↓
-                  // 非表示
-                  //
-                  // 2026年9月へ移動すると
-                  // +50,000円を表示する。
-                  //================================================
-
-                  if (!_isInFocusedMonth(day)) {
-                    return null;
-                  }
-
-                  final profit =
-                      _getProfitForDay(
-                    day,
-                    provider,
-                  );
-
-                  //================================================
-                  // 収支データなし
-                  //================================================
-
-                  if (profit == null) {
-                    return null;
-                  }
-
-                  //================================================
-                  // プラス収支
-                  //================================================
-
-                  if (profit > 0) {
-                    return _buildResultLabel(
-                      _formatProfit(
-                        profit,
-                      ),
-                      AppColors.profit,
-                    );
-                  }
-
-                  //================================================
-                  // マイナス収支
-                  //================================================
-
-                  if (profit < 0) {
-                    return _buildResultLabel(
-                      _formatProfit(
-                        profit,
-                      ),
-                      AppColors.loss,
-                    );
-                  }
-
-                  return null;
-                },
+                  for (final row in weekRows)
+                    row,
+                ],
               ),
             ),
 
             //==================================================
             // 上部ガラスハイライト
-            //==================================================
-            //
-            // カード上部だけにごく薄い白い光を入れ、
-            // ガラス表面の反射感を演出する。
             //==================================================
 
             Positioned(
@@ -931,12 +782,9 @@ class _CalendarCardState
               child: IgnorePointer(
                 child: Container(
                   height: 2,
-                  decoration:
-                      BoxDecoration(
+                  decoration: BoxDecoration(
                     borderRadius:
-                        BorderRadius.circular(
-                      2,
-                    ),
+                        BorderRadius.circular(2),
                     gradient:
                         const LinearGradient(
                       colors: [
@@ -1080,7 +928,6 @@ class _CalendarCardState
     );
   }
 
-  
   //==================================================
   // 収支結果ラベル
   //==================================================
@@ -1101,12 +948,9 @@ class _CalendarCardState
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          // 最終週の金額がカード下端で
-          // 切れないように、下側の余白を確保する。
-          padding: const EdgeInsets.only(
-            bottom: 10,
-            left: 2,
-            right: 2,
+          padding:
+              const EdgeInsets.symmetric(
+            horizontal: 2,
           ),
           child: SizedBox(
             width: double.infinity,
@@ -1117,11 +961,13 @@ class _CalendarCardState
                 text,
                 maxLines: 1,
                 softWrap: false,
-                textAlign: TextAlign.center,
+                textAlign:
+                    TextAlign.center,
                 style: TextStyle(
                   color: color,
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:
+                      FontWeight.w600,
                   height: 1.0,
                 ),
               ),
