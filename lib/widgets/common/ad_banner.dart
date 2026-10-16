@@ -69,7 +69,7 @@ class _AdBannerState extends State<AdBanner> {
   ///
   /// Google Play掲載用スクリーンショット撮影時など、
   /// 一時的に広告を非表示にする場合はfalseにする。
-  static const bool showAd = false;
+  static const bool showAd = true;
 
   //==================================================
   // BannerAd
