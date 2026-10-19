@@ -67,6 +67,25 @@ android {
 
     buildTypes {
         release {
+            // ========================================
+            // R8によるコード縮小・最適化設定
+            // ========================================
+
+            // コード縮小・最適化を有効化します。
+            isMinifyEnabled = true
+
+            // リソース縮小は、コード縮小後の動作確認が
+            // 完了するまで無効にしておきます。
+            isShrinkResources = true
+
+            // Android標準の最適化用ProGuardルールを使用します。
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt")
+            )
+
+            // ========================================
+            // リリース署名設定
+            // ========================================
             // key.properties が存在する場合：
             // 本番用の正式な release 署名を使用します。
             //
