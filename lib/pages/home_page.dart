@@ -876,7 +876,7 @@ class _HomePageState
                     AppSpacing.gapLg,
 
                     // ==========================================
-                    // 収支データ一覧
+                    // 収支データリスト
                     // ==========================================
 
                     OutlinedButton.icon(
@@ -886,7 +886,7 @@ class _HomePageState
                         size: 38,
                       ),
                       label: const Text(
-                        '収支DATA一覧',
+                        '収支データリスト',
                       ),
                     ),
                   ],

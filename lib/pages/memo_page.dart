@@ -1071,8 +1071,8 @@ class _MemoPageState
           appBar: AppBar(
             title: Text(
               _isEditMode
-                  ? 'メモDATA編集'
-                  : 'メモDATA入力',
+                  ? 'メモデータ編集'
+                  : 'メモデータ入力',
             ),
             centerTitle: true,
           ),
@@ -1254,7 +1254,7 @@ class _MemoPageState
                                 ),
                                 label:
                                     const Text(
-                                  'メモDATA一覧',
+                                  'メモデータリスト',
                                 ),
                               ),
                             ],

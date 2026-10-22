@@ -1146,8 +1146,8 @@ class InputPageState
         title:
             Text(
           _isEditMode
-              ? '収支DATA編集'
-              : '収支DATA入力',
+              ? '収支データ編集'
+              : '収支データ入力',
         ),
         centerTitle: true,
       ),

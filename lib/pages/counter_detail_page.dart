@@ -437,7 +437,7 @@ class CounterDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('小役DATA詳細'),
+        title: const Text('小役データ詳細'),
         centerTitle: true,
       ),
       body: SafeArea(

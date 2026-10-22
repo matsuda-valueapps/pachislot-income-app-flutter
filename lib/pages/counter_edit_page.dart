@@ -623,7 +623,7 @@ class _CounterEditPageState extends State<CounterEditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('小役DATA編集'),
+        title: const Text('小役データ編集'),
         centerTitle: true,
       ),
       body: SafeArea(

@@ -2297,7 +2297,7 @@ class _MainPageState
                     BottomNavigationIconType
                         .search,
               ),
-              label: '検索',
+              label: 'サーチ',
             ),
           ],
         ),

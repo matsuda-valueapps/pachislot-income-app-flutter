@@ -1210,7 +1210,7 @@ class _CounterListPageState extends State<CounterListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '小役DATA一覧',
+          '小役データリスト',
         ),
         centerTitle: true,
       ),

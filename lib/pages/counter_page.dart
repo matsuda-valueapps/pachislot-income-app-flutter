@@ -1038,7 +1038,7 @@ class _CounterPageState extends State<CounterPage> {
                             size: 38,
                           ),
                           label: const Text(
-                            '小役DATA一覧',
+                            '小役データリスト',
                           ),
                         ),
                       ),
