@@ -462,6 +462,10 @@ class CounterPageState extends State<CounterPage> {
       return;
     }
 
+    // リセット後はページ上部へ戻す
+    scrollToTop();
+
+    // リセット完了メッセージ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('リセットしました'),
