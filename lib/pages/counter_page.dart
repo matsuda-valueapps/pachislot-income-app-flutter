@@ -23,10 +23,10 @@ class CounterPage extends StatefulWidget {
   const CounterPage({super.key});
 
   @override
-  State<CounterPage> createState() => _CounterPageState();
+  CounterPageState createState() => CounterPageState();
 }
 
-class _CounterPageState extends State<CounterPage> {
+class CounterPageState extends State<CounterPage> {
   //==================================================
   // Controller
   //==================================================
@@ -42,6 +42,60 @@ class _CounterPageState extends State<CounterPage> {
   /// タイトル
   final TextEditingController _titleController =
       TextEditingController();
+
+  //==================================================
+  // スクロール位置制御
+  //==================================================
+
+  /// ページ上部の位置
+  final GlobalKey _topSectionKey = GlobalKey();
+
+  /// 小役カードの位置
+  final GlobalKey _counterSectionKey = GlobalKey();
+
+  /// 小役カード付近までスクロールする。
+  void scrollToCounterSection() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final targetContext = _counterSectionKey.currentContext;
+
+      if (targetContext == null) {
+        return;
+      }
+
+      Scrollable.ensureVisible(
+        targetContext,
+        alignment: 0.05,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  /// ページ上部までスクロールする。
+  void scrollToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final targetContext = _topSectionKey.currentContext;
+
+      if (targetContext == null) {
+        return;
+      }
+
+      Scrollable.ensureVisible(
+        targetContext,
+        alignment: 0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
 
   //==================================================
   // プレミアムガラスカード
@@ -71,15 +125,7 @@ class _CounterPageState extends State<CounterPage> {
           1.0,
         ],
       ),
-
-      //================================================
-      // 既存カードと同じ角丸
-      //================================================
       borderRadius: AppRadius.card,
-
-      //================================================
-      // 薄いブルーBorder
-      //================================================
       border: Border.all(
         color: const Color.fromRGBO(
           157,
@@ -89,14 +135,7 @@ class _CounterPageState extends State<CounterPage> {
         ),
         width: 1.5,
       ),
-
-      //================================================
-      // 柔らかい立体影
-      //================================================
       boxShadow: const [
-        //================================================
-        // 下方向の柔らかい影
-        //================================================
         BoxShadow(
           color: Color.fromRGBO(
             92,
@@ -106,15 +145,8 @@ class _CounterPageState extends State<CounterPage> {
           ),
           blurRadius: 22,
           spreadRadius: 2,
-          offset: Offset(
-            0,
-            10,
-          ),
+          offset: Offset(0, 10),
         ),
-
-        //================================================
-        // 近距離の立体影
-        //================================================
         BoxShadow(
           color: Color.fromRGBO(
             125,
@@ -124,10 +156,7 @@ class _CounterPageState extends State<CounterPage> {
           ),
           blurRadius: 8,
           spreadRadius: 0,
-          offset: Offset(
-            0,
-            3,
-          ),
+          offset: Offset(0, 3),
         ),
       ],
     );
@@ -151,10 +180,7 @@ class _CounterPageState extends State<CounterPage> {
           return;
         }
 
-        //================================================
         // ゲーム数
-        //================================================
-
         _startGameController.text = provider.startGame == 0
             ? ''
             : provider.startGame.toString();
@@ -163,10 +189,7 @@ class _CounterPageState extends State<CounterPage> {
             ? ''
             : provider.currentGame.toString();
 
-        //================================================
         // タイトル
-        //================================================
-
         _titleController.text = provider.title;
       },
     );
@@ -185,12 +208,8 @@ class _CounterPageState extends State<CounterPage> {
   // 日付表示
   //==================================================
 
-  /// 日付を
-  /// 「2026年8月18日(火)」
-  /// の形式で表示する。
-  String _formatDate(
-    DateTime date,
-  ) {
+  /// 日付を「2026年8月18日(火)」の形式で表示する。
+  String _formatDate(DateTime date) {
     return DateFormat(
       'yyyy年M月d日(E)',
       'ja_JP',
@@ -210,10 +229,7 @@ class _CounterPageState extends State<CounterPage> {
       initialDate: provider.selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      locale: const Locale(
-        'ja',
-        'JP',
-      ),
+      locale: const Locale('ja', 'JP'),
     );
 
     if (pickedDate == null) {
@@ -224,9 +240,7 @@ class _CounterPageState extends State<CounterPage> {
       return;
     }
 
-    provider.setSelectedDate(
-      pickedDate,
-    );
+    provider.setSelectedDate(pickedDate);
   }
 
   //==================================================
@@ -257,41 +271,26 @@ class _CounterPageState extends State<CounterPage> {
     final counts = provider.activeCounts;
 
     return CounterRecord(
-      //================================================
       // 基本情報
-      //================================================
-
       date: provider.selectedDate
           .toIso8601String()
           .split('T')
           .first,
-
       title: provider.title.trim(),
-
       machineType: provider.machineType,
 
-      //================================================
       // ゲーム数
-      //================================================
-
       startGame: provider.startGame,
-
       currentGame: provider.currentGame,
 
-      //================================================
       // Aタイプ小役
-      //================================================
-
       cherry: counts['cherry'] ?? 0,
       bell: counts['bell'] ?? 0,
       suika: counts['suika'] ?? 0,
       grape: counts['grape'] ?? 0,
       chance: counts['chance'] ?? 0,
 
-      //================================================
       // ATタイプ小役
-      //================================================
-
       strongCherry: counts['strongCherry'] ?? 0,
       weakCherry: counts['weakCherry'] ?? 0,
       strongBell: counts['strongBell'] ?? 0,
@@ -303,10 +302,7 @@ class _CounterPageState extends State<CounterPage> {
       strongChance: counts['strongChance'] ?? 0,
       weakChance: counts['weakChance'] ?? 0,
 
-      //================================================
       // 日時
-      //================================================
-
       createdAt: now.toIso8601String(),
       updatedAt: now.toIso8601String(),
     );
@@ -317,38 +313,21 @@ class _CounterPageState extends State<CounterPage> {
   //==================================================
 
   /// 小役カウンターの保存成功後に、
-  /// 入力画面を完全に初期状態へ戻す。
+  /// 入力画面を初期状態へ戻す。
   ///
   /// ・フォーカス解除
   /// ・キーボード非表示
   /// ・Provider初期化
   /// ・TextField初期化
-  /// ・スクロールトップ
+  ///
+  /// 保存後のスクロール位置は強制変更しない。
   Future<void> _resetAfterSave(
     CounterProvider provider,
   ) async {
-    //================================================
     // フォーカス解除
-    //================================================
-    //
-    // 最後に入力していたタイトル・ゲーム数欄などに
-    // フォーカスが残るのを防ぐ。
-    //================================================
-
     FocusManager.instance.primaryFocus?.unfocus();
 
-    //================================================
     // ソフトウェアキーボードを閉じる
-    //================================================
-    //
-    // フォーカス解除に加えて、
-    // TextInputへ明示的に非表示を通知する。
-    //
-    // キーボード非表示処理そのものに失敗しても、
-    // 既にSQLite保存済みのデータを
-    // 「保存失敗」と扱わないようにする。
-    //================================================
-
     try {
       await SystemChannels.textInput.invokeMethod<void>(
         'TextInput.hide',
@@ -358,63 +337,20 @@ class _CounterPageState extends State<CounterPage> {
       // 保存済みデータの処理には影響させない。
     }
 
-    //================================================
     // Providerをリセット
-    //================================================
-    //
-    // provider.reset()の中で
-    // CounterDraftService.clearDraft()
-    // も実行される。
-    //================================================
-
     await provider.reset();
 
     if (!mounted) {
       return;
     }
 
-    //================================================
     // TextFieldも初期状態へ戻す
-    //================================================
-
     _startGameController.clear();
     _currentGameController.clear();
     _titleController.clear();
 
-    //================================================
-    // 次のフレームでスクロールトップ
-    //================================================
-    //
-    // MainPageからCounterPageへ接続されている
-    // PrimaryScrollControllerを使用する。
-    //
-    // PostFrameCallbackを使用することで、
-    // provider.reset()による画面更新後に
-    // スクロール位置をトップへ戻す。
-    //================================================
-
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) {
-        if (!mounted) {
-          return;
-        }
-
-        final controller =
-            PrimaryScrollController.maybeOf(context);
-
-        if (controller == null) {
-          return;
-        }
-
-        if (!controller.hasClients) {
-          return;
-        }
-
-        controller.jumpTo(
-          controller.position.minScrollExtent,
-        );
-      },
-    );
+    // 保存成功後はページ上部へ戻す
+    scrollToTop();
   }
 
   //==================================================
@@ -429,7 +365,8 @@ class _CounterPageState extends State<CounterPage> {
   /// 4. カウンター初期化
   /// 5. フォーカス解除
   /// 6. キーボード非表示
-  /// 7. スクロールトップ
+  ///
+  /// 保存後にスクロールトップへ強制移動しない。
   Future<void> _onSave(
     CounterProvider provider,
   ) async {
@@ -449,18 +386,10 @@ class _CounterPageState extends State<CounterPage> {
     }
 
     try {
-      //================================================
       // SQLite保存用データ作成
-      //================================================
+      final record = _createCounterRecord(provider);
 
-      final record = _createCounterRecord(
-        provider,
-      );
-
-      //================================================
       // SQLiteへ正式保存
-      //================================================
-
       await DatabaseService.instance.insertCounterRecord(
         record,
       );
@@ -469,27 +398,17 @@ class _CounterPageState extends State<CounterPage> {
         return;
       }
 
-      //================================================
-      // SQLite保存成功後に画面を完全初期化
-      //================================================
-
-      await _resetAfterSave(
-        provider,
-      );
+      // SQLite保存成功後に画面を初期化
+      await _resetAfterSave(provider);
 
       if (!mounted) {
         return;
       }
 
-      //================================================
       // 保存完了
-      //================================================
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            '保存しました',
-          ),
+          content: Text('保存しました'),
         ),
       );
     } catch (e) {
@@ -497,13 +416,7 @@ class _CounterPageState extends State<CounterPage> {
         return;
       }
 
-      //================================================
-      // SQLite保存失敗
-      //
-      // この場合はprovider.reset()を実行しないため、
-      // 下書きは残る。
-      //================================================
-
+      // SQLite保存失敗時は下書きを残す。
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -537,16 +450,10 @@ class _CounterPageState extends State<CounterPage> {
       return;
     }
 
-    //================================================
     // Providerをリセット
-    //================================================
-
     await provider.reset();
 
-    //================================================
     // TextFieldも初期状態へ戻す
-    //================================================
-
     _startGameController.clear();
     _currentGameController.clear();
     _titleController.clear();
@@ -557,9 +464,7 @@ class _CounterPageState extends State<CounterPage> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'リセットしました',
-        ),
+        content: Text('リセットしました'),
       ),
     );
   }
@@ -586,39 +491,23 @@ class _CounterPageState extends State<CounterPage> {
     BuildContext context,
     CounterProvider provider,
   ) {
-    final formattedDate = _formatDate(
-      provider.selectedDate,
-    );
+    final formattedDate = _formatDate(provider.selectedDate);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //================================================
-        // ラベル
-        //================================================
-
         Text(
           '日付',
           style: AppTextStyles.body.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
-
-        const SizedBox(
-          height: AppSpacing.sm,
-        ),
-
-        //================================================
-        // 日付選択
-        //================================================
-
+        const SizedBox(height: AppSpacing.sm),
         Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: () => _selectDate(provider),
-            borderRadius: BorderRadius.circular(
-              AppRadius.md,
-            ),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             child: Ink(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
@@ -626,9 +515,7 @@ class _CounterPageState extends State<CounterPage> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(
-                  AppRadius.md,
-                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
                   color: AppColors.border,
                 ),
@@ -639,11 +526,7 @@ class _CounterPageState extends State<CounterPage> {
                     icon: 'google_calendar',
                     size: 38,
                   ),
-
-                  const SizedBox(
-                    width: AppSpacing.md,
-                  ),
-
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
                       formattedDate,
@@ -655,7 +538,6 @@ class _CounterPageState extends State<CounterPage> {
                           ),
                     ),
                   ),
-
                   const Icon(
                     Icons.arrow_drop_down_rounded,
                     color: AppColors.iconDisabled,
@@ -685,36 +567,26 @@ class _CounterPageState extends State<CounterPage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-
-        const SizedBox(
-          height: AppSpacing.sm,
-        ),
-
+        const SizedBox(height: AppSpacing.sm),
         DropdownButtonFormField<String>(
           initialValue: provider.machineType,
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.surface,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: const BorderSide(
                 color: AppColors.border,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: const BorderSide(
                 color: AppColors.border,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: BorderSide(
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -755,32 +627,17 @@ class _CounterPageState extends State<CounterPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //================================================
-        // ラベル
-        //================================================
-
         Text(
           'タイトル',
           style: AppTextStyles.body.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
-
-        const SizedBox(
-          height: AppSpacing.sm,
-        ),
-
-        //================================================
-        // 入力欄
-        //================================================
-
+        const SizedBox(height: AppSpacing.sm),
         TextField(
           controller: _titleController,
           onChanged: (value) {
-            _onTitleChanged(
-              provider,
-              value,
-            );
+            _onTitleChanged(provider, value);
           },
           textInputAction: TextInputAction.done,
           decoration: InputDecoration(
@@ -788,25 +645,19 @@ class _CounterPageState extends State<CounterPage> {
             filled: true,
             fillColor: AppColors.surface,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: const BorderSide(
                 color: AppColors.border,
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: const BorderSide(
                 color: AppColors.border,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                AppRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               borderSide: BorderSide(
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -826,136 +677,63 @@ class _CounterPageState extends State<CounterPage> {
   //==================================================
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     final provider = context.watch<CounterProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          '小役カウンター',
-        ),
+        title: const Text('小役カウンター'),
         centerTitle: true,
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            //================================================
             // AdMobバナー
-            //================================================
-            //
-            // このCounterPageは
-            // 「小役カウンター」入力画面のため、
-            // AppBar直下に広告を表示する。
-            //
-            // 編集画面が別Pageの場合は、
-            // そちらにはAdBannerを配置しない。
-            //================================================
-
             const AdBanner(),
 
-            //================================================
-            // 既存の小役カウンター画面
-            //================================================
-            //
-            // Expandedに入れることで、
-            // AppBarとAdBannerの下に残った領域を
-            // 既存どおりスクロール可能な領域として使用する。
-            //
-            // ScrollControllerを明示指定せず、
-            // MainPageから提供されている
-            // PrimaryScrollControllerをそのまま使用する。
-            //================================================
-
+            // ページ全体のスクロール領域
             Expanded(
               child: SingleChildScrollView(
                 padding: AppSpacing.page,
                 child: Container(
-                  //================================================
-                  // MemoPageと同じカード外側余白
-                  //
-                  // AppBarとカードの距離をMemoPageと揃える。
-                  //================================================
-
+                  key: _topSectionKey,
                   margin: const EdgeInsets.symmetric(
                     vertical: AppSpacing.xs,
                   ),
-
-                  //================================================
-                  // MemoPageと同じカード内側余白
-                  //================================================
-
                   padding: AppSpacing.card,
-
-                  //================================================
-                  // プレミアムガラス装飾
-                  //
-                  // ・グラデーション
-                  // ・外側Border
-                  // ・柔らかな立体影
-                  //
-                  // ※ガラス内側ハイライトなし
-                  // ※上部ガラスハイライトなし
-                  //================================================
-
                   decoration: _buildGlassDecoration(),
-
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      //================================================
                       // 日付
-                      //================================================
-
                       _buildDateField(
                         context,
                         provider,
                       ),
 
-                      const SizedBox(
-                        height: AppSpacing.lg,
-                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-                      //================================================
                       // 機種タイプ
-                      //================================================
+                      _buildMachineTypeField(provider),
 
-                      _buildMachineTypeField(
-                        provider,
-                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-                      const SizedBox(
-                        height: AppSpacing.lg,
-                      ),
-
-                      //================================================
                       // タイトル
-                      //================================================
-
                       _buildTitleField(
                         context,
                         provider,
                       ),
 
-                      const SizedBox(
-                        height: AppSpacing.lg,
-                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-                      //================================================
                       // 開始ゲーム数
-                      //================================================
-
                       StartGameCounter(
                         controller: _startGameController,
                         onChanged: provider.updateStartGame,
                       ),
 
-                      //================================================
                       // 現在ゲーム数
-                      //================================================
-
                       GameCounter(
                         controller: _currentGameController,
                         onChanged: provider.updateCurrentGame,
@@ -964,71 +742,70 @@ class _CounterPageState extends State<CounterPage> {
                       //================================================
                       // 小役カウンター
                       //================================================
+                      //
+                      // Aタイプ：1列表示
+                      // ATタイプ：2列表示
+                      //
+                      // GridView内部ではスクロールせず、
+                      // ページ全体のスクロールを使用する。
+                      //================================================
 
-                      ...provider.items.map(
-                        (item) => CounterCard(
-                          item: item,
-                          probability: provider.probability(
-                            item.id,
-                          ),
-                          onIncrement: () {
-                            provider.increment(
-                              item.id,
+                      Container(
+                        key: _counterSectionKey,
+                        child: GridView.count(
+                          crossAxisCount:
+                              provider.machineType == 'Aタイプ' ? 1 : 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 4,
+                          childAspectRatio:
+                              provider.machineType == 'Aタイプ' ? 4.1 : 1.35,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          children: provider.items.map((item) {
+                            return CounterCard(
+                              item: item,
+                              probability: provider.probability(
+                                item.id,
+                              ),
+                              onIncrement: () {
+                                provider.increment(item.id);
+                              },
+                              onDecrement: () {
+                                provider.decrement(item.id);
+                              },
                             );
-                          },
-                          onDecrement: () {
-                            provider.decrement(
-                              item.id,
-                            );
-                          },
+                          }).toList(),
                         ),
                       ),
 
-                      const SizedBox(
-                        height: AppSpacing.lg,
-                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-                      //================================================
                       // リセット・保存
-                      //================================================
-
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => _onReset(
-                                provider,
-                              ),
-                              child: const Text(
-                                'リセット',
-                              ),
+                              onPressed: () {
+                                _onReset(provider);
+                              },
+                              child: const Text('リセット'),
                             ),
                           ),
-
-                          const SizedBox(
-                            width: AppSpacing.md,
-                          ),
-
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: FilledButton(
-                              onPressed: () => _onSave(
-                                provider,
-                              ),
-                              child: const Text(
-                                '保存',
-                              ),
+                              onPressed: () {
+                                _onSave(provider);
+                              },
+                              child: const Text('保存'),
                             ),
                           ),
                         ],
                       ),
 
-                      //================================================
                       // 保存小役データ一覧
-                      //================================================
-
-                      const SizedBox(
-                        height: AppSpacing.md,
-                      ),
+                      const SizedBox(height: AppSpacing.md),
 
                       SizedBox(
                         width: double.infinity,
@@ -1037,9 +814,7 @@ class _CounterPageState extends State<CounterPage> {
                           icon: const ActionButtonIcon.list(
                             size: 38,
                           ),
-                          label: const Text(
-                            '小役データリスト',
-                          ),
+                          label: const Text('小役データリスト'),
                         ),
                       ),
                     ],

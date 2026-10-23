@@ -147,6 +147,16 @@ class _MainPageState
       GlobalKey<InputPageState>();
 
   //==================================================
+  // Counter Page Key
+  //==================================================
+
+  /// 小役カウンター画面のStateへアクセスするためのKey。
+  ///
+  /// タブ復帰時に小役カード付近へスクロールするために使用する。
+  GlobalKey<CounterPageState> _counterPageKey =
+      GlobalKey<CounterPageState>();
+
+  //==================================================
   // Navigator Observer
   //==================================================
 
@@ -391,6 +401,18 @@ class _MainPageState
   void _resetTabScrollPosition(
     int index,
   ) {
+    //================================================
+    // 小役カウンター
+    //================================================
+    // 小役カウンターは専用の位置へ移動するため、
+    // 共通のトップ移動処理から除外する。
+    //================================================
+
+    if (index == 3) {
+      _counterPageKey.currentState?.scrollToCounterSection();
+      return;
+    }
+    
     //================================================
     // ホーム
     //================================================
@@ -1003,7 +1025,13 @@ class _MainPageState
       //================================================
 
       case 3:
-        page = const CounterPage();
+        // CounterPageStateへアクセスするKeyを毎回新しく生成する。
+        // Navigatorのルートを再生成する場合のGlobalKey重複を防ぐ。
+        _counterPageKey = GlobalKey<CounterPageState>();
+
+        page = CounterPage(
+          key: _counterPageKey,
+        );
         break;
 
       //================================================

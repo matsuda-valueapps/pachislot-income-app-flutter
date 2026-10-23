@@ -33,6 +33,9 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// Aタイプの小役一覧
+  ///
+  /// 表示順：
+  /// チェリー → スイカ → チャンス目 → ベル → ブドウ
   List<CounterItem> _aItems = [
     const CounterItem(
       id: 'cherry',
@@ -40,24 +43,24 @@ class CounterProvider extends ChangeNotifier {
       color: Colors.red,
     ),
     const CounterItem(
-      id: 'bell',
-      name: 'ベル',
-      color: Colors.yellow,
-    ),
-    const CounterItem(
       id: 'suika',
       name: 'スイカ',
       color: Colors.green,
     ),
     const CounterItem(
-      id: 'grape',
-      name: 'ブドウ',
-      color: Colors.purple,
-    ),
-    const CounterItem(
       id: 'chance',
       name: 'チャンス目',
       color: Colors.blue,
+    ),
+    const CounterItem(
+      id: 'bell',
+      name: 'ベル',
+      color: Colors.yellow,
+    ),
+    const CounterItem(
+      id: 'grape',
+      name: 'ブドウ',
+      color: Colors.purple,
     ),
   ];
 
@@ -66,6 +69,17 @@ class CounterProvider extends ChangeNotifier {
   //==================================================
 
   /// ATタイプの小役一覧
+  ///
+  /// 表示順：
+  /// 強チェリー → 弱チェリー
+  /// → 強スイカ → 弱スイカ
+  /// → 強チャンス目 → 弱チャンス目
+  /// → 強ベル → 弱ベル
+  ///
+  /// 強ブドウ・弱ブドウは画面に表示しない。
+  ///
+  /// 既存の下書きデータとの互換性を維持するため、
+  /// 強ブドウ・弱ブドウのデータは内部に保持する。
   List<CounterItem> _atItems = [
     const CounterItem(
       id: 'strong_cherry',
@@ -78,16 +92,6 @@ class CounterProvider extends ChangeNotifier {
       color: Colors.red,
     ),
     const CounterItem(
-      id: 'strong_bell',
-      name: '強ベル',
-      color: Colors.yellow,
-    ),
-    const CounterItem(
-      id: 'weak_bell',
-      name: '弱ベル',
-      color: Colors.yellow,
-    ),
-    const CounterItem(
       id: 'strong_suika',
       name: '強スイカ',
       color: Colors.green,
@@ -98,16 +102,6 @@ class CounterProvider extends ChangeNotifier {
       color: Colors.green,
     ),
     const CounterItem(
-      id: 'strong_grape',
-      name: '強ブドウ',
-      color: Colors.purple,
-    ),
-    const CounterItem(
-      id: 'weak_grape',
-      name: '弱ブドウ',
-      color: Colors.purple,
-    ),
-    const CounterItem(
       id: 'strong_chance',
       name: '強チャンス目',
       color: Colors.blue,
@@ -116,6 +110,29 @@ class CounterProvider extends ChangeNotifier {
       id: 'weak_chance',
       name: '弱チャンス目',
       color: Colors.blue,
+    ),
+    const CounterItem(
+      id: 'strong_bell',
+      name: '強ベル',
+      color: Colors.yellow,
+    ),
+    const CounterItem(
+      id: 'weak_bell',
+      name: '弱ベル',
+      color: Colors.yellow,
+    ),
+
+    // 既存データとの互換性維持用。
+    // 画面には表示しない。
+    const CounterItem(
+      id: 'strong_grape',
+      name: '強ブドウ',
+      color: Colors.purple,
+    ),
+    const CounterItem(
+      id: 'weak_grape',
+      name: '弱ブドウ',
+      color: Colors.purple,
     ),
   ];
 
@@ -153,19 +170,31 @@ class CounterProvider extends ChangeNotifier {
   }
 
   /// 現在選択されている機種タイプの小役一覧
-  List<CounterItem> get items =>
-      List.unmodifiable(_activeItems);
+  List<CounterItem> get items => List.unmodifiable(_activeItems);
 
-  /// 現在選択されている機種タイプの小役一覧
-  List<CounterItem> get _activeItems =>
-      isAtType ? _atItems : _aItems;
+  /// 現在選択されている機種タイプの表示対象小役一覧
+  ///
+  /// ATタイプでは強ブドウ・弱ブドウを表示対象から除外する。
+  List<CounterItem> get _activeItems {
+    if (!isAtType) {
+      return _aItems;
+    }
+
+    return _atItems
+        .where(
+          (item) =>
+              item.id != 'strong_grape' &&
+              item.id != 'weak_grape',
+        )
+        .toList();
+  }
 
   /// AタイプとATタイプの両方のカウント
   ///
   /// 保存処理などで使用する。
-  /// Aタイプの項目は既存のキーを維持し、
-  /// ATタイプの項目はCounterRecordの
-  /// Dartフィールド名に合わせたキーを使用する。
+  ///
+  /// 既存のキーを維持し、
+  /// 過去の下書きデータとの互換性を保つ。
   Map<String, int> get activeCounts {
     return Map.unmodifiable({
       // Aタイプ
@@ -176,26 +205,19 @@ class CounterProvider extends ChangeNotifier {
       'chance': _getCount(_aItems, 'chance'),
 
       // ATタイプ
-      'strongCherry':
-          _getCount(_atItems, 'strong_cherry'),
-      'weakCherry':
-          _getCount(_atItems, 'weak_cherry'),
-      'strongBell':
-          _getCount(_atItems, 'strong_bell'),
-      'weakBell':
-          _getCount(_atItems, 'weak_bell'),
-      'strongSuika':
-          _getCount(_atItems, 'strong_suika'),
-      'weakSuika':
-          _getCount(_atItems, 'weak_suika'),
-      'strongGrape':
-          _getCount(_atItems, 'strong_grape'),
-      'weakGrape':
-          _getCount(_atItems, 'weak_grape'),
-      'strongChance':
-          _getCount(_atItems, 'strong_chance'),
-      'weakChance':
-          _getCount(_atItems, 'weak_chance'),
+      'strongCherry': _getCount(_atItems, 'strong_cherry'),
+      'weakCherry': _getCount(_atItems, 'weak_cherry'),
+      'strongBell': _getCount(_atItems, 'strong_bell'),
+      'weakBell': _getCount(_atItems, 'weak_bell'),
+      'strongSuika': _getCount(_atItems, 'strong_suika'),
+      'weakSuika': _getCount(_atItems, 'weak_suika'),
+
+      // 既存データとの互換性維持用
+      'strongGrape': _getCount(_atItems, 'strong_grape'),
+      'weakGrape': _getCount(_atItems, 'weak_grape'),
+
+      'strongChance': _getCount(_atItems, 'strong_chance'),
+      'weakChance': _getCount(_atItems, 'weak_chance'),
     });
   }
 
@@ -245,6 +267,10 @@ class CounterProvider extends ChangeNotifier {
   ///
   /// 日付・タイトル・機種タイプ・ゲーム数・
   /// AタイプおよびATタイプのカウントを復元する。
+  ///
+  /// 小役の配列位置ではなくIDに対応する保存キーを
+  /// 使用することで、表示順の変更による
+  /// カウントの取り違えを防ぐ。
   Future<void> loadDraft() async {
     final draft = await CounterDraftService.loadDraft();
 
@@ -252,8 +278,7 @@ class CounterProvider extends ChangeNotifier {
     // 日付
     //================================================
 
-    final dateString =
-        draft['date']?.toString() ?? '';
+    final dateString = draft['date']?.toString() ?? '';
 
     if (dateString.isNotEmpty) {
       try {
@@ -278,10 +303,9 @@ class CounterProvider extends ChangeNotifier {
     final savedMachineType =
         draft['machineType']?.toString() ?? 'Aタイプ';
 
-    _machineType =
-        savedMachineType == 'ATタイプ'
-            ? 'ATタイプ'
-            : 'Aタイプ';
+    _machineType = savedMachineType == 'ATタイプ'
+        ? 'ATタイプ'
+        : 'Aタイプ';
 
     //================================================
     // ゲーム数
@@ -295,62 +319,62 @@ class CounterProvider extends ChangeNotifier {
     // Aタイプ小役
     //================================================
 
-    _aItems = [
-      _aItems[0].copyWith(
-        count: _readInt(draft['cherry']),
-      ),
-      _aItems[1].copyWith(
-        count: _readInt(draft['bell']),
-      ),
-      _aItems[2].copyWith(
-        count: _readInt(draft['suika']),
-      ),
-      _aItems[3].copyWith(
-        count: _readInt(draft['grape']),
-      ),
-      _aItems[4].copyWith(
-        count: _readInt(draft['chance']),
-      ),
-    ];
+    _aItems = _restoreItems(
+      _aItems,
+      draft,
+      const {
+        'cherry': 'cherry',
+        'suika': 'suika',
+        'chance': 'chance',
+        'bell': 'bell',
+        'grape': 'grape',
+      },
+    );
 
     //================================================
     // ATタイプ小役
     //================================================
 
-    _atItems = [
-      _atItems[0].copyWith(
-        count: _readInt(draft['strongCherry']),
-      ),
-      _atItems[1].copyWith(
-        count: _readInt(draft['weakCherry']),
-      ),
-      _atItems[2].copyWith(
-        count: _readInt(draft['strongBell']),
-      ),
-      _atItems[3].copyWith(
-        count: _readInt(draft['weakBell']),
-      ),
-      _atItems[4].copyWith(
-        count: _readInt(draft['strongSuika']),
-      ),
-      _atItems[5].copyWith(
-        count: _readInt(draft['weakSuika']),
-      ),
-      _atItems[6].copyWith(
-        count: _readInt(draft['strongGrape']),
-      ),
-      _atItems[7].copyWith(
-        count: _readInt(draft['weakGrape']),
-      ),
-      _atItems[8].copyWith(
-        count: _readInt(draft['strongChance']),
-      ),
-      _atItems[9].copyWith(
-        count: _readInt(draft['weakChance']),
-      ),
-    ];
+    _atItems = _restoreItems(
+      _atItems,
+      draft,
+      const {
+        'strong_cherry': 'strongCherry',
+        'weak_cherry': 'weakCherry',
+        'strong_suika': 'strongSuika',
+        'weak_suika': 'weakSuika',
+        'strong_chance': 'strongChance',
+        'weak_chance': 'weakChance',
+        'strong_bell': 'strongBell',
+        'weak_bell': 'weakBell',
+
+        // 既存の下書きデータとの互換性維持用
+        'strong_grape': 'strongGrape',
+        'weak_grape': 'weakGrape',
+      },
+    );
 
     notifyListeners();
+  }
+
+  /// 保存データから小役のカウントを復元する。
+  ///
+  /// item.id と保存キーを対応させることで、
+  /// 表示順が変わってもカウントを正しく復元する。
+  List<CounterItem> _restoreItems(
+    List<CounterItem> source,
+    Map<String, dynamic> draft,
+    Map<String, String> draftKeys,
+  ) {
+    return source.map((item) {
+      final draftKey = draftKeys[item.id];
+
+      final count = draftKey == null
+          ? 0
+          : _readInt(draft[draftKey]);
+
+      return item.copyWith(count: count);
+    }).toList();
   }
 
   /// 値を安全にintへ変換する。
@@ -395,8 +419,11 @@ class CounterProvider extends ChangeNotifier {
         'weakBell': counts['weakBell'] ?? 0,
         'strongSuika': counts['strongSuika'] ?? 0,
         'weakSuika': counts['weakSuika'] ?? 0,
+
+        // 既存データとの互換性維持用
         'strongGrape': counts['strongGrape'] ?? 0,
         'weakGrape': counts['weakGrape'] ?? 0,
+
         'strongChance': counts['strongChance'] ?? 0,
         'weakChance': counts['weakChance'] ?? 0,
       },
@@ -491,23 +518,30 @@ class CounterProvider extends ChangeNotifier {
   void increment(String id) {
     final items = _activeItems;
 
-    final index = items.indexWhere(
+    // 表示対象の小役かどうかを確認する。
+    final visibleIndex = items.indexWhere(
       (item) => item.id == id,
     );
 
-    if (index == -1) {
+    if (visibleIndex == -1) {
       return;
     }
 
-    final updatedItem = items[index].copyWith(
-      count: items[index].count + 1,
+    // 表示用リストの位置ではなく、
+    // 元の管理リストから対象小役を検索する。
+    final source = isAtType ? _atItems : _aItems;
+
+    final sourceIndex = source.indexWhere(
+      (item) => item.id == id,
     );
 
-    if (isAtType) {
-      _atItems[index] = updatedItem;
-    } else {
-      _aItems[index] = updatedItem;
+    if (sourceIndex == -1) {
+      return;
     }
+
+    source[sourceIndex] = source[sourceIndex].copyWith(
+      count: source[sourceIndex].count + 1,
+    );
 
     _saveDraft();
 
@@ -518,27 +552,34 @@ class CounterProvider extends ChangeNotifier {
   void decrement(String id) {
     final items = _activeItems;
 
-    final index = items.indexWhere(
+    // 表示対象の小役かどうかを確認する。
+    final visibleIndex = items.indexWhere(
       (item) => item.id == id,
     );
 
-    if (index == -1) {
+    if (visibleIndex == -1) {
       return;
     }
 
-    if (items[index].count == 0) {
-      return;
-    }
+    // 表示用リストの位置ではなく、
+    // 元の管理リストから対象小役を検索する。
+    final source = isAtType ? _atItems : _aItems;
 
-    final updatedItem = items[index].copyWith(
-      count: items[index].count - 1,
+    final sourceIndex = source.indexWhere(
+      (item) => item.id == id,
     );
 
-    if (isAtType) {
-      _atItems[index] = updatedItem;
-    } else {
-      _aItems[index] = updatedItem;
+    if (sourceIndex == -1) {
+      return;
     }
+
+    if (source[sourceIndex].count == 0) {
+      return;
+    }
+
+    source[sourceIndex] = source[sourceIndex].copyWith(
+      count: source[sourceIndex].count - 1,
+    );
 
     _saveDraft();
 

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../models/counter_item.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
-import '../../theme/app_spacing.dart';
 import 'counter_button.dart';
 import 'koyaku_icon.dart';
 
@@ -34,9 +33,7 @@ class CounterCard extends StatelessWidget {
 
   /// CounterItemのIDを
   /// KoyakuIconで使用するKoyakuTypeへ変換する。
-  KoyakuType _getKoyakuType(
-    String id,
-  ) {
+  KoyakuType _getKoyakuType(String id) {
     switch (id) {
       //================================================
       // Aタイプ
@@ -91,45 +88,136 @@ class CounterCard extends StatelessWidget {
   }
 
   //==================================================
+  // Aタイプ判定
+  //==================================================
+
+  /// Aタイプの小役IDかどうかを判定する。
+  bool get _isAType {
+    return const [
+      'cherry',
+      'suika',
+      'chance',
+      'bell',
+      'grape',
+    ].contains(item.id);
+  }
+
+  //==================================================
   // 小役アイコンサイズ
   //==================================================
 
   /// 小役IDに応じてアイコンサイズを変更する。
   ///
-  /// ・Aタイプ：36px
-  /// ・ATタイプ「強」：36px
-  /// ・ATタイプ「弱」：28px
-  double _getIconSize(
-    String id,
-  ) {
-    //================================================
-    // ATタイプ「弱」
-    //================================================
-
+  /// ・Aタイプ：30px
+  /// ・ATタイプ「強」：28px
+  /// ・ATタイプ「弱」：23px
+  double _getIconSize(String id) {
     if (id.startsWith('weak_')) {
-      return 28;
+      return 23;
     }
 
-    //================================================
-    // AタイプおよびATタイプ「強」
-    //================================================
+    if (_isAType) {
+      return 30;
+    }
 
-    return 36;
+    return 28;
   }
 
   //==================================================
-  // Build
+  // 小役アイコン
   //==================================================
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildKoyakuIcon({
+    required double size,
+  }) {
+    return SizedBox(
+      width: size + 2,
+      height: size + 2,
+      child: Center(
+        child: KoyakuIcon(
+          type: _getKoyakuType(item.id),
+          size: size,
+        ),
+      ),
+    );
+  }
+
+  //==================================================
+  // 小役名
+  //==================================================
+
+  Widget _buildKoyakuName({
+    required double fontSize,
+  }) {
+    return Text(
+      item.name,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  //==================================================
+  // カウント数
+  //==================================================
+
+  Widget _buildCount({
+    required double fontSize,
+  }) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        '${item.count}',
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  //==================================================
+  // 確率
+  //==================================================
+
+  Widget _buildProbability({
+    required double fontSize,
+  }) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          probability,
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  //==================================================
+  // Aタイプカード
+  //==================================================
+
+  /// 修正前に近い横長カード。
+  ///
+  /// カード内の上下の余白を縮小し、
+  /// 小役名・ボタン・カウント数を横方向に配置する。
+  Widget _buildATypeCard() {
     return Container(
       margin: const EdgeInsets.only(
-        bottom: AppSpacing.sm,
+        bottom: 4,
       ),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        horizontal: 10,
+        vertical: 5,
       ),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -141,103 +229,161 @@ class CounterCard extends StatelessWidget {
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
-              //================================================
-              // 小役アイコン
-              //================================================
-
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: Center(
-                  child: KoyakuIcon(
-                    type: _getKoyakuType(
-                      item.id,
-                    ),
-                    size: _getIconSize(
-                      item.id,
-                    ),
-                  ),
-                ),
+              _buildKoyakuIcon(
+                size: 30,
               ),
-
-              const SizedBox(
-                width: AppSpacing.sm,
-              ),
-
-              //================================================
-              // 小役名
-              //================================================
-
+              const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: _buildKoyakuName(
+                  fontSize: 15,
                 ),
               ),
-
-              //================================================
-              // －ボタン
-              //================================================
-
               CounterButton(
                 icon: Icons.remove,
                 onPressed: onDecrement,
               ),
-
-              //================================================
-              // カウント
-              //================================================
-
+              const SizedBox(width: 6),
               SizedBox(
-                width: 52,
+                width: 38,
                 child: Center(
-                  child: Text(
-                    '${item.count}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: _buildCount(
+                    fontSize: 22,
                   ),
                 ),
               ),
-
-              //================================================
-              // ＋ボタン
-              //================================================
-
+              const SizedBox(width: 6),
               CounterButton(
                 icon: Icons.add,
                 onPressed: onIncrement,
               ),
             ],
           ),
+          const SizedBox(height: 1),
+          _buildProbability(
+            fontSize: 11,
+          ),
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(
-            height: 4,
+  //==================================================
+  // ATタイプカード
+  //==================================================
+
+  /// 2列表示向けのコンパクトカード。
+  ///
+  /// カード内部の高さを抑えつつ、
+  /// ボタンと確率表示の領域を確保する。
+  Widget _buildAtTypeCard() {
+    return Container(
+      margin: const EdgeInsets.only(
+        bottom: 1,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 5,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(
+          AppRadius.md,
+        ),
+        border: Border.all(
+          color: AppColors.border,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 小役アイコン・小役名
+          SizedBox(
+            height: 30,
+            child: Row(
+              children: [
+                _buildKoyakuIcon(
+                  size: _getIconSize(item.id),
+                ),
+                const SizedBox(width: 3),
+                Expanded(
+                  child: _buildKoyakuName(
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          //==================================================
-          // 確率
-          //==================================================
+          const SizedBox(height: 2),
 
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              probability,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
-              ),
+          // －ボタン・カウント・＋ボタン
+          SizedBox(
+            height: 42,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: CounterButton(
+                        icon: Icons.remove,
+                        onPressed: onDecrement,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: _buildCount(
+                      fontSize: 19,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: CounterButton(
+                        icon: Icons.add,
+                        onPressed: onIncrement,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 1),
+
+          // 確率
+          SizedBox(
+            height: 14,
+            child: _buildProbability(
+              fontSize: 10,
             ),
           ),
         ],
       ),
     );
+  }
+
+  //==================================================
+  // Build
+  //==================================================
+
+  @override
+  Widget build(BuildContext context) {
+    // Aタイプは横長カード、
+    // ATタイプは2列向けのコンパクトカード。
+    if (_isAType) {
+      return _buildATypeCard();
+    }
+
+    return _buildAtTypeCard();
   }
 }
