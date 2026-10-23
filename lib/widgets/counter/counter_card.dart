@@ -103,24 +103,92 @@ class CounterCard extends StatelessWidget {
   }
 
   //==================================================
+  // 小役カード背景色
+  //==================================================
+
+  /// 小役IDに応じてカードの背景色を取得する。
+  ///
+  /// AタイプとATタイプの強小役は同じ色にする。
+  /// ATタイプの弱小役は、強小役よりも淡い色にする。
+  Color _getCardBackgroundColor() {
+    switch (item.id) {
+      //================================================
+      // Aタイプ・ATタイプ 強小役
+      //================================================
+
+      // チェリー：薄い赤色
+      case 'cherry':
+      case 'strong_cherry':
+        return const Color(0xFFFCE8E8);
+
+      // スイカ：薄い緑色
+      case 'suika':
+      case 'strong_suika':
+        return const Color(0xFFE8F5E9);
+
+      // チャンス目：薄い水色
+      case 'chance':
+      case 'strong_chance':
+        return const Color(0xFFE3F2FD);
+
+      // ベル：薄い黄色
+      case 'bell':
+      case 'strong_bell':
+        return const Color(0xFFFFF5D6);
+
+      // ブドウ：薄い紫色（Aタイプ用）
+      case 'grape':
+        return const Color(0xFFF1E6FA);
+
+      //================================================
+      // ATタイプ 弱小役
+      //================================================
+
+      // 弱チェリー：もっと薄い赤色
+      case 'weak_cherry':
+        return const Color(0xFFFFF7F7);
+
+      // 弱スイカ：もっと薄い緑色
+      case 'weak_suika':
+        return const Color(0xFFF7FCF7);
+
+      // 弱チャンス目：もっと薄い水色
+      case 'weak_chance':
+        return const Color(0xFFF7FBFE);
+
+      // 弱ベル：もっと薄い黄色
+      case 'weak_bell':
+        return const Color(0xFFFFFCF2);
+
+      //================================================
+      // その他
+      //================================================
+
+      // 未定義の小役は既存の背景色を維持する。
+      default:
+        return AppColors.surface;
+    }
+  }
+
+  //==================================================
   // 小役アイコンサイズ
   //==================================================
 
   /// 小役IDに応じてアイコンサイズを変更する。
   ///
   /// ・Aタイプ：30px
-  /// ・ATタイプ「強」：28px
-  /// ・ATタイプ「弱」：23px
+  /// ・ATタイプ「強」：30px
+  /// ・ATタイプ「弱」：24px
   double _getIconSize(String id) {
     if (id.startsWith('weak_')) {
-      return 23;
+      return 24;
     }
 
     if (_isAType) {
       return 30;
     }
 
-    return 28;
+    return 30;
   }
 
   //==================================================
@@ -220,7 +288,8 @@ class CounterCard extends StatelessWidget {
         vertical: 5,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        // 小役に応じた背景色
+        color: _getCardBackgroundColor(),
         borderRadius: BorderRadius.circular(
           AppRadius.md,
         ),
@@ -289,7 +358,8 @@ class CounterCard extends StatelessWidget {
         vertical: 5,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        // 強小役と弱小役で背景色を切り替える
+        color: _getCardBackgroundColor(),
         borderRadius: BorderRadius.circular(
           AppRadius.md,
         ),

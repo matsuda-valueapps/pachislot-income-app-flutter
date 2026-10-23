@@ -384,85 +384,148 @@ class _CounterEditPageState extends State<CounterEditPage> {
   }
 
   //==================================================
-  // 入力フィールド
+  // 小役カードの背景色
   //==================================================
 
-  /// 数値入力フィールド
+  /// 小役カウンター画面に合わせた背景色。
   ///
-  /// koyakuTypeが指定されている場合は、
-  /// 小役アイコンと小役名を入力欄の上に表示する。
+  /// ATタイプの弱小役は、強小役よりも淡い色にする。
+  Color _koyakuBackgroundColor(String label) {
+    if (label.contains('チェリー')) {
+      if (_isAtType && label.startsWith('弱')) {
+        return const Color(0xFFFFF6F6);
+      }
+
+      return const Color(0xFFFBE8E8);
+    }
+
+    if (label.contains('スイカ')) {
+      if (_isAtType && label.startsWith('弱')) {
+        return const Color(0xFFF4FAF4);
+      }
+
+      return const Color(0xFFE7F4E8);
+    }
+
+    if (label.contains('チャンス目')) {
+      if (_isAtType && label.startsWith('弱')) {
+        return const Color(0xFFF5F9FC);
+      }
+
+      return const Color(0xFFE2F0FC);
+    }
+
+    if (label.contains('ベル')) {
+      if (_isAtType && label.startsWith('弱')) {
+        return const Color(0xFFFFFCF3);
+      }
+
+      return const Color(0xFFFFF4D5);
+    }
+
+    if (label.contains('ブドウ')) {
+      return const Color(0xFFF0E5F8);
+    }
+
+    return AppColors.surface;
+  }
+
+  //==================================================
+  // 小役カウント入力カード
+  //==================================================
+
+  /// 小役カウンター画面に合わせたカードデザイン。
   ///
-  /// Aタイプ：アイコン36px
-  /// ATタイプ：強小役36px、弱小役28px
+  /// アイコンサイズは既存の設定を維持する。
+  /// Aタイプ：30px
+  /// ATタイプ：強小役30px、弱小役24px
   ///
-  /// アイコンの表示領域を36pxで統一し、
-  /// 強・弱でサイズが変わっても小役名の位置を揃える。
+  /// アイコンの表示領域は36×36pxで統一する。
   Widget _buildNumberField({
     required String label,
     required TextEditingController controller,
     KoyakuType? koyakuType,
   }) {
-    if (koyakuType != null) {
-      final bool isWeakAtType =
-          _isAtType && label.startsWith('弱');
-
-      final double iconSize = isWeakAtType ? 28 : 36;
-
+    // 小役アイコンを必要としない通常の数値入力欄
+    if (koyakuType == null) {
       return Padding(
         padding: const EdgeInsets.only(
           bottom: AppSpacing.md,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: Center(
-                    child: KoyakuIcon(
-                      type: koyakuType,
-                      size: iconSize,
-                    ),
+        child: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
+          decoration: _inputDecoration(
+            label: label,
+          ),
+        ),
+      );
+    }
+
+    final bool isWeakAtType =
+        _isAtType && label.startsWith('弱');
+
+    final double iconSize = isWeakAtType ? 24 : 30;
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: _koyakuBackgroundColor(label),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFDCDCDC),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 小役アイコンと小役名
+          Row(
+            children: [
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: Center(
+                  child: KoyakuIcon(
+                    type: koyakuType,
+                    size: iconSize,
                   ),
                 ),
-                const SizedBox(
-                  width: AppSpacing.sm,
-                ),
-                Expanded(
+              ),
+              const SizedBox(
+                width: 6,
+              ),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
                     label,
+                    maxLines: 1,
+                    softWrap: false,
                     style: AppTextStyles.body.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(
-              height: AppSpacing.sm,
-            ),
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.next,
-              decoration: _inputDecoration(),
-            ),
-          ],
-        ),
-      );
-    }
+              ),
+            ],
+          ),
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: AppSpacing.md,
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.next,
-        decoration: _inputDecoration(label: label),
+          const SizedBox(
+            height: 8,
+          ),
+
+          // 小役カウント入力欄
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            decoration: _inputDecoration(),
+          ),
+        ],
       ),
     );
   }
@@ -811,91 +874,116 @@ class _CounterEditPageState extends State<CounterEditPage> {
                       ),
 
                       if (_isAtType) ...[
-                        // ATタイプ：強・弱チェリー
-                        _buildNumberField(
-                          label: '強チェリー',
-                          controller: _strongCherryController,
-                          koyakuType: KoyakuType.cherry,
-                        ),
-                        _buildNumberField(
-                          label: '弱チェリー',
-                          controller: _weakCherryController,
-                          koyakuType: KoyakuType.cherry,
-                        ),
+                        //================================
+                        // ATタイプ：2列×4行
+                        //================================
 
-                        // ATタイプ：強・弱ベル
-                        _buildNumberField(
-                          label: '強ベル',
-                          controller: _strongBellController,
-                          koyakuType: KoyakuType.bell,
-                        ),
-                        _buildNumberField(
-                          label: '弱ベル',
-                          controller: _weakBellController,
-                          koyakuType: KoyakuType.bell,
-                        ),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.12,
+                          children: [
+                            // 1行目：強チェリー・弱チェリー
+                            _buildNumberField(
+                              label: '強チェリー',
+                              controller: _strongCherryController,
+                              koyakuType: KoyakuType.cherry,
+                            ),
+                            _buildNumberField(
+                              label: '弱チェリー',
+                              controller: _weakCherryController,
+                              koyakuType: KoyakuType.cherry,
+                            ),
 
-                        // ATタイプ：強・弱スイカ
-                        _buildNumberField(
-                          label: '強スイカ',
-                          controller: _strongSuikaController,
-                          koyakuType: KoyakuType.watermelon,
-                        ),
-                        _buildNumberField(
-                          label: '弱スイカ',
-                          controller: _weakSuikaController,
-                          koyakuType: KoyakuType.watermelon,
-                        ),
+                            // 2行目：強スイカ・弱スイカ
+                            _buildNumberField(
+                              label: '強スイカ',
+                              controller: _strongSuikaController,
+                              koyakuType: KoyakuType.watermelon,
+                            ),
+                            _buildNumberField(
+                              label: '弱スイカ',
+                              controller: _weakSuikaController,
+                              koyakuType: KoyakuType.watermelon,
+                            ),
 
-                        // ATタイプ：強・弱ブドウ
-                        _buildNumberField(
-                          label: '強ブドウ',
-                          controller: _strongGrapeController,
-                          koyakuType: KoyakuType.grape,
-                        ),
-                        _buildNumberField(
-                          label: '弱ブドウ',
-                          controller: _weakGrapeController,
-                          koyakuType: KoyakuType.grape,
-                        ),
+                            // 3行目：強チャンス目・弱チャンス目
+                            _buildNumberField(
+                              label: '強チャンス目',
+                              controller: _strongChanceController,
+                              koyakuType: KoyakuType.chance,
+                            ),
+                            _buildNumberField(
+                              label: '弱チャンス目',
+                              controller: _weakChanceController,
+                              koyakuType: KoyakuType.chance,
+                            ),
 
-                        // ATタイプ：強・弱チャンス目
-                        _buildNumberField(
-                          label: '強チャンス目',
-                          controller: _strongChanceController,
-                          koyakuType: KoyakuType.chance,
-                        ),
-                        _buildNumberField(
-                          label: '弱チャンス目',
-                          controller: _weakChanceController,
-                          koyakuType: KoyakuType.chance,
+                            // 4行目：強ベル・弱ベル
+                            _buildNumberField(
+                              label: '強ベル',
+                              controller: _strongBellController,
+                              koyakuType: KoyakuType.bell,
+                            ),
+                            _buildNumberField(
+                              label: '弱ベル',
+                              controller: _weakBellController,
+                              koyakuType: KoyakuType.bell,
+                            ),
+                          ],
                         ),
                       ] else ...[
-                        // Aタイプ：従来の5種類
+                        //================================
+                        // Aタイプ：指定された5種類
+                        //================================
+
                         _buildNumberField(
                           label: 'チェリー',
                           controller: _cherryController,
                           koyakuType: KoyakuType.cherry,
                         ),
-                        _buildNumberField(
-                          label: 'ベル',
-                          controller: _bellController,
-                          koyakuType: KoyakuType.bell,
+
+                        const SizedBox(
+                          height: AppSpacing.sm,
                         ),
+
                         _buildNumberField(
                           label: 'スイカ',
                           controller: _suikaController,
                           koyakuType: KoyakuType.watermelon,
                         ),
-                        _buildNumberField(
-                          label: 'ブドウ',
-                          controller: _grapeController,
-                          koyakuType: KoyakuType.grape,
+
+                        const SizedBox(
+                          height: AppSpacing.sm,
                         ),
+
                         _buildNumberField(
                           label: 'チャンス目',
                           controller: _chanceController,
                           koyakuType: KoyakuType.chance,
+                        ),
+
+                        const SizedBox(
+                          height: AppSpacing.sm,
+                        ),
+
+                        _buildNumberField(
+                          label: 'ベル',
+                          controller: _bellController,
+                          koyakuType: KoyakuType.bell,
+                        ),
+
+                        const SizedBox(
+                          height: AppSpacing.sm,
+                        ),
+
+                        _buildNumberField(
+                          label: 'ブドウ',
+                          controller: _grapeController,
+                          koyakuType: KoyakuType.grape,
                         ),
                       ],
                     ],
