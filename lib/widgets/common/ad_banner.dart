@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:flutter/material.dart';
-
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 ///==================================================
@@ -21,12 +18,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 /// ↓
 /// 既存コンテンツ
 ///
-/// 開発・実機テスト時は
-/// Google公式のテスト広告ユニットIDを使用する。
-///
-/// Releaseビルド時は
-/// Android / iOSそれぞれの
-/// 本番用AdMob広告ユニットIDを使用する。
+/// Debug / Profile / Releaseのすべてで
+/// Android / iOSそれぞれの本番用AdMob広告ユニットIDを使用する。
 ///
 /// なお、adUnitIdを明示的に指定した場合は、
 /// その広告ユニットIDを優先して使用する。
@@ -40,14 +33,11 @@ class AdBanner extends StatefulWidget {
 
   /// 広告ユニットIDを明示的に指定する場合に使用する。
   ///
-  /// nullの場合は、現在のビルド種別と
-  /// OSに応じて以下を自動選択する。
+  /// nullの場合は、現在のプラットフォームに対応する
+  /// 本番用AdMob広告ユニットIDを使用する。
   ///
-  /// Debug / Profile：
-  ///   Google公式テスト広告ユニットID
-  ///
-  /// Release：
-  ///   Android / iOSの本番広告ユニットID
+  /// Debug / Profile / Releaseのすべてで
+  /// 本番用広告ユニットIDを使用する。
   final String? adUnitId;
 
   @override
@@ -116,20 +106,6 @@ class _AdBannerState extends State<AdBanner> {
   static const String _iosProductionAdUnitId =
       'ca-app-pub-7409422327092258/9390567526';
 
-  //==================================================
-  // Android公式テスト用バナー広告ID
-  //==================================================
-
-  static const String _androidTestAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111';
-
-  //==================================================
-  // iOS公式テスト用バナー広告ID
-  //==================================================
-
-  static const String _iosTestAdUnitId =
-      'ca-app-pub-3940256099942544/2934735716';
-
   /// 現在のプラットフォームに応じた
   /// 本番広告ユニットIDを返す。
   String get _productionAdUnitId {
@@ -140,16 +116,6 @@ class _AdBannerState extends State<AdBanner> {
     return _androidProductionAdUnitId;
   }
 
-  /// 現在のプラットフォームに応じた
-  /// テスト広告ユニットIDを返す。
-  String get _testAdUnitId {
-    if (Platform.isIOS) {
-      return _iosTestAdUnitId;
-    }
-
-    return _androidTestAdUnitId;
-  }
-
   /// 使用する広告ユニットID。
   ///
   /// 1.
@@ -157,12 +123,11 @@ class _AdBannerState extends State<AdBanner> {
   ///     → 指定されたIDを使用
   ///
   /// 2.
-  /// Debug / Profileビルドの場合
-  ///     → Google公式テストIDを使用
+  /// widget.adUnitIdがnullの場合
+  ///     → OSに対応する本番用広告ユニットIDを使用
   ///
-  /// 3.
-  /// Releaseビルドの場合
-  ///     → 本番用AdMob広告ユニットIDを使用
+  /// Debug / Profile / Releaseの違いによる
+  /// テスト広告IDへの自動切り替えは行わない。
   String get _adUnitId {
     //================================================
     // 明示指定がある場合は最優先
@@ -173,15 +138,7 @@ class _AdBannerState extends State<AdBanner> {
     }
 
     //================================================
-    // Release以外はテスト広告を使用
-    //================================================
-
-    if (!kReleaseMode) {
-      return _testAdUnitId;
-    }
-
-    //================================================
-    // Releaseでは本番広告を使用
+    // すべてのビルド種別で本番広告を使用
     //================================================
 
     return _productionAdUnitId;
