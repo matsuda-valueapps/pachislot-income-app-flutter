@@ -10,31 +10,48 @@ import 'providers/home_provider.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
+  //==================================================
+  // Flutter初期化
+  //==================================================
+
   WidgetsFlutterBinding.ensureInitialized();
 
   //==================================================
-  // Google Mobile Ads 初期化
-  //==================================================
-  //
-  // アプリ起動時にAdMob SDKを初期化する。
-  //
-  // バナー広告などの広告を読み込む前に
-  // 一度だけ実行する。
-  //==================================================
-
-  await MobileAds.instance.initialize();
-
-  //==================================================
   // アプリ起動
+  //==================================================
+  //
+  // AdMobの初期化完了を待たずに、
+  // 先にアプリ画面の表示を開始する。
+  //
   //==================================================
 
   runApp(
     const PachislotIncomeApp(),
   );
+
+  //==================================================
+  // Google Mobile Ads 初期化
+  //==================================================
+  //
+  // アプリ画面の表示開始後にAdMobを初期化する。
+  //
+  // 初期化完了を待たずに処理を進めることで、
+  // AdMobの初期化時間が画面表示開始を直接遅らせない
+  // 構成にする。
+  //
+  //==================================================
+
+  MobileAds.instance.initialize().then((_) {
+    // AdMob初期化完了
+  }).catchError((Object error) {
+    // AdMob初期化失敗時のエラー処理
+    debugPrint(
+      '[AdMob] Initialization failed: $error',
+    );
+  });
 }
 
-class PachislotIncomeApp
-    extends StatelessWidget {
+class PachislotIncomeApp extends StatelessWidget {
   const PachislotIncomeApp({
     super.key,
   });
@@ -50,8 +67,7 @@ class PachislotIncomeApp
         // ==========================================
 
         ChangeNotifierProvider(
-          create: (_) =>
-              CalculatorProvider(),
+          create: (_) => CalculatorProvider(),
         ),
 
         // ==========================================
@@ -59,8 +75,7 @@ class PachislotIncomeApp
         // ==========================================
 
         ChangeNotifierProvider(
-          create: (_) =>
-              CounterProvider(),
+          create: (_) => CounterProvider(),
         ),
 
         // ==========================================
@@ -68,22 +83,18 @@ class PachislotIncomeApp
         // ==========================================
 
         ChangeNotifierProvider(
-          create: (_) =>
-              HomeProvider(),
+          create: (_) => HomeProvider(),
         ),
       ],
       child: MaterialApp(
         title: 'パチスロ収支表',
 
-        debugShowCheckedModeBanner:
-            false,
+        debugShowCheckedModeBanner: false,
 
-        theme:
-            AppTheme.lightTheme,
+        theme: AppTheme.lightTheme,
 
         // 日本語ロケール対応
-        locale:
-            const Locale(
+        locale: const Locale(
           'ja',
           'JP',
         ),
@@ -96,16 +107,12 @@ class PachislotIncomeApp
         ],
 
         localizationsDelegates: const [
-          GlobalMaterialLocalizations
-              .delegate,
-          GlobalWidgetsLocalizations
-              .delegate,
-          GlobalCupertinoLocalizations
-              .delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
 
-        home:
-            const MainPage(),
+        home: const MainPage(),
       ),
     );
   }
