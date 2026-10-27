@@ -1146,44 +1146,70 @@ class _MemoListPageState
   }
 
   //==================================================
-  // メモなし表示
+  // 空データ表示
   //==================================================
 
-  Widget _buildEmptyView() {
-    return RefreshIndicator(
-      onRefresh:
-          _loadMemoRecords,
-      child: ListView(
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+  Widget _buildEmptyView(
+    BuildContext context,
+  ) {
+    return Center(
+      child: Padding(
         padding:
-            AppSpacing.page,
-        children: const [
-          SizedBox(
-            height: 160,
-          ),
-
-          Icon(
-            Icons.description_outlined,
-            size: 64,
-            color: Colors.grey,
-          ),
-
-          SizedBox(
-            height:
-                AppSpacing.md,
-          ),
-
-          Center(
-            child: Text(
-              '保存されたメモはありません。',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+            const EdgeInsets.all(
+          AppSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize:
+              MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/buttons/list_button.png',
+              width: 75,
+              height: 75,
+              fit: BoxFit.contain,
             ),
-          ),
-        ],
+
+            const SizedBox(
+              height:
+                  AppSpacing.md,
+            ),
+
+            Text(
+              '保存データがありません',
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+            ),
+
+            const SizedBox(
+              height:
+                  AppSpacing.sm,
+            ),
+
+            Text(
+              'メモデータ入力画面からデータを\n'
+              '保存すると、ここに表示されます。',
+              textAlign:
+                  TextAlign.center,
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(
+                        color: Theme.of(
+                          context,
+                        )
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1329,7 +1355,7 @@ class _MemoListPageState
     //================================================
 
     if (_memoRecords.isEmpty) {
-      return _buildEmptyView();
+      return _buildEmptyView(context,);
     }
 
     //================================================

@@ -1471,12 +1471,11 @@ class _IncomeListPageState
           mainAxisSize:
               MainAxisSize.min,
           children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 64,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurfaceVariant,
+            Image.asset(
+              'assets/images/buttons/list_button.png',
+              width: 75,
+              height: 75,
+              fit: BoxFit.contain,
             ),
 
             const SizedBox(
@@ -1502,8 +1501,8 @@ class _IncomeListPageState
             ),
 
             Text(
-              '入力画面からデータを保存すると、\n'
-              'ここに表示されます。',
+              '収支データ入力画面からデータを\n'
+              '保存すると、ここに表示されます。',
               textAlign:
                   TextAlign.center,
               style:

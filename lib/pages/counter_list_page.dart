@@ -1097,44 +1097,70 @@ class _CounterListPageState extends State<CounterListPage> {
   }
 
   //==================================================
-  // データなし表示
+  // 空データ表示
   //==================================================
 
-  Widget _buildEmptyState(
+  Widget _buildEmptyView(
     BuildContext context,
   ) {
-    return RefreshIndicator(
-      onRefresh: _loadRecords,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppSpacing.page,
-        children: [
-          const SizedBox(
-            height: 160,
-          ),
-
-          Icon(
-            Icons.calculate_outlined,
-            size: 64,
-            color: Theme.of(context)
-                .colorScheme
-                .onSurfaceVariant,
-          ),
-
-          const SizedBox(
-            height: AppSpacing.md,
-          ),
-
-          const Center(
-            child: Text(
-              '保存された小役データはありません。',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+    return Center(
+      child: Padding(
+        padding:
+            const EdgeInsets.all(
+          AppSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize:
+              MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/buttons/list_button.png',
+              width: 75,
+              height: 75,
+              fit: BoxFit.contain,
             ),
-          ),
-        ],
+
+            const SizedBox(
+              height:
+                  AppSpacing.md,
+            ),
+
+            Text(
+              '保存データがありません',
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+            ),
+
+            const SizedBox(
+              height:
+                  AppSpacing.sm,
+            ),
+
+            Text(
+              '小役カウンター画面からデータを\n'
+              '保存すると、ここに表示されます。',
+              textAlign:
+                  TextAlign.center,
+              style:
+                  Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(
+                        color: Theme.of(
+                          context,
+                        )
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1270,7 +1296,7 @@ class _CounterListPageState extends State<CounterListPage> {
     //================================================
 
     if (_records.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyView(
         context,
       );
     }
