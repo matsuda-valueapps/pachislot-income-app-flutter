@@ -409,7 +409,9 @@ class _MainPageState
     //================================================
 
     if (index == 3) {
-      _counterPageKey.currentState?.scrollToCounterSection();
+      final counterState = _counterPageKey.currentState;
+
+      counterState?.scrollToCounterSection();
       return;
     }
     
@@ -919,12 +921,32 @@ class _MainPageState
       index < _navigatorKeys.length;
       index++
     ) {
+
       final navigator =
-          _navigatorKeys[index]
-              .currentState;
+          _navigatorKeys[index].currentState;
 
       if (navigator == null) {
         continue;
+      }
+
+      //================================================
+      // カウンター画面用Key
+      //
+      // 通常の画面構築時にはKeyを変更しない。
+      // データ復元によってルートを再生成するときだけ、
+      // カウンター画面用の新しいKeyを用意する。
+      //================================================
+
+      final GlobalKey<CounterPageState>? counterPageKey;
+
+      if (index == 3) {
+        _counterPageKey =
+            GlobalKey<CounterPageState>();
+
+        counterPageKey = _counterPageKey;
+
+      } else {
+        counterPageKey = null;
       }
 
       navigator.pushAndRemoveUntil(
@@ -932,6 +954,7 @@ class _MainPageState
           builder: (context) =>
               _buildRootPage(
             index,
+            counterPageKey: counterPageKey,
           ),
         ),
         (route) => false,
@@ -975,8 +998,9 @@ class _MainPageState
   /// 制御できるよう、PrimaryScrollControllerを
   /// 各タブ専用Controllerへ接続する。
   Widget _buildRootPage(
-    int index,
-  ) {
+    int index, {
+    GlobalKey<CounterPageState>? counterPageKey,
+  }) {
     late final Widget page;
 
     switch (index) {
@@ -1025,13 +1049,21 @@ class _MainPageState
       //================================================
 
       case 3:
-        // CounterPageStateへアクセスするKeyを毎回新しく生成する。
-        // Navigatorのルートを再生成する場合のGlobalKey重複を防ぐ。
-        _counterPageKey = GlobalKey<CounterPageState>();
+        //================================================
+        // CounterPageStateへアクセスするKey
+        //
+        // 通常の画面構築では既存のKeyを使用する。
+        // データ復元によるルート再生成時は、
+        // 引数で渡されたKeyを使用する。
+        //================================================
+
+        final key =
+            counterPageKey ?? _counterPageKey;
 
         page = CounterPage(
-          key: _counterPageKey,
+          key: key,
         );
+
         break;
 
       //================================================
